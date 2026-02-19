@@ -7,357 +7,249 @@ import { supabase } from '@/lib/supabase';
 import ProductCard, { type ColorVariant, getColorHex } from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/skeletons/ProductCardSkeleton';
 import AnimatedSection, { AnimatedGrid } from '@/components/AnimatedSection';
-import NewsletterSection from '@/components/NewsletterSection';
 import { usePageTitle } from '@/hooks/usePageTitle';
+
+const MAIN_GOODS_SLUGS = [
+  'grocery', 'mobile', 'stationery', 'lighting-battery', 'food-items', 'nonfood-items',
+  'personal-household-care', 'occasions-holidays', 'medicine',
+];
+const ESSENTIALS_SECTIONS = [
+  { label: 'Pantry & Dry Goods', slug: 'pantry-dry-goods' },
+  { label: 'Snacks & Confectionery', slug: 'snacks-confectionery' },
+  { label: 'Beverages', slug: 'beverages' },
+  { label: 'Personal Care', slug: 'personal-care' },
+  { label: 'Household Essentials', slug: 'household-essentials' },
+];
+
+const DELIVERY_OPTIONS = [
+  { id: 'pickup', title: 'Pickup', desc: 'Within 72hrs (excluding Sunday) after confirmation.', href: '/shipping#pickup', icon: 'ri-store-2-line' },
+  { id: 'free', title: 'Free Delivery', desc: 'Tue/Fri only. Min 5% discount as Free Delivery Discount.', href: '/shipping#free-delivery', icon: 'ri-truck-line' },
+  { id: 'sole', title: 'Sole Express', desc: 'Daily. Fresh/perishable must use Express. 2hr–48hr slots.', href: '/shipping#sole-express', icon: 'ri-time-line' },
+  { id: 'joint', title: 'Joint Express', desc: 'Share fee with neighbor. Same perishable rule. 2hr–48hr.', href: '/shipping#joint-express', icon: 'ri-group-line' },
+];
 
 export default function Home() {
   usePageTitle('');
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [allCategories, setAllCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Config State - Managed in Code
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % 2);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const config: {
-    hero: {
-      headline: string;
-      subheadline: string;
-      primaryButtonText: string;
-      primaryButtonLink: string;
-      secondaryButtonText: string;
-      secondaryButtonLink: string;
-      backgroundImage?: string;
-    };
-    banners?: Array<{ text: string; active: boolean }>;
-  } = {
-    hero: {
-      headline: 'Dresses, Electronics, Bags & Shoes — Everything You Need, One Store',
-      subheadline: 'Quality products locally sourced and imported directly from China. Unbeatable prices for individuals and resellers across Ghana.',
-      primaryButtonText: 'Shop Collections',
-      primaryButtonLink: '/shop',
-      secondaryButtonText: 'Our Story',
-      secondaryButtonLink: '/about',
-      // backgroundImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop' // Optional override
-    },
-    banners: [
-      { text: '🚚 Free delivery on orders over GH₵ 500 within Accra!', active: false },
-      { text: '✨ New stock arriving this weekend - Pre-order now!', active: false },
-      { text: '💳 Secure payments via Mobile Money & Card', active: false }
-    ]
-  };
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch featured products directly from Supabase
-        const { data: productsData, error: productsError } = await supabase
-          .from('products')
-          .select('*, product_variants(*), product_images(*)')
-          .eq('status', 'active')
-          .eq('featured', true)
-          .order('created_at', { ascending: false })
-          .limit(8);
-
-        if (productsError) throw productsError;
-        setFeaturedProducts(productsData || []);
-
-        // Fetch featured categories (featured is stored in metadata JSONB)
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from('categories')
-          .select('id, name, slug, image_url, metadata')
-          .eq('status', 'active')
-          .order('name');
-
-        if (categoriesError) throw categoriesError;
-
-        // Filter by metadata.featured = true on client side
-        const featuredCategories = (categoriesData || []).filter(
-          (cat: any) => cat.metadata?.featured === true
-        );
-        setCategories(featuredCategories);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+        const [productsRes, categoriesRes, allCatRes] = await Promise.all([
+          supabase.from('products').select('*, product_variants(*), product_images(*)').eq('status', 'active').eq('featured', true).order('created_at', { ascending: false }).limit(12),
+          supabase.from('categories').select('id, name, slug, image_url, metadata').eq('status', 'active').order('position').order('name'),
+          supabase.from('categories').select('id, name, slug, image_url').eq('status', 'active').order('position').order('name'),
+        ]);
+        if (!productsRes.error) setFeaturedProducts(productsRes.data || []);
+        const featured = (categoriesRes.data || []).filter((c: any) => c.metadata?.featured === true);
+        setCategories(featured.length > 0 ? featured : (categoriesRes.data || []).slice(0, 8));
+        setAllCategories(allCatRes.data || []);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
-
-  const getHeroImage = () => {
-    if (config.hero.backgroundImage) return config.hero.backgroundImage;
-    return "/logo.png";
-  };
-
-  const renderBanners = () => {
-    const activeBanners = config.banners?.filter(b => b.active) || [];
-    if (activeBanners.length === 0) return null;
-
-    return (
-      <div className="bg-blue-900 text-white py-2 overflow-hidden relative">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {activeBanners.concat(activeBanners).map((banner, index) => (
-            <span key={index} className="mx-8 text-sm font-medium tracking-wide flex items-center">
-              {banner.text}
-            </span>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  const mainGoods = allCategories.filter((c) => MAIN_GOODS_SLUGS.some((s) => (c.slug || '').toLowerCase().includes(s))).slice(0, 11);
+  const showMainGoods = mainGoods.length > 0 ? mainGoods : allCategories.slice(0, 10);
 
   return (
-    <main className="flex-col items-center justify-between min-h-screen">
-      {renderBanners()}
-
-      {/* Hero Section */}
-      <section className="relative w-full h-[70vh] md:h-[90vh] overflow-hidden bg-black">
-
-        {/* Background Slider + Per-Slide Content */}
-        {[
-          {
-            image: '/hero-1.png',
-            tag: 'Electronics & Appliances',
-            heading: <>Top-Quality <br /><span className="italic font-light">Electronics & Gadgets</span></>,
-            subtext: 'From smart kitchen appliances to everyday electronics — imported directly and priced to move.',
-            cta: { text: 'Shop Electronics', href: '/shop?category=electronics' },
-            cta2: { text: 'View All', href: '/shop' },
-          },
-          {
-            image: '/hero-2.png',
-            tag: 'Fashion & Dresses',
-            heading: <>Stunning African <br /><span className="italic font-light">Print Dresses</span></>,
-            subtext: 'Beautiful locally sourced dresses and fashion pieces — bold prints, perfect fits, unbeatable prices.',
-            cta: { text: 'Shop Dresses', href: '/shop?category=dresses' },
-            cta2: { text: 'All Fashion', href: '/shop?category=fashion' },
-          },
-        ].map((slide, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-          >
-            {/* Background Image */}
-            <Image
-              src={slide.image}
-              alt={`Hero Banner ${index + 1}`}
-              fill
-              className="object-cover"
-              priority={index === 0}
-              quality={90}
-            />
-            <div className="absolute inset-0 bg-black/20"></div> {/* 20% black overlay */}
-
-            {/* Slide Content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto mt-[-50px]">
-              <p
-                key={`tag-${currentSlide}`}
-                className="text-white/90 text-sm md:text-base tracking-[0.2em] uppercase font-medium mb-6 animate-fade-in-up"
+    <main className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="relative bg-gsg-purple text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-gsg-purple-dark/80 to-gsg-purple/90" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+              GSG Convenience Goods
+            </h1>
+            <p className="text-lg md:text-xl text-white/90 mb-8">
+              Premium, trustworthy convenience shopping. Ghana-based. Modern e-commerce for your everyday needs.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/shop"
+                className="inline-flex items-center justify-center bg-white text-gsg-purple px-8 py-4 rounded-pill font-bold hover:bg-gsg-accent hover:text-gsg-black transition-colors"
               >
-                {slide.tag}
-              </p>
-
-              <h1
-                key={`heading-${currentSlide}`}
-                className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-serif text-white mb-6 leading-tight drop-shadow-lg animate-fade-in-up"
-                style={{ animationDelay: '0.1s' }}
+                Start Shopping
+              </Link>
+              <Link
+                href="/shipping"
+                className="inline-flex items-center justify-center bg-white/20 text-white border-2 border-white px-8 py-4 rounded-pill font-bold hover:bg-white/30 transition-colors"
               >
-                {slide.heading}
-              </h1>
-
-              <p
-                key={`sub-${currentSlide}`}
-                className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-10 font-light tracking-wide animate-fade-in-up"
-                style={{ animationDelay: '0.2s' }}
-              >
-                {slide.subtext}
-              </p>
-
-              <div
-                key={`cta-${currentSlide}`}
-                className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 animate-fade-in-up"
-                style={{ animationDelay: '0.3s' }}
-              >
-                <Link
-                  href={slide.cta.href}
-                  className="bg-white text-gray-900 px-8 py-3 sm:px-10 sm:py-4 rounded-full font-medium text-base sm:text-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1 duration-300"
-                >
-                  {slide.cta.text}
-                </Link>
-                <Link
-                  href={slide.cta2.href}
-                  className="px-8 py-3 sm:px-10 sm:py-4 rounded-full font-medium text-base sm:text-lg text-white border border-white/40 hover:bg-white/10 transition-colors backdrop-blur-sm"
-                >
-                  {slide.cta2.text}
-                </Link>
-              </div>
+                Explore Delivery Options
+              </Link>
+            </div>
+            <div className="mt-12 flex flex-wrap gap-8 text-sm text-white/90">
+              <span className="flex items-center gap-2"><i className="ri-secure-payment-line text-xl" /> Secure Checkout</span>
+              <span className="flex items-center gap-2"><i className="ri-truck-line text-xl" /> Fast Delivery</span>
+              <span className="flex items-center gap-2"><i className="ri-customer-service-2-line text-xl" /> Support 24/7</span>
             </div>
           </div>
-        ))}
-
-        {/* Bottom Features (Desktop) */}
-        <div className="absolute bottom-12 left-0 right-0 z-20 hidden md:flex justify-center items-center gap-16 text-white text-center">
-          <div>
-            <p className="font-serif text-lg font-medium">Direct Import</p>
-            <p className="text-xs text-white/60 font-light tracking-wide uppercase mt-1">From China &amp; Local Suppliers</p>
-          </div>
-          <div className="w-px h-10 bg-white/20"></div>
-          <div>
-            <p className="font-serif text-lg font-medium">Verified Quality</p>
-            <p className="text-xs text-white/60 font-light tracking-wide uppercase mt-1">Every Item Checked</p>
-          </div>
-          <div className="w-px h-10 bg-white/20"></div>
-          <div>
-            <p className="font-serif text-lg font-medium">Best Prices</p>
-            <p className="text-xs text-white/60 font-light tracking-wide uppercase mt-1">Wholesale &amp; Retail</p>
-          </div>
         </div>
-
-        {/* Floating "Exclusive Offer" Card (Bottom Left) */}
-        <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-20 bg-white rounded-xl p-6 shadow-2xl max-w-[280px] animate-fade-in hidden lg:block">
-          <p className="font-serif text-blue-800 text-lg italic mb-0.5">Exclusive Offer</p>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">25% Off</h3>
-          <p className="text-xs text-gray-500 font-medium leading-relaxed">
-            On your first order. <br />
-            <Link href="/shop" className="underline text-blue-700 hover:text-blue-900 mt-1 inline-block">Shop now</Link>
-          </p>
-        </div>
-
       </section>
 
-      {/* Categories Section */}
-      <section className="py-12 md:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <AnimatedSection className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-gray-900 mb-4">Shop by Category</h2>
-              <p className="text-gray-600 text-lg max-w-md">From dresses to electronics, bags to shoes</p>
-            </div>
-            <Link href="/categories" className="hidden md:flex items-center text-blue-800 font-medium hover:text-blue-900 transition-colors">
-              View All <i className="ri-arrow-right-line ml-2"></i>
-            </Link>
-          </AnimatedSection>
-
-          <AnimatedGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {categories.map((category) => (
-              <Link href={`/shop?category=${category.slug}`} key={category.id} className="group cursor-pointer block relative">
-                <div className="aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md group-hover:shadow-xl transition-all duration-300">
-                  <Image
-                    src={category.image || category.image_url || 'https://via.placeholder.com/600x800?text=' + encodeURIComponent(category.name)}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    quality={75}
-                  />
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-                  
-                  {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col justify-end h-full">
-                    <h3 className="font-serif font-bold text-white text-xl md:text-2xl mb-1 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{category.name}</h3>
-                    <div className="flex items-center text-white/90 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 delay-75">
-                      <span className="uppercase tracking-wider text-xs">Shop Now</span>
-                      <i className="ri-arrow-right-line ml-2 transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                  </div>
+      {/* Delivery options strip */}
+      <section className="py-12 bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-gsg-black mb-8 text-center">Delivery Options</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {DELIVERY_OPTIONS.map((opt) => (
+              <Link
+                key={opt.id}
+                href={opt.href}
+                className="bg-white rounded-card-lg p-6 shadow-sm hover:shadow-md border border-gray-100 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-card bg-gsg-purple-light/20 text-gsg-purple flex items-center justify-center mb-4 group-hover:bg-gsg-purple group-hover:text-white transition-colors">
+                  <i className={`${opt.icon} text-2xl`} />
                 </div>
+                <h3 className="font-bold text-gsg-black mb-2">{opt.title}</h3>
+                <p className="text-sm text-gray-600">{opt.desc}</p>
               </Link>
             ))}
-          </AnimatedGrid>
+          </div>
+        </div>
+      </section>
 
-          <div className="mt-8 text-center md:hidden">
-            <Link href="/categories" className="inline-flex items-center text-blue-800 font-medium hover:text-blue-900 transition-colors">
-              View All <i className="ri-arrow-right-line ml-2"></i>
+      {/* Category showcase – Main Goods */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gsg-black mb-8">Main Goods</h2>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible">
+            <Link href="/shop" className="shrink-0 w-40 md:w-auto rounded-card-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                <i className="ri-shopping-bag-line text-4xl text-gsg-purple-light" />
+              </div>
+              <p className="p-3 font-bold text-gsg-black text-center text-sm">Grocery</p>
+            </Link>
+            <a href="https://shopper.gsgbrands.com.gh" target="_blank" rel="noopener noreferrer" className="shrink-0 w-40 md:w-auto rounded-card-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                <i className="ri-user-star-line text-4xl text-gsg-purple-light" />
+              </div>
+              <p className="p-3 font-bold text-gsg-black text-center text-sm">My Personal Shopper</p>
+            </a>
+            {showMainGoods.slice(0, 9).map((cat) => (
+              <Link key={cat.id} href={`/shop?category=${cat.slug}`} className="shrink-0 w-40 md:w-auto rounded-card-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 relative">
+                  {cat.image_url ? (
+                    <Image src={cat.image_url} alt={cat.name} fill className="object-cover" sizes="160px" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <i className="ri-archive-line text-4xl text-gsg-purple-light" />
+                    </div>
+                  )}
+                </div>
+                <p className="p-3 font-bold text-gsg-black text-center text-sm">{cat.name}</p>
+              </Link>
+            ))}
+            <Link href="/categories" className="shrink-0 w-40 md:w-auto rounded-card-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow flex flex-col items-center justify-center aspect-square bg-gray-100">
+              <i className="ri-more-line text-4xl text-gsg-purple" />
+              <p className="p-3 font-bold text-gsg-black text-sm">More</p>
             </Link>
           </div>
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 md:py-24 bg-stone-50">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection className="text-center mb-16">
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-gray-900 mb-4">Featured Products</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">Top picks from our latest arrivals</p>
-          </AnimatedSection>
-
+          <h2 className="text-2xl md:text-3xl font-bold text-gsg-black mb-8">Featured Products</h2>
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-8">
-              {[...Array(4)].map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)}
             </div>
           ) : (
-            <AnimatedGrid className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
-              {featuredProducts.map((product) => {
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible">
+              {featuredProducts.slice(0, 8).map((product) => {
                 const variants = product.product_variants || [];
                 const hasVariants = variants.length > 0;
                 const minVariantPrice = hasVariants ? Math.min(...variants.map((v: any) => v.price || product.price)) : undefined;
-                const totalVariantStock = hasVariants ? variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0) : 0;
+                const totalVariantStock = hasVariants ? variants.reduce((s: number, v: any) => s + (v.quantity || 0), 0) : 0;
                 const effectiveStock = hasVariants ? totalVariantStock : product.quantity;
-
-                // Extract unique colors from option2
                 const colorVariants: ColorVariant[] = [];
-                const seenColors = new Set<string>();
+                const seen = new Set<string>();
                 for (const v of variants) {
-                  const colorName = (v as any).option2;
-                  if (colorName && !seenColors.has(colorName.toLowerCase().trim())) {
-                    const hex = getColorHex(colorName);
+                  const name = (v as any).option2;
+                  if (name && !seen.has(name.toLowerCase().trim())) {
+                    const hex = getColorHex(name);
                     if (hex) {
-                      seenColors.add(colorName.toLowerCase().trim());
-                      colorVariants.push({ name: colorName.trim(), hex });
+                      seen.add(name.toLowerCase().trim());
+                      colorVariants.push({ name: name.trim(), hex });
                     }
                   }
                 }
-
                 return (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    slug={product.slug}
-                    name={product.name}
-                    price={product.price}
-                    originalPrice={product.compare_at_price}
-                    image={product.product_images?.[0]?.url || 'https://via.placeholder.com/400x500'}
-                    rating={product.rating_avg || 5}
-                    reviewCount={product.review_count || 0}
-                    badge={product.featured ? 'Featured' : undefined}
-                    inStock={effectiveStock > 0}
-                    maxStock={effectiveStock || 50}
-                    moq={product.moq || 1}
-                    hasVariants={hasVariants}
-                    minVariantPrice={minVariantPrice}
-                    colorVariants={colorVariants}
-                  />
+                  <div key={product.id} className="shrink-0 w-[280px] md:w-auto">
+                    <ProductCard
+                      id={product.id}
+                      slug={product.slug}
+                      name={product.name}
+                      price={product.price}
+                      originalPrice={product.compare_at_price}
+                      image={product.product_images?.[0]?.url || 'https://via.placeholder.com/400x500'}
+                      rating={product.rating_avg || 5}
+                      reviewCount={product.review_count || 0}
+                      badge={product.featured ? 'Featured' : undefined}
+                      inStock={effectiveStock > 0}
+                      maxStock={effectiveStock || 50}
+                      moq={product.moq || 1}
+                      hasVariants={hasVariants}
+                      minVariantPrice={minVariantPrice}
+                      colorVariants={colorVariants}
+                    />
+                  </div>
                 );
               })}
-            </AnimatedGrid>
+            </div>
           )}
-
-          <div className="text-center mt-16">
-            <Link
-              href="/shop"
-              className="inline-flex items-center justify-center bg-gray-900 text-white px-10 py-4 rounded-full font-medium hover:bg-blue-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 btn-animate"
-            >
+          <div className="text-center mt-10">
+            <Link href="/shop" className="inline-flex items-center justify-center bg-gsg-purple text-white px-8 py-4 rounded-pill font-bold hover:bg-gsg-purple-dark transition-colors">
               View All Products
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Newsletter - Homepage Only */}
-      <NewsletterSection />
+      {/* Shop by Essentials */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gsg-black mb-8">Shop by Essentials</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {ESSENTIALS_SECTIONS.map((s) => {
+              const cat = allCategories.find((c) => (c.slug || '').toLowerCase().includes(s.slug) || (c.name || '').toLowerCase().includes(s.label.toLowerCase().split(' ')[0]));
+              const href = cat ? `/shop?category=${cat.slug}` : `/shop?category=${s.slug}`;
+              return (
+                <Link key={s.slug} href={href} className="rounded-card-lg border border-gray-200 p-6 text-center hover:shadow-md hover:border-gsg-purple-light/50 transition-all">
+                  <i className="ri-shopping-cart-2-line text-3xl text-gsg-purple-light mb-2 block" />
+                  <span className="font-bold text-gsg-black text-sm">{s.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
+      {/* Promo + Track order */}
+      <section className="py-12 bg-gsg-purple-light/20 border-y border-gsg-purple-light/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-gsg-black font-bold text-lg">🎁 Free gift for every purchase</p>
+          <Link href="/order-tracking" className="inline-flex items-center justify-center bg-gsg-purple text-white px-6 py-3 rounded-pill font-medium hover:bg-gsg-purple-dark transition-colors">
+            Track your order easily
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="py-12 bg-gsg-black text-white text-center">
+        <p className="text-lg font-medium mb-2">Need help? WhatsApp & Telegram Active 24/7</p>
+        <p className="text-white/80 text-sm">+233 (0) 246 033 792 · +233 (0) 579 033 792 · <a href="https://t.me/gsgbrandsgh" target="_blank" rel="noopener noreferrer" className="text-gsg-accent hover:underline">t.me/gsgbrandsgh</a></p>
+      </section>
     </main>
   );
 }

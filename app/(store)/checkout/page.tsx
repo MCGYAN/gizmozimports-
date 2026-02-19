@@ -55,8 +55,17 @@ export default function CheckoutPage() {
   ];
 
   const [deliveryMethod, setDeliveryMethod] = useState('pickup');
+  const [jointExpressNeighbor, setJointExpressNeighbor] = useState({ name: '', phone: '' });
   const [paymentMethod, setPaymentMethod] = useState('moolre');
   const [errors, setErrors] = useState<any>({});
+
+  const deliveryOptionsList = [
+    { value: 'personal-shopper', label: 'Add To My Personal Shopper', desc: 'Send your list to your personal shopper.', href: 'https://shopper.gsgbrands.com.gh' },
+    { value: 'free-delivery', label: 'Free Delivery (Tue/Fri)', desc: 'Tue/Fri only. Min 5% discount as Free Delivery Discount. Confirmed before noon of preceding day.', href: null },
+    { value: 'sole-express', label: 'Sole Express Delivery (Daily)', desc: 'Fresh/perishable must use Express. 2hr, 6hr, 12hr, 24hr or 48hr after confirmation.', href: null },
+    { value: 'joint-express', label: 'Joint Express – Myself & Neighbor (Daily)', desc: 'Share delivery fee with neighbor; items stay private. Same perishable rule. 2hr–48hr slots.', href: null },
+    { value: 'pickup', label: 'Pickup (Within 72 Hrs.)', desc: 'Within 72hrs (excluding Sunday). Pickup location shown at confirmation.', href: null },
+  ];
 
 
 
@@ -167,7 +176,10 @@ export default function CheckoutPage() {
             guest_checkout: !user,
             first_name: shippingData.firstName,
             last_name: shippingData.lastName,
-            tracking_number: trackingNumber
+            tracking_number: trackingNumber,
+            ...(deliveryMethod === 'joint-express' && (jointExpressNeighbor.name || jointExpressNeighbor.phone)
+              ? { joint_express_neighbor: jointExpressNeighbor }
+              : {})
           }
         }])
         .select()
@@ -530,70 +542,55 @@ export default function CheckoutPage() {
               <>
                 <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
                   <h2 className="text-xl font-bold text-gray-900 mb-6">Delivery Method</h2>
-                  <div className="space-y-4">
-                    <label className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors ${deliveryMethod === 'pickup' ? 'border-blue-700 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-                      }`}>
-                      <div className="flex items-center space-x-4">
-                        <input
-                          type="radio"
-                          name="delivery"
-                          value="pickup"
-                          checked={deliveryMethod === 'pickup'}
-                          onChange={(e) => setDeliveryMethod(e.target.value)}
-                          className="w-5 h-5 text-blue-700"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-900">Store Pickup</p>
-                          <p className="text-sm text-gray-600">Pick up from our store — Ready in 24 hours</p>
+                  <div className="space-y-3">
+                    {deliveryOptionsList.map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={`flex items-start justify-between p-4 border-2 rounded-card cursor-pointer transition-colors ${deliveryMethod === opt.value ? 'border-gsg-purple bg-gsg-purple-light/10' : 'border-gray-300 hover:border-gray-400'}`}
+                      >
+                        <div className="flex items-start space-x-4">
+                          <input
+                            type="radio"
+                            name="delivery"
+                            value={opt.value}
+                            checked={deliveryMethod === opt.value}
+                            onChange={(e) => setDeliveryMethod(e.target.value)}
+                            className="w-5 h-5 mt-0.5 text-gsg-purple"
+                          />
+                          <div>
+                            <p className="font-semibold text-gray-900">{opt.label}</p>
+                            <p className="text-sm text-gray-600 mt-1">{opt.desc}</p>
+                          </div>
                         </div>
-                      </div>
-                      <p className="font-bold text-blue-700">FREE</p>
-                    </label>
-
-                    <label className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors ${deliveryMethod === 'doorstep' ? 'border-blue-700 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-                      }`}>
-                      <div className="flex items-center space-x-4">
-                        <input
-                          type="radio"
-                          name="delivery"
-                          value="doorstep"
-                          checked={deliveryMethod === 'doorstep'}
-                          onChange={(e) => setDeliveryMethod(e.target.value)}
-                          className="w-5 h-5 text-blue-700"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-900">Doorstep Delivery</p>
-                          <p className="text-sm text-gray-600">We will contact you with the delivery cost</p>
-                        </div>
-                      </div>
-                      <p className="font-semibold text-amber-600 text-sm">At a Cost</p>
-                    </label>
-
-                    {/* Comprehensive delivery options - to be re-enabled later
-                    <label className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors ${deliveryMethod === 'accra' ? 'border-blue-700 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-                      }`}>
-                      <div className="flex items-center space-x-4">
-                        <input type="radio" name="delivery" value="accra" checked={deliveryMethod === 'accra'} onChange={(e) => setDeliveryMethod(e.target.value)} className="w-5 h-5 text-blue-700" />
-                        <div>
-                          <p className="font-semibold text-gray-900">Accra Delivery</p>
-                          <p className="text-sm text-gray-600">Delivery within Accra</p>
-                        </div>
-                      </div>
-                      <p className="font-bold text-gray-900">GH₵ 40.00</p>
-                    </label>
-                    <label className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors ${deliveryMethod === 'outside-accra' ? 'border-blue-700 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-                      }`}>
-                      <div className="flex items-center space-x-4">
-                        <input type="radio" name="delivery" value="outside-accra" checked={deliveryMethod === 'outside-accra'} onChange={(e) => setDeliveryMethod(e.target.value)} className="w-5 h-5 text-blue-700" />
-                        <div>
-                          <p className="font-semibold text-gray-900">Outside Accra Delivery</p>
-                          <p className="text-sm text-gray-600">Delivery to bus stations (VIP, OA, STC, etc.)</p>
-                        </div>
-                      </div>
-                      <p className="font-bold text-gray-900">GH₵ 30.00</p>
-                    </label>
-                    */}
+                      </label>
+                    ))}
                   </div>
+                  {deliveryMethod === 'joint-express' && (
+                    <div className="mt-6 p-4 rounded-card bg-gray-50 border border-gray-200">
+                      <p className="font-medium text-gray-900 mb-3">Neighbor / Colleague details (optional)</p>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          placeholder="Name"
+                          value={jointExpressNeighbor.name}
+                          onChange={(e) => setJointExpressNeighbor((p) => ({ ...p, name: e.target.value }))}
+                          className="px-4 py-2 border border-gray-300 rounded-lg"
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone"
+                          value={jointExpressNeighbor.phone}
+                          onChange={(e) => setJointExpressNeighbor((p) => ({ ...p, phone: e.target.value }))}
+                          className="px-4 py-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {deliveryMethod === 'personal-shopper' && (
+                    <p className="mt-4 text-sm text-gray-600">
+                      <a href="https://shopper.gsgbrands.com.gh" target="_blank" rel="noopener noreferrer" className="text-gsg-purple font-medium hover:underline">Go to My Personal Shopper</a> to add items to your list.
+                    </p>
+                  )}
 
                   <div className="flex flex-col-reverse md:flex-row gap-4 mt-6">
                     <button

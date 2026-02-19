@@ -1,8 +1,9 @@
 'use client';
 
 import { Suspense } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import GSGHeader from '@/components/GSGHeader';
+import GSGFooter from '@/components/GSGFooter';
+import GSGPromoBanner from '@/components/GSGPromoBanner';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ScrollToTop from '@/components/ScrollToTop';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -36,13 +37,14 @@ export default function StoreLayout({
       <div className="min-h-screen bg-gray-50">
         <PWASplash />
         <PWAInstaller />
-        <Header />
+        <GSGPromoBanner />
+        <GSGHeader />
         <ErrorBoundary>
           <div className="pwa-page-enter">
             {children}
           </div>
         </ErrorBoundary>
-        <Footer />
+        <GSGFooter />
         <MobileBottomNav />
         <SessionTimeoutWarning />
         <PWAPrompt />

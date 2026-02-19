@@ -54,6 +54,17 @@ interface ProductCardProps {
   hasVariants?: boolean;
   minVariantPrice?: number;
   colorVariants?: ColorVariant[];
+  /** Quick Specs modal (image click) */
+  brand?: string;
+  productType?: string;
+  netVolume?: string;
+  unit?: string;
+  /** Item details drawer */
+  description?: string;
+  ingredients?: string;
+  nutrition?: string;
+  specification?: string;
+  size?: string;
 }
 
 export default function ProductCard({
@@ -71,26 +82,64 @@ export default function ProductCard({
   moq = 1,
   hasVariants = false,
   minVariantPrice,
-  colorVariants = []
+  colorVariants = [],
+  brand,
+  productType,
+  netVolume,
+  unit,
+  description,
+  ingredients,
+  nutrition,
+  specification,
+  size,
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const [activeColor, setActiveColor] = useState<string | null>(null);
+  const [quickSpecsOpen, setQuickSpecsOpen] = useState(false);
+  const [itemDetailsOpen, setItemDetailsOpen] = useState(false);
+  const [addQty, setAddQty] = useState(moq);
+  const [showQtySelector, setShowQtySelector] = useState(false);
   const displayPrice = hasVariants && minVariantPrice ? minVariantPrice : price;
   const discount = originalPrice ? Math.round((1 - displayPrice / originalPrice) * 100) : 0;
   const MAX_SWATCHES = 5;
 
   const formatPrice = (val: number) => `GH\u20B5${val.toFixed(2)}`;
 
-  return (
-    <div className="group bg-transparent rounded-lg h-full flex flex-col hover-lift">
-      <Link href={`/product/${slug}`} className="relative block aspect-[3/4] overflow-hidden rounded-xl bg-gray-100 mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300">
-        <LazyImage
-          src={image}
-          alt={name}
-          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
-        />
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hasVariants) {
+      window.location.href = `/product/${slug}`;
+      return;
+    }
+    setAddQty(Math.max(moq, addQty));
+    setShowQtySelector(true);
+  };
 
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+  const confirmAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart({ id, name, price, image, quantity: addQty, slug, maxStock, moq });
+    setShowQtySelector(false);
+  };
+
+  return (
+    <div className="group relative bg-white rounded-card border border-gray-100 h-full flex flex-col shadow-sm hover:shadow-md transition-all">
+      <div className="relative block aspect-[3/4] overflow-hidden rounded-t-card bg-gray-100">
+        <Link href={`/product/${slug}`} className="absolute inset-0 z-0">
+          <LazyImage
+            src={image}
+            alt={name}
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+          />
+        </Link>
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickSpecsOpen(true); }}
+          className="absolute inset-0 z-10 cursor-pointer"
+          aria-label="Quick specs"
+        />
+        <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
           {badge && (
             <span className="bg-white/90 backdrop-blur text-gray-900 border border-gray-100 text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-md shadow-sm">
               {badge}
@@ -104,66 +153,90 @@ export default function ProductCard({
         </div>
 
         {!inStock && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-20">
             <span className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium">Out of Stock</span>
           </div>
         )}
 
         {inStock && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden lg:block">
-            {hasVariants ? (
-              <span className="w-full bg-white text-gray-900 hover:bg-gray-900 hover:text-white py-3 rounded-lg font-medium shadow-lg transition-colors flex items-center justify-center space-x-2 text-sm">
-                <i className="ri-list-check"></i>
-                <span>Select Options</span>
-              </span>
-            ) : (
+          <>
+            <div className="absolute bottom-3 left-3 z-20">
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq });
-                }}
-                className="w-full bg-white text-gray-900 hover:bg-gray-900 hover:text-white py-3 rounded-lg font-medium shadow-lg transition-colors flex items-center justify-center space-x-2 text-sm"
+                onClick={handleAddToCart}
+                className="bg-white text-gray-900 hover:bg-gsg-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors flex items-center gap-1 text-sm"
               >
-                <i className="ri-shopping-cart-2-line"></i>
-                <span>{moq > 1 ? `Add ${moq} to Cart` : 'Quick Add'}</span>
+                <i className="ri-add-line"></i>
+                <span>+ Add</span>
               </button>
-            )}
-          </div>
-        )}
-      </Link>
-
-      <div className="flex flex-col flex-grow">
-        <Link href={`/product/${slug}`}>
-          <h3 className="font-serif text-lg leading-tight text-gray-900 mb-1 group-hover:text-blue-800 transition-colors line-clamp-2">
-            {name}
-          </h3>
-        </Link>
-
-        {colorVariants.length > 0 && (
-          <div className="flex items-center gap-1.5 mb-2">
-            {colorVariants.slice(0, MAX_SWATCHES).map((color) => (
+            </div>
+            <div className="absolute bottom-3 right-3 z-20">
               <button
-                key={color.name}
-                title={color.name}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveColor(activeColor === color.name ? null : color.name);
-                }}
-                className={`w-4 h-4 rounded-full border transition-all duration-200 flex-shrink-0 ${
-                  activeColor === color.name
-                    ? 'ring-2 ring-offset-1 ring-blue-600 scale-110'
-                    : 'hover:scale-110'
-                } ${color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}`}
-                style={{ backgroundColor: color.hex }}
-              />
-            ))}
-            {colorVariants.length > MAX_SWATCHES && (
-              <span className="text-xs text-gray-400 ml-0.5">+{colorVariants.length - MAX_SWATCHES}</span>
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setItemDetailsOpen(true); }}
+                className="bg-white text-gray-900 hover:bg-gsg-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors text-sm"
+              >
+                Item details
+              </button>
+            </div>
+            {showQtySelector && (
+              <div className="absolute bottom-14 left-3 z-30 flex items-center gap-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2">
+                <input
+                  type="number"
+                  min={moq}
+                  max={maxStock}
+                  value={addQty}
+                  onChange={(e) => setAddQty(Math.max(moq, Math.min(maxStock, parseInt(e.target.value, 10) || moq)))}
+                  className="w-14 py-1 px-2 border border-gray-300 rounded text-center text-sm"
+                />
+                <button onClick={confirmAdd} className="bg-gsg-purple text-white py-1.5 px-3 rounded text-sm font-medium">
+                  Add
+                </button>
+              </div>
             )}
-          </div>
+          </>
         )}
+      </div>
 
-        <div className="flex items-baseline space-x-2 mb-2">
+      {/* Quick Specs modal */}
+      {quickSpecsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setQuickSpecsOpen(false)}>
+          <div className="bg-white rounded-card p-6 max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-gray-900 mb-4">Quick Specs</h3>
+            <dl className="space-y-2 text-sm">
+              <div><dt className="text-gray-500">Brand</dt><dd className="font-medium">{brand || '—'}</dd></div>
+              <div><dt className="text-gray-500">Type</dt><dd className="font-medium">{productType || '—'}</dd></div>
+              <div><dt className="text-gray-500">Net Volume</dt><dd className="font-medium">{netVolume || '—'}</dd></div>
+              <div><dt className="text-gray-500">Unit</dt><dd className="font-medium">{unit || '—'}</dd></div>
+            </dl>
+            <Link href={`/product/${slug}`} className="mt-4 inline-block text-gsg-purple font-medium hover:underline">View full product</Link>
+            <button type="button" onClick={() => setQuickSpecsOpen(false)} className="mt-4 w-full border border-gray-300 py-2 rounded-lg">Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Item details drawer/modal */}
+      {itemDetailsOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={() => setItemDetailsOpen(false)}>
+          <div className="bg-white rounded-t-2xl sm:rounded-card max-h-[85vh] w-full sm:max-w-md overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="font-bold text-gray-900">Item details</h3>
+              <button type="button" onClick={() => setItemDetailsOpen(false)} className="p-2" aria-label="Close">×</button>
+            </div>
+            <div className="p-6 space-y-4 text-sm">
+              {description && <div><h4 className="font-semibold text-gray-900 mb-1">Description</h4><p className="text-gray-600">{description}</p></div>}
+              {ingredients && <div><h4 className="font-semibold text-gray-900 mb-1">Ingredients</h4><p className="text-gray-600">{ingredients}</p></div>}
+              {nutrition && <div><h4 className="font-semibold text-gray-900 mb-1">Nutrition</h4><p className="text-gray-600">{nutrition}</p></div>}
+              {specification && <div><h4 className="font-semibold text-gray-900 mb-1">Specification</h4><p className="text-gray-600">{specification}</p></div>}
+              {(!description && !ingredients && !nutrition && !specification) && <p className="text-gray-500">See product page for full details.</p>}
+            </div>
+            <div className="p-6 border-t">
+              <Link href={`/product/${slug}`} className="block w-full text-center bg-gsg-purple text-white py-3 rounded-lg font-medium">View product</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col flex-grow p-4">
+        <div className="flex items-baseline gap-2 mb-1">
           {hasVariants && minVariantPrice ? (
             <span className="text-gray-900 font-semibold">From {formatPrice(minVariantPrice)}</span>
           ) : (
@@ -173,26 +246,40 @@ export default function ProductCard({
             <span className="text-sm text-gray-400 line-through">{formatPrice(originalPrice)}</span>
           )}
         </div>
+        <Link href={`/product/${slug}`}>
+          <h3 className="font-medium text-gray-900 mb-1 group-hover:text-gsg-purple transition-colors line-clamp-2">
+            {name}{size ? ` · ${size}` : ''}
+          </h3>
+        </Link>
+        <p className="text-xs text-gray-500">Min order: {moq} {moq === 1 ? 'piece' : 'pieces'}</p>
 
-        <div className="mt-auto pt-2 lg:hidden">
+        {colorVariants.length > 0 && (
+          <div className="flex items-center gap-1.5 mt-2">
+            {colorVariants.slice(0, MAX_SWATCHES).map((color) => (
+              <button
+                key={color.name}
+                title={color.name}
+                onClick={(e) => { e.preventDefault(); setActiveColor(activeColor === color.name ? null : color.name); }}
+                className={`w-4 h-4 rounded-full border flex-shrink-0 ${activeColor === color.name ? 'ring-2 ring-offset-1 ring-gsg-purple scale-110' : ''} ${color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}`}
+                style={{ backgroundColor: color.hex }}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="mt-auto pt-3 lg:hidden">
           {hasVariants ? (
-            <Link
-              href={`/product/${slug}`}
-              className="w-full border border-gray-200 text-gray-900 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center justify-center space-x-1"
-            >
-              <i className="ri-list-check text-sm"></i>
+            <Link href={`/product/${slug}`} className="w-full border border-gray-200 text-gray-900 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center justify-center gap-1">
+              <i className="ri-list-check"></i>
               <span>Select Options</span>
             </Link>
           ) : (
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq });
-              }}
+              onClick={(e) => { e.preventDefault(); setShowQtySelector(true); }}
               disabled={!inStock}
-              className="w-full border border-gray-200 text-gray-900 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border border-gray-200 text-gray-900 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
             >
-              {moq > 1 ? `Add ${moq} to Cart` : 'Add to Cart'}
+              + Add (min {moq})
             </button>
           )}
         </div>
