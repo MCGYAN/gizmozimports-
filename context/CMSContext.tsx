@@ -2,6 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
+import { SITE_LOGO_PATH } from '@/lib/brand';
+import { DEFAULT_CONTACT_EMAIL, DEFAULT_CONTACT_PHONE, DEFAULT_CONTACT_WHATSAPP } from '@/lib/store-config';
+import { STORE_CURRENCY, STORE_CURRENCY_SYMBOL } from '@/lib/currency';
 
 interface SiteSettings {
     site_name: string;
@@ -9,6 +12,7 @@ interface SiteSettings {
     site_logo: string;
     contact_email: string;
     contact_phone: string;
+    contact_whatsapp: string;
     contact_address: string;
     social_facebook: string;
     social_instagram: string;
@@ -67,10 +71,11 @@ interface CMSContextType {
 
 const defaultSettings: SiteSettings = {
     site_name: 'Gizmoz Trades',
-    site_tagline: 'Affordable import sourcing and online shopping for Ghana',
-    site_logo: '/gizmoz-logo.png',
-    contact_email: 'support@gizmoztrades.com',
-    contact_phone: '+233209597443',
+    site_tagline: 'Your China sourcing partner in Ghana. We source, pay, and deliver quality products so you do not have to.',
+    site_logo: SITE_LOGO_PATH,
+    contact_email: DEFAULT_CONTACT_EMAIL,
+    contact_phone: DEFAULT_CONTACT_PHONE,
+    contact_whatsapp: DEFAULT_CONTACT_WHATSAPP,
     contact_address: 'Accra, Ghana',
     social_facebook: '',
     social_instagram: '',
@@ -78,10 +83,10 @@ const defaultSettings: SiteSettings = {
     social_tiktok: '',
     social_snapchat: '',
     social_youtube: '',
-    primary_color: '#059669',
-    secondary_color: '#0D9488',
-    currency: 'GHS',
-    currency_symbol: 'GH₵',
+    primary_color: '#0ea5e9',
+    secondary_color: '#fbbf24',
+    currency: STORE_CURRENCY,
+    currency_symbol: STORE_CURRENCY_SYMBOL,
 };
 
 const CMSContext = createContext<CMSContextType>({
@@ -98,10 +103,11 @@ const CMSContext = createContext<CMSContextType>({
 export function CMSProvider({ children }: { children: ReactNode }) {
     const [settings, setSettings] = useState<SiteSettings>({
         site_name: 'Gizmoz Trades',
-        site_tagline: 'Affordable import sourcing and online shopping for Ghana',
-        site_logo: '/gizmoz-logo.png',
-        contact_email: 'support@gizmoztrades.com',
-        contact_phone: '+233209597443',
+        site_tagline: 'Your China sourcing partner in Ghana. We source, pay, and deliver quality products so you do not have to.',
+        site_logo: SITE_LOGO_PATH,
+        contact_email: DEFAULT_CONTACT_EMAIL,
+        contact_phone: DEFAULT_CONTACT_PHONE,
+        contact_whatsapp: DEFAULT_CONTACT_WHATSAPP,
         contact_address: 'Accra, Ghana',
         social_facebook: '',
         social_instagram: '',
@@ -109,10 +115,10 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         social_tiktok: '',
         social_snapchat: '',
         social_youtube: '',
-        primary_color: '#2563eb',
-        secondary_color: '#FBF6F2',
-        currency: 'GHS',
-        currency_symbol: 'GH₵',
+        primary_color: '#0ea5e9',
+        secondary_color: '#fbbf24',
+        currency: STORE_CURRENCY,
+        currency_symbol: STORE_CURRENCY_SYMBOL,
     });
     const [content, setContent] = useState<CMSContent[]>([]);
     const [banners, setBanners] = useState<Banner[]>([]);

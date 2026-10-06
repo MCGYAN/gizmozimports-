@@ -1,54 +1,45 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import { supabase } from '@/lib/supabase';
 import { useRecaptcha } from '@/hooks/useRecaptcha';
+import {
+  getFriendlyAuthError,
+  getPasswordIssues,
+  isStrongPassword,
+  isValidGhPhone,
+} from '@/lib/auth-copy';
 
-function getFriendlyError(message: string): string {
-  const lower = message.toLowerCase();
-  if (lower.includes('email rate limit exceeded') || lower.includes('over_email_send_rate_limit')) {
-    return 'Our system is experiencing high demand. Please wait a few minutes and try again, or contact us for help.';
-  }
-  if (lower.includes('user already registered') || lower.includes('already been registered')) {
-    return 'An account with this email already exists. Try signing in instead.';
-  }
-  if (lower.includes('password') && lower.includes('weak')) {
-    return 'Your password is too weak. Please use at least 8 characters with a mix of letters, numbers, and symbols.';
-  }
-  if (lower.includes('invalid email')) {
-    return 'Please enter a valid email address.';
-  }
-  if (lower.includes('network') || lower.includes('fetch')) {
-    return 'Connection error. Please check your internet and try again.';
-  }
-  return message;
-}
-
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const emailFromQuery = searchParams.get('email') || '';
   const errorRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
+    email: emailFromQuery,
     password: '',
     confirmPassword: '',
     acceptTerms: false,
-    newsletter: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [success, setSuccess] = useState(false);
   const { getToken, verifying } = useRecaptcha();
 
-  // Auto-scroll to error when it appears
+  useEffect(() => {
+    if (emailFromQuery) {
+      setFormData((prev) => ({ ...prev, email: emailFromQuery }));
+    }
+  }, [emailFromQuery]);
+
   useEffect(() => {
     if (authError && errorRef.current) {
       errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -61,27 +52,29 @@ export default function SignupPage() {
     setAuthError('');
     setIsLoading(true);
 
-    const newErrors: any = {};
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    if (!formData.email) {
+    const newErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!isValidGhPhone(formData.phone)) {
+      newErrors.phone = 'Use a valid Ghana number, like 0244123456';
+    }
+    if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    if (!formData.phone) {
-      newErrors.phone = 'Phone number is required';
-    }
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!isStrongPassword(formData.password)) {
+      newErrors.password = getPasswordIssues(formData.password).join('. ') + '.';
     }
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'You must accept the terms and conditions';
+      newErrors.acceptTerms = 'Please accept the terms to continue';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -90,299 +83,287 @@ export default function SignupPage() {
       return;
     }
 
-    // reCAPTCHA verification
     const isHuman = await getToken('signup');
     if (!isHuman) {
-      setAuthError('Security verification failed. Please try again.');
+      setAuthError('Security check failed. Please try again.');
       setIsLoading(false);
       return;
     }
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
         options: {
           data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone,
-            newsletter: formData.newsletter
-          }
-        }
+            first_name: formData.firstName.trim(),
+            last_name: formData.lastName.trim(),
+            phone: formData.phone.trim(),
+            full_name: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
+          },
+        },
       });
 
       if (error) throw error;
 
       if (data.user) {
-        // Send Welcome Notification
         fetch('/api/notifications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: 'welcome',
             payload: {
-              email: formData.email,
-              firstName: formData.firstName
-            }
-          })
-        }).catch(err => console.error('Welcome notification error:', err));
-        // If Supabase confirms via email, data.session might be null initially
-        if (!data.session) {
-          setSuccess(true);
-        } else {
-          // Auto-login success (if email confirming is off)
+              email: formData.email.trim(),
+              firstName: formData.firstName.trim(),
+            },
+          }),
+        }).catch(() => {});
+
+        if (data.session?.access_token) {
+          try {
+            await fetch('/api/orders/claim', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${data.session.access_token}`,
+              },
+              body: JSON.stringify({}),
+            });
+          } catch {
+            /* non-blocking */
+          }
           router.push('/account');
           router.refresh();
+          return;
         }
+
+        // Autoconfirm should return a session; if not, send them to sign in.
+        router.push(
+          `/auth/login?email=${encodeURIComponent(formData.email.trim())}&next=/account`,
+        );
       }
     } catch (err: any) {
       console.error('Signup error:', err);
-      setAuthError(getFriendlyError(err.message || 'Failed to sign up. Please try again.'));
+      setAuthError(getFriendlyAuthError(err.message || '', 'signup'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (success) {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="ri-mail-send-line text-4xl text-blue-600"></i>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Check Your Email</h1>
-          <p className="text-gray-600 mb-8">
-            We've sent a confirmation link to <strong>{formData.email}</strong>.<br />
-            Please check your inbox to activate your account.
-          </p>
-          <Link href="/auth/login" className="inline-block bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-800 transition-colors">
-            Back to Login
-          </Link>
-        </div>
-      </main>
-    );
-  }
+  const inputClass = (hasError?: boolean) =>
+    `w-full rounded-lg border-2 px-4 py-3 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent ${
+      hasError ? 'border-red-500' : 'border-gray-300'
+    }`;
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600">Join us and start shopping today</p>
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl">Create account</h1>
+          <p className="text-gray-600">
+            Save your details once. Then reopen invoices and track orders anytime.
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-8">
-          {authError && (
-            <div ref={errorRef} className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-start gap-3">
-              <i className="ri-error-warning-line text-red-500 text-lg flex-shrink-0 mt-0.5"></i>
-              <span>{authError}</span>
+        <div className="rounded-xl bg-white p-8 shadow-sm">
+          {authError ? (
+            <div
+              ref={errorRef}
+              className="mb-4 space-y-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+            >
+              <p>{authError}</p>
+              {authError.toLowerCase().includes('sign in') ? (
+                <Link
+                  href={`/auth/login${formData.email ? `?email=${encodeURIComponent(formData.email.trim())}` : ''}`}
+                  className="inline-block font-semibold text-brand-primary underline"
+                >
+                  Sign in instead
+                </Link>
+              ) : null}
             </div>
-          )}
+          ) : null}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  First Name
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-gray-900">First name</label>
                 <input
                   type="text"
+                  name="given-name"
+                  autoComplete="given-name"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.firstName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="John"
+                  className={inputClass(Boolean(errors.firstName))}
+                  placeholder="Ama"
                 />
-                {errors.firstName && (
-                  <p className="text-sm text-red-600 mt-1">{errors.firstName}</p>
-                )}
+                {errors.firstName ? <p className="mt-1 text-sm text-red-600">{errors.firstName}</p> : null}
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Last Name
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-gray-900">Last name</label>
                 <input
                   type="text"
+                  name="family-name"
+                  autoComplete="family-name"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.lastName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Doe"
+                  className={inputClass(Boolean(errors.lastName))}
+                  placeholder="Mensah"
                 />
-                {errors.lastName && (
-                  <p className="text-sm text-red-600 mt-1">{errors.lastName}</p>
-                )}
+                {errors.lastName ? <p className="mt-1 text-sm text-red-600">{errors.lastName}</p> : null}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder="name@email.com"
-              />
-              {errors.email && (
-                <p className="text-sm text-red-600 mt-2">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Phone Number
-              </label>
+              <label className="mb-2 block text-sm font-semibold text-gray-900">Phone</label>
               <input
                 type="tel"
+                name="tel"
+                autoComplete="tel"
+                inputMode="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder="+233 XX XXX XXXX"
+                className={inputClass(Boolean(errors.phone))}
+                placeholder="0244123456"
               />
-              {errors.phone && (
-                <p className="text-sm text-red-600 mt-2">{errors.phone}</p>
-              )}
+              {errors.phone ? <p className="mt-1 text-sm text-red-600">{errors.phone}</p> : null}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Password
-              </label>
+              <label className="mb-2 block text-sm font-semibold text-gray-900">Email</label>
+              <input
+                type="email"
+                name="email"
+                autoComplete="username email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className={inputClass(Boolean(errors.email))}
+                placeholder="you@example.com"
+              />
+              {errors.email ? <p className="mt-1 text-sm text-red-600">{errors.email}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-gray-900">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  name="new-password"
+                  autoComplete="new-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="At least 8 characters"
+                  className={`${inputClass(Boolean(errors.password))} pr-12`}
+                  placeholder="Create a strong password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   <i className={`${showPassword ? 'ri-eye-off-line' : 'ri-eye-line'} text-xl`}></i>
                 </button>
               </div>
               <PasswordStrengthMeter password={formData.password} />
-              {errors.password && (
-                <p className="text-sm text-red-600 mt-2">{errors.password}</p>
-              )}
+              <p className="mt-1 text-xs text-slate-500">
+                Your browser can offer to save this password for next time.
+              </p>
+              {errors.password ? <p className="mt-1 text-sm text-red-600">{errors.password}</p> : null}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Confirm Password
-              </label>
+              <label className="mb-2 block text-sm font-semibold text-gray-900">Confirm password</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirm-password"
+                  autoComplete="new-password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Re-enter password"
+                  className={`${inputClass(Boolean(errors.confirmPassword))} pr-12`}
+                  placeholder="Type it again"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
                   <i className={`${showConfirmPassword ? 'ri-eye-off-line' : 'ri-eye-line'} text-xl`}></i>
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-600 mt-2">{errors.confirmPassword}</p>
-              )}
+              {errors.confirmPassword ? (
+                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+              ) : null}
             </div>
 
             <div>
-              <label className="flex items-start space-x-3 cursor-pointer">
+              <label className="flex cursor-pointer items-start space-x-3">
                 <input
                   type="checkbox"
                   checked={formData.acceptTerms}
                   onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
-                  className="w-4 h-4 mt-1 text-blue-600 rounded focus:ring-blue-500"
+                  className="mt-1 h-4 w-4 rounded text-brand-accent focus:ring-brand-accent"
                 />
                 <span className="text-sm text-gray-700">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-blue-700 hover:text-blue-900 font-medium whitespace-nowrap">
-                    Terms & Conditions
-                  </Link>
-                  {' '}and{' '}
-                  <Link href="/privacy" className="text-blue-700 hover:text-blue-900 font-medium whitespace-nowrap">
+                  <Link href="/terms" className="font-medium text-brand-primary whitespace-nowrap hover:underline">
+                    Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="font-medium text-brand-primary whitespace-nowrap hover:underline">
                     Privacy Policy
                   </Link>
+                  .
                 </span>
               </label>
-              {errors.acceptTerms && (
-                <p className="text-sm text-red-600 mt-2">{errors.acceptTerms}</p>
-              )}
+              {errors.acceptTerms ? <p className="mt-2 text-sm text-red-600">{errors.acceptTerms}</p> : null}
             </div>
 
             <button
               type="submit"
               disabled={isLoading || verifying}
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white py-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+              className="w-full cursor-pointer whitespace-nowrap rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#0d2747] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading || verifying ? (
                 <span className="flex items-center justify-center">
-                  <i className="ri-loader-4-line animate-spin mr-2"></i> {verifying ? 'Verifying...' : 'Creating account...'}
+                  <i className="ri-loader-4-line mr-2 animate-spin"></i>
+                  {verifying ? 'Checking…' : 'Creating account…'}
                 </span>
-              ) : 'Create Account'}
+              ) : (
+                'Create account'
+              )}
             </button>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">Or sign up with</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              <button
-                disabled
-                className="flex items-center justify-center space-x-2 border-2 border-gray-200 bg-gray-50 py-3 rounded-lg cursor-not-allowed opacity-60"
-              >
-                <i className="ri-google-fill text-xl text-red-600 grayscale opacity-50"></i>
-                <span className="font-medium text-gray-400">Google</span>
-              </button>
-              <button
-                disabled
-                className="flex items-center justify-center space-x-2 border-2 border-gray-200 bg-gray-50 py-3 rounded-lg cursor-not-allowed opacity-60"
-              >
-                <i className="ri-facebook-fill text-xl text-blue-600 grayscale opacity-50"></i>
-                <span className="font-medium text-gray-400">Facebook</span>
-              </button>
-            </div>
-          </div>
-
           <p className="mt-8 text-center text-gray-600">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-blue-700 hover:text-blue-900 font-semibold whitespace-nowrap">
+            <Link href="/auth/login" className="whitespace-nowrap font-semibold text-brand-primary hover:underline">
               Sign in
             </Link>
           </p>
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/" className="text-gray-600 hover:text-gray-900 font-medium whitespace-nowrap">
+          <Link href="/" className="whitespace-nowrap font-medium text-gray-600 hover:text-gray-900">
             <i className="ri-arrow-left-line mr-2"></i>
             Back to Home
           </Link>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+          <p className="text-slate-500">Loading…</p>
+        </main>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }

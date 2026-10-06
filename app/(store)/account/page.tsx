@@ -1,28 +1,82 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import OrderHistory from './OrderHistory';
 import AddressBook from './AddressBook';
+import MyShipments from './MyShipments';
+import FinancialDocuments from './FinancialDocuments';
+import DeliveryRequests from './DeliveryRequests';
+import OrderStatus from './OrderStatus';
+import ChinaWarehouse from './ChinaWarehouse';
 import { supabase } from '@/lib/supabase';
+import { getAuthCookies } from '@/lib/auth-remember';
+
+const ACCOUNT_TABS = [
+  'profile',
+  'status',
+  'orders',
+  'warehouse',
+  'shipments',
+  'documents',
+  'deliveries',
+  'addresses',
+  'security',
+] as const;
 
 function AccountContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'profile';
+  const initialTab = searchParams.get('tab') || 'status';
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [accessToken, setAccessToken] = useState('');
+  const [portalData, setPortalData] = useState<{
+    packages: any[];
+    board: any | null;
+    documents: any[];
+    orderStatus: any[];
+    rmbStatus: any[];
+  }>({ packages: [], board: null, documents: [], orderStatus: [], rmbStatus: [] });
+  const [portalLoading, setPortalLoading] = useState({
+    shipments: false,
+    documents: false,
+    status: false,
+  });
+  const [portalLoaded, setPortalLoaded] = useState({
+    shipments: false,
+    documents: false,
+    status: false,
+  });
 
   // Update active tab when URL param changes
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['profile', 'orders', 'addresses', 'security'].includes(tab)) {
+    if (tab && (ACCOUNT_TABS as readonly string[]).includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
+
+  const goToTab = (tab: string) => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tab);
+    if (tab !== 'status') params.delete('order');
+    if (tab !== 'documents') params.delete('document');
+    router.replace(`/account?${params.toString()}`, { scroll: false });
+  };
+
+  const mobileTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    const el = mobileTabRefs.current[activeTab];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [activeTab]);
 
   // Profile Form States
   const [profileData, setProfileData] = useState({
@@ -44,13 +98,25 @@ function AccountContent() {
 
   useEffect(() => {
     async function checkUser() {
-      const { data: { session } } = await supabase.auth.getSession();
+      let {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
-        router.push('/auth/login');
+        const cookies = getAuthCookies();
+        if (cookies) {
+          const restored = await supabase.auth.setSession(cookies);
+          session = restored.data.session;
+        }
+      }
+      if (!session) {
+        const query = searchParams.toString();
+        const nextPath = `/account${query ? `?${query}` : ''}`;
+        router.push(`/auth/login?next=${encodeURIComponent(nextPath)}`);
         return;
       }
 
       setUser(session.user);
+      setAccessToken(session.access_token);
       setProfileData({
         firstName: session.user.user_metadata?.first_name || '',
         lastName: session.user.user_metadata?.last_name || '',
@@ -58,9 +124,74 @@ function AccountContent() {
         phone: session.user.phone || ''
       });
       setLoading(false);
+
+      // Guest records are normally claimed during sign-in. Recheck quietly here
+      // without making the account screen wait for database updates.
+      void fetch('/api/orders/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: '{}',
+      }).catch(() => null);
     }
     checkUser();
-  }, [router]);
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    const section =
+      activeTab === 'shipments'
+        ? 'shipments'
+        : activeTab === 'documents'
+          ? 'documents'
+          : activeTab === 'status'
+            ? 'status'
+            : null;
+    if (!section || !accessToken || portalLoaded[section] || portalLoading[section]) return;
+
+    const loadPortalSection = async () => {
+      setPortalLoading((current) => ({ ...current, [section]: true }));
+      try {
+        const include =
+          section === 'shipments'
+            ? 'packages,board'
+            : section === 'documents'
+              ? 'documents'
+              : 'order-status';
+        const response = await fetch(`/api/account/portal?include=${include}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not load account records.');
+        setPortalData((current) => ({ ...current, ...result }));
+      } catch (error) {
+        console.error(`[account ${section}]`, error);
+      } finally {
+        setPortalLoaded((current) => ({ ...current, [section]: true }));
+        setPortalLoading((current) => ({ ...current, [section]: false }));
+      }
+    };
+
+    void loadPortalSection();
+  }, [accessToken, activeTab, portalLoaded, portalLoading]);
+
+  const reloadDocuments = async () => {
+    if (!accessToken) return;
+    setPortalLoading((current) => ({ ...current, documents: true }));
+    try {
+      const response = await fetch('/api/account/portal?include=documents', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not load account records.');
+      setPortalData((current) => ({ ...current, documents: result.documents || [] }));
+    } catch (error) {
+      console.error('[account documents refresh]', error);
+    } finally {
+      setPortalLoading((current) => ({ ...current, documents: false }));
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,11 +203,20 @@ function AccountContent() {
         data: {
           first_name: profileData.firstName,
           last_name: profileData.lastName,
-          phone: profileData.phone // Storing phone in metadata for now
+          full_name: `${profileData.firstName} ${profileData.lastName}`.trim(),
+          phone: profileData.phone,
         }
       });
 
       if (error) throw error;
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: `${profileData.firstName} ${profileData.lastName}`.trim(),
+          phone: profileData.phone.trim() || null,
+        })
+        .eq('id', user.id);
+      if (profileError) throw profileError;
       setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (err: any) {
       setProfileMessage({ type: 'error', text: err.message });
@@ -114,6 +254,8 @@ function AccountContent() {
   };
 
   const handleSignOut = async () => {
+    const { clearAuthCookies } = await import('@/lib/auth-remember');
+    clearAuthCookies();
     await supabase.auth.signOut();
     router.push('/auth/login');
     router.refresh();
@@ -122,7 +264,7 @@ function AccountContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <i className="ri-loader-4-line animate-spin text-4xl text-brand-purple"></i>
+        <i className="ri-loader-4-line animate-spin text-4xl text-brand-primary"></i>
       </div>
     );
   }
@@ -138,7 +280,7 @@ function AccountContent() {
       icon: 'ri-user-add-line',
       title: 'Refer & Earn',
       description: 'Invite friends and earn rewards',
-      link: '/referral-rewards'
+      link: '/referral'
     }
   ];
 
@@ -167,7 +309,7 @@ function AccountContent() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
             <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
-              <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-brand-purple-light/30 flex items-center justify-center text-brand-purple text-xl md:text-2xl font-bold shadow-inner border-2 border-white">
+              <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-brand-light flex items-center justify-center text-brand-primary text-xl md:text-2xl font-bold shadow-inner border-2 border-white">
                 {profileData.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
@@ -177,9 +319,8 @@ function AccountContent() {
             </div>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-all font-medium shadow-sm w-full md:w-auto justify-center md:justify-start"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-all font-bold shadow-sm w-full md:w-auto justify-center md:justify-start"
             >
-              <i className="ri-logout-box-r-line"></i>
               Sign Out
             </button>
           </div>
@@ -191,19 +332,23 @@ function AccountContent() {
                 <nav className="p-2 space-y-1">
                   {[
                     { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile Settings' },
-                    { id: 'orders', icon: 'ri-shopping-bag-3-line', label: 'Order History' },
+                    { id: 'status', icon: 'ri-map-pin-line', label: 'Order status' },
+                    { id: 'orders', icon: 'ri-archive-line', label: 'Past orders' },
+                    { id: 'warehouse', icon: 'ri-building-2-line', label: 'China Warehouse' },
+                    { id: 'shipments', icon: 'ri-ship-2-line', label: 'My Shipments' },
+                    { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices & Receipts' },
+                    { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries' },
                     { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
                     { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' }
                   ].map(tab => (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-left group ${activeTab === tab.id
-                        ? 'bg-brand-purple-light/20 text-brand-purple shadow-sm'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      onClick={() => goToTab(tab.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left group ${activeTab === tab.id
+                        ? 'bg-brand-primary text-white shadow-md'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-brand-primary'
                         }`}
                     >
-                      <i className={`${tab.icon} text-xl transition-colors ${activeTab === tab.id ? 'text-brand-purple' : 'text-gray-400 group-hover:text-gray-600'}`}></i>
                       <span>{tab.label}</span>
                     </button>
                   ))}
@@ -212,23 +357,33 @@ function AccountContent() {
             </div>
 
             {/* Mobile Horizontal Navigation */}
-            <div className="lg:hidden col-span-1 pb-2 -mx-4 px-4">
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="sticky top-16 z-20 -mx-4 mb-2 border-b border-slate-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur lg:hidden">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [-webkit-overflow-scrolling:touch]">
                 {[
                   { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile' },
-                  { id: 'orders', icon: 'ri-shopping-bag-3-line', label: 'Orders' },
+                  { id: 'status', icon: 'ri-map-pin-line', label: 'Status' },
+                  { id: 'orders', icon: 'ri-archive-line', label: 'Past' },
+                  { id: 'warehouse', icon: 'ri-building-2-line', label: 'Warehouse' },
+                  { id: 'shipments', icon: 'ri-ship-2-line', label: 'Shipments' },
+                  { id: 'documents', icon: 'ri-file-list-3-line', label: 'Receipts' },
+                  { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries' },
                   { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Address' },
-                  { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' }
-                ].map(tab => (
+                  { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' },
+                ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium whitespace-nowrap transition-all border shadow-sm ${activeTab === tab.id
-                      ? 'bg-brand-purple text-white border-brand-purple ring-2 ring-brand-purple-light/40'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                      }`}
+                    ref={(node) => {
+                      mobileTabRefs.current[tab.id] = node;
+                    }}
+                    type="button"
+                    onClick={() => goToTab(tab.id)}
+                    className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-bold whitespace-nowrap transition-all border shadow-sm ${
+                      activeTab === tab.id
+                        ? 'bg-brand-primary text-white border-brand-primary'
+                        : 'bg-white text-gray-600 border-gray-200'
+                    }`}
                   >
-                    <i className={tab.icon}></i>
+                    <i className={`${tab.icon} text-base`} aria-hidden />
                     <span>{tab.label}</span>
                   </button>
                 ))}
@@ -237,14 +392,14 @@ function AccountContent() {
 
             {/* Main Content Area */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-8 min-h-[500px]">
+              <div className="min-h-[420px] rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-6 md:p-8">
                 {activeTab === 'profile' && (
                   <div className="max-w-2xl">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Information</h2>
                     <p className="text-gray-500 mb-8">Update your personal details and contact info.</p>
 
                     {profileMessage.text && (
-                      <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${profileMessage.type === 'success' ? 'bg-brand-purple-light/20 text-brand-purple border border-brand-purple-light/40' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                      <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${profileMessage.type === 'success' ? 'bg-blue-50 text-brand-primary border border-blue-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
                         <i className={`text-xl mt-0.5 ${profileMessage.type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'}`}></i>
                         <div>{profileMessage.text}</div>
                       </div>
@@ -258,7 +413,7 @@ function AccountContent() {
                             type="text"
                             value={profileData.firstName}
                             onChange={e => setProfileData({ ...profileData, firstName: e.target.value })}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-purple-light/30 focus:border-brand-purple transition-all bg-gray-50 focus:bg-white"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-brand-accent transition-all bg-gray-50 focus:bg-white"
                           />
                         </div>
                         <div className="space-y-2">
@@ -267,7 +422,7 @@ function AccountContent() {
                             type="text"
                             value={profileData.lastName}
                             onChange={e => setProfileData({ ...profileData, lastName: e.target.value })}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-purple-light/30 focus:border-brand-purple transition-all bg-gray-50 focus:bg-white"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-brand-accent transition-all bg-gray-50 focus:bg-white"
                           />
                         </div>
                       </div>
@@ -294,8 +449,8 @@ function AccountContent() {
                             type="tel"
                             value={profileData.phone}
                             onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
-                            placeholder="+233 XX XXX XXXX"
-                            className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-purple-light/30 focus:border-brand-purple transition-all bg-gray-50 focus:bg-white"
+                            placeholder="+1 555 000 0000"
+                            className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-brand-accent transition-all bg-gray-50 focus:bg-white"
                           />
                         </div>
                       </div>
@@ -304,7 +459,7 @@ function AccountContent() {
                         <button
                           type="submit"
                           disabled={profileLoading}
-                          className="px-8 py-3 bg-brand-purple hover:bg-brand-purple-dark text-white rounded-xl font-semibold transition-all shadow-lg shadow-brand-purple/20 active:scale-95 disabled:opacity-50 disabled:shadow-none"
+                          className="px-8 py-3 bg-brand-primary hover:bg-brand-accent hover:text-white text-white rounded-xl font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:shadow-none"
                         >
                           {profileLoading ? 'Saving Info...' : 'Save Profile Information'}
                         </button>
@@ -316,7 +471,7 @@ function AccountContent() {
                       <p className="text-gray-500 mb-6">Ensure your account uses a strong, unique password.</p>
 
                       {passwordMessage.text && (
-                        <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${passwordMessage.type === 'success' ? 'bg-brand-purple-light/20 text-brand-purple border border-brand-purple-light/40' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                        <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${passwordMessage.type === 'success' ? 'bg-blue-50 text-brand-primary border border-blue-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
                           <i className={`text-xl mt-0.5 ${passwordMessage.type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'}`}></i>
                           <div>{passwordMessage.text}</div>
                         </div>
@@ -332,7 +487,7 @@ function AccountContent() {
                                 type="password"
                                 value={passwordData.password}
                                 onChange={e => setPasswordData({ ...passwordData, password: e.target.value })}
-                                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-purple-light/30 focus:border-brand-purple transition-all bg-gray-50 focus:bg-white"
+                                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-brand-accent transition-all bg-gray-50 focus:bg-white"
                               />
                             </div>
                           </div>
@@ -344,7 +499,7 @@ function AccountContent() {
                                 type="password"
                                 value={passwordData.confirmPassword}
                                 onChange={e => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-purple-light/30 focus:border-brand-purple transition-all bg-gray-50 focus:bg-white"
+                                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-brand-accent transition-all bg-gray-50 focus:bg-white"
                               />
                             </div>
                           </div>
@@ -361,7 +516,36 @@ function AccountContent() {
                   </div>
                 )}
 
+                {activeTab === 'status' && (
+                  <OrderStatus
+                    orders={portalData.orderStatus || []}
+                    rmbOrders={portalData.rmbStatus || []}
+                    loading={portalLoading.status || !portalLoaded.status}
+                    focusOrderNumber={searchParams.get('order')}
+                  />
+                )}
+
                 {activeTab === 'orders' && <OrderHistory />}
+
+                {activeTab === 'warehouse' && <ChinaWarehouse accessToken={accessToken} />}
+
+                {activeTab === 'shipments' && (
+                  <MyShipments
+                    data={{ packages: portalData.packages, board: portalData.board }}
+                    loading={portalLoading.shipments || !portalLoaded.shipments}
+                  />
+                )}
+
+                {activeTab === 'documents' && (
+                  <FinancialDocuments
+                    documents={portalData.documents}
+                    loading={portalLoading.documents || !portalLoaded.documents}
+                    accessToken={accessToken}
+                    onRefresh={reloadDocuments}
+                  />
+                )}
+
+                {activeTab === 'deliveries' && <DeliveryRequests />}
 
                 {activeTab === 'addresses' && <AddressBook />}
 
@@ -373,10 +557,10 @@ function AccountContent() {
                         <Link
                           key={index}
                           href={option.link}
-                          className="flex items-center justify-between p-5 border border-gray-200 rounded-2xl hover:border-brand-purple hover:shadow-md transition-all group bg-white"
+                          className="flex items-center justify-between p-5 border border-gray-200 rounded-2xl hover:border-brand-accent hover:shadow-md transition-all group bg-white"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center group-hover:bg-brand-purple-light/30 group-hover:text-brand-purple transition-colors flex-shrink-0">
+                            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center group-hover:bg-brand-light group-hover:text-brand-primary transition-colors flex-shrink-0">
                               <i className={`${option.icon} text-xl`}></i>
                             </div>
                             <div className="min-w-0">
@@ -386,7 +570,7 @@ function AccountContent() {
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">
                             {option.status === 'verified' && (
-                              <span className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 bg-blue-100 text-brand-purple rounded-full flex items-center gap-1">
+                              <span className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 bg-brand-light text-brand-primary rounded-full flex items-center gap-1">
                                 <i className="ri-verified-badge-fill"></i> <span className="hidden sm:inline">Verified</span>
                               </span>
                             )}
@@ -395,7 +579,7 @@ function AccountContent() {
                                 <i className="ri-error-warning-fill"></i> <span className="hidden sm:inline">Verify</span>
                               </span>
                             )}
-                            <i className="ri-arrow-right-line text-gray-300 group-hover:text-brand-purple transition-colors"></i>
+                            <i className="ri-arrow-right-line text-gray-300 group-hover:text-blue-500 transition-colors"></i>
                           </div>
                         </Link>
                       ))}
@@ -415,7 +599,7 @@ export default function AccountPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <i className="ri-loader-4-line animate-spin text-4xl text-brand-purple"></i>
+        <i className="ri-loader-4-line animate-spin text-4xl text-brand-primary"></i>
       </div>
     }>
       <AccountContent />

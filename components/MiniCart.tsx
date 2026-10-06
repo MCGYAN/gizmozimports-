@@ -1,8 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useCart } from '@/context/CartContext';
+import { formatStoreMoney } from '@/lib/currency';
+import { cleanVariantDisplayLabel } from '@/lib/product-variants';
+import { X, ShoppingCart, Trash2, Minus, Plus } from 'lucide-react';
 
 interface MiniCartProps {
   isOpen: boolean;
@@ -11,150 +15,194 @@ interface MiniCartProps {
 
 export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
   const { cart, removeFromCart, updateQuantity, subtotal } = useCart();
+  const [mounted, setMounted] = useState(false);
 
-  // Lock body scroll when cart is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = previous;
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
 
-  return (
-    <>
-      <div
-        className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 transition-opacity"
+  if (!mounted || !isOpen) return null;
+
+  const itemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[200]" role="dialog" aria-modal="true" aria-label="Your basket">
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/45"
+        aria-label="Close basket"
         onClick={onClose}
-      ></div>
+      />
 
-      <div className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col slide-in-right">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">
-            Shopping Cart ({cart.reduce((sum, i) => sum + i.quantity, 0)})
+      <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-2xl sm:border-l sm:border-gray-200">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4">
+          <h2 className="text-lg font-bold text-brand-primary">
+            Your basket
+            <span className="ml-1.5 text-brand-accent">({itemCount})</span>
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-primary"
+            aria-label="Close"
           >
-            <i className="ri-close-line text-2xl text-gray-700"></i>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {cart.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-full mb-4">
-              <i className="ri-shopping-cart-line text-5xl text-gray-400"></i>
+          <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-center">
+            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gray-50">
+              <ShoppingCart className="h-10 w-10 text-gray-300" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-600 mb-6">Add items to get started</p>
+            <h3 className="mb-2 text-xl font-bold text-brand-primary">Your basket is empty</h3>
+            <p className="mb-6 text-sm text-gray-500">Add something you like, then checkout here.</p>
             <Link
               href="/shop"
               onClick={onClose}
-              className="px-6 py-3 bg-blue-700 text-white rounded-lg font-semibold hover:bg-blue-800 transition-colors whitespace-nowrap cursor-pointer"
+              className="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-accent"
             >
-              Continue Shopping
+              Start shopping
             </Link>
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-4">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
+              <ul className="space-y-3">
                 {cart.map((item) => (
-                  <div key={`${item.id}-${item.variant}`} className="flex space-x-4 bg-gray-50 rounded-lg p-4">
-                    <div className="w-20 h-20 bg-white rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                  <li
+                    key={`${item.id}-${item.variant || 'default'}`}
+                    className="flex gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3"
+                  >
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-white">
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover object-center"
+                        className="h-full w-full object-contain object-center p-1"
                       />
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{item.name}</h3>
-                      {item.variant && (
-                        <p className="text-xs text-gray-600 mb-2">
-                          Variant: {item.variant}
-                        </p>
-                      )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-brand-primary">
+                            {item.name}
+                          </h3>
+                          {item.variant ? (
+                            <p className="mt-1 text-xs font-medium text-gray-500">
+                              {cleanVariantDisplayLabel(item.variant)}
+                            </p>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(item.id, item.variant)}
+                          aria-label="Remove item"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
 
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-lg font-bold text-blue-700">
-                          GH₵{item.price.toFixed(2)}
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        <span className="text-base font-bold text-brand-primary">
+                          {formatStoreMoney(item.price)}
                         </span>
-
-                        <div className="flex items-center border border-gray-300 rounded bg-white">
+                        <div className="flex items-center overflow-hidden rounded-full border border-gray-200 bg-white">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant)}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
+                            type="button"
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1, item.variant)
+                            }
+                            className="flex h-8 w-8 items-center justify-center text-gray-600 transition-colors hover:bg-gray-50"
+                            aria-label={
+                              item.quantity <= (item.moq || 1) ? 'Remove item' : 'Decrease quantity'
+                            }
                           >
                             {item.quantity <= (item.moq || 1) ? (
-                              <i className="ri-delete-bin-line text-red-500"></i>
+                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
                             ) : (
-                              <i className="ri-subtract-line text-gray-700"></i>
+                              <Minus className="h-3.5 w-3.5" />
                             )}
                           </button>
-                          <span className="w-10 text-center font-semibold text-gray-900">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm font-bold text-brand-primary">
+                            {item.quantity}
+                          </span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant)}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
+                            type="button"
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1, item.variant)
+                            }
                             disabled={item.quantity >= item.maxStock}
+                            className="flex h-8 w-8 items-center justify-center text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
+                            aria-label="Increase quantity"
                           >
-                            <i className="ri-add-line text-gray-700"></i>
+                            <Plus className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </div>
-                      {item.quantity >= item.maxStock && (
-                        <p className="text-xs text-amber-600 mt-1">Max stock reached</p>
-                      )}
+                      {item.quantity >= item.maxStock ? (
+                        <p className="mt-1 text-[11px] font-semibold text-brand-accent">
+                          Max stock reached
+                        </p>
+                      ) : null}
                     </div>
-
-                    <button
-                      onClick={() => removeFromCart(item.id, item.variant)}
-                      className="w-8 h-8 flex items-center justify-center hover:bg-red-50 rounded-full transition-colors flex-shrink-0 cursor-pointer"
-                    >
-                      <i className="ri-delete-bin-line text-red-600"></i>
-                    </button>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            <div className="border-t border-gray-200 p-6 bg-gray-50">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-gray-700 font-medium">Subtotal</span>
-                <span className="text-2xl font-bold text-gray-900">GH₵{subtotal.toFixed(2)}</span>
+            <div className="shrink-0 border-t border-gray-100 bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4">
+              <div className="mb-1 flex items-baseline justify-between gap-3">
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Subtotal
+                </span>
+                <span className="text-2xl font-extrabold text-brand-primary">
+                  {formatStoreMoney(subtotal)}
+                </span>
               </div>
-
-              <p className="text-sm text-gray-600 mb-4 text-center">
-                Shipping calculated at checkout
+              <p className="mb-4 text-xs leading-relaxed text-gray-500">
+                Ghana only. Choose pickup or delivery after your package is ready.
               </p>
-
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <Link
                   href="/checkout"
                   onClick={onClose}
-                  className="block w-full py-4 bg-blue-700 text-white text-center rounded-lg font-semibold hover:bg-blue-800 transition-colors whitespace-nowrap cursor-pointer"
+                  className="block w-full rounded-xl bg-brand-primary py-3.5 text-center text-sm font-bold text-white transition-colors hover:bg-brand-accent"
                 >
-                  Proceed to Checkout
+                  Checkout
                 </Link>
                 <Link
                   href="/cart"
                   onClick={onClose}
-                  className="block w-full py-4 border-2 border-gray-900 text-gray-900 text-center rounded-lg font-semibold hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer"
+                  className="block w-full rounded-xl border border-gray-200 bg-white py-3.5 text-center text-sm font-bold text-brand-primary transition-colors hover:border-brand-primary/30 hover:bg-gray-50"
                 >
-                  View Cart
+                  View basket
                 </Link>
               </div>
             </div>
           </>
         )}
-      </div>
-    </>
+      </aside>
+    </div>,
+    document.body,
   );
 }

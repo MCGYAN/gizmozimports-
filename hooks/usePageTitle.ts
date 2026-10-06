@@ -1,11 +1,16 @@
 'use client';
 
 import { useEffect } from 'react';
+import { SEO } from '@/lib/seo';
 
-const SITE_NAME = 'Demo Storefront';
-
+/** Client title helper. Prefer server `pageMetadata` for crawlers. */
 export function usePageTitle(title: string) {
   useEffect(() => {
-    document.title = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | Dresses, Electronics, Bags, Shoes & More`;
+    const site = SEO.siteName;
+    if (!title) {
+      document.title = SEO.defaultTitle;
+      return;
+    }
+    document.title = title.includes(site) ? title : `${title} | ${site}`;
   }, [title]);
 }

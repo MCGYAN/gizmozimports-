@@ -1,9 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { IMPORT_TYPE_OPTIONS, IMPORT_TYPE_DESCRIPTIONS, parseProductCommerce, resolveDirectPayment } from '@/lib/product-commerce';
+import { getImportProductMode } from '@/lib/store-config';
+import { inferVariantSizeName } from '@/lib/product-variants';
+import { uploadAdminImage } from '@/lib/admin-image-upload';
+import { revalidateStorefrontFromAdmin } from '@/lib/revalidate-storefront';
+import {
+    formatGhsAmount,
+    formatRmbAmount,
+    parseComparePriceRmb,
+    parseProductBasePriceRmb,
+    parseVariantBasePriceRmb,
+    rmbToGhsPrice,
+} from '@/lib/product-pricing';
+import { formatCorridorBuyRate } from '@/lib/exchange-corridors';
 
 interface ProductFormProps {
     initialData?: any;
@@ -17,21 +31,82 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
 
     const [productName, setProductName] = useState(initialData?.name || '');
     const [categoryId, setCategoryId] = useState(initialData?.category_id || '');
+    const initialBasePriceRmb = parseProductBasePriceRmb(initialData?.metadata);
+    const initialComparePriceRmb = parseComparePriceRmb(initialData?.metadata);
+    const [priceRmb, setPriceRmb] = useState(initialBasePriceRmb != null ? String(initialBasePriceRmb) : '');
     const [price, setPrice] = useState(initialData?.price || '');
-    const [comparePrice, setComparePrice] = useState(initialData?.compare_at_price || '');
+    const [buyRmbRate, setBuyRmbRate] = useState<number | null>(null);
+    const [buyRateLoading, setBuyRateLoading] = useState(true);
+    const [comparePriceRmb, setComparePriceRmb] = useState(
+        initialComparePriceRmb != null ? String(initialComparePriceRmb) : '',
+    );
     const [sku, setSku] = useState(initialData?.sku || '');
     const [stock, setStock] = useState(initialData?.quantity || '');
     const [moq, setMoq] = useState(initialData?.moq || '1');
     const [lowStockThreshold, setLowStockThreshold] = useState(initialData?.metadata?.low_stock_threshold || '5');
     const [description, setDescription] = useState(initialData?.description || '');
-    const [status, setStatus] = useState(initialData?.status || 'Active');
-    const [featured, setFeatured] = useState(initialData?.featured || false);
+    const [status, setStatus] = useState(() => {
+        const raw = String(initialData?.status || 'active').toLowerCase();
+        if (raw === 'archived') return 'archived';
+        if (raw === 'draft') return 'draft';
+        return 'active';
+    });
+    const [featured, setFeatured] = useState(Boolean(initialData?.featured));
     const [preorderShipping, setPreorderShipping] = useState(initialData?.metadata?.preorder_shipping || '');
+    const initialCommerce = parseProductCommerce(initialData?.metadata);
+    const initialImportMode = getImportProductMode(
+        initialData?.categories?.name,
+        initialData?.categories?.slug,
+    );
+    const [directPaymentEnabled, setDirectPaymentEnabled] = useState(
+        resolveDirectPayment(initialCommerce.directPayment, initialImportMode),
+    );
+    const [importType, setImportType] = useState(initialData?.metadata?.import_type || '');
+    const [importNotes, setImportNotes] = useState(initialData?.metadata?.import_notes || '');
     const [activeTab, setActiveTab] = useState('general');
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/exchange/rate?country=GH');
+                const data = await res.json();
+                const rate = Number(data.board?.buy_rmb_rate);
+                if (!cancelled && rate > 0) setBuyRmbRate(rate);
+            } finally {
+                if (!cancelled) setBuyRateLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!(buyRmbRate != null && buyRmbRate > 0)) return;
+        const rmb = parseFloat(priceRmb);
+        if (!(rmb > 0)) return;
+        setPrice(String(rmbToGhsPrice(rmb, buyRmbRate)));
+    }, [priceRmb, buyRmbRate]);
+
+    const comparePriceGhs = useMemo(() => {
+        if (!(buyRmbRate != null && buyRmbRate > 0)) return 0;
+        const rmb = parseFloat(comparePriceRmb);
+        if (!(rmb > 0)) return 0;
+        return rmbToGhsPrice(rmb, buyRmbRate);
+    }, [comparePriceRmb, buyRmbRate]);
+
+    const previewGhsFromRmb = (rmbValue: string, fallbackRmb = priceRmb) => {
+        if (!(buyRmbRate != null && buyRmbRate > 0)) return 0;
+        const source = rmbValue.trim() || fallbackRmb.trim();
+        const rmb = parseFloat(source);
+        if (!(rmb > 0)) return 0;
+        return rmbToGhsPrice(rmb, buyRmbRate);
+    };
 
     // Auto-generate SKU function
     const generateSku = () => {
-        const prefix = 'DST'; // Demo Storefront
+        const prefix = process.env.NEXT_PUBLIC_SKU_PREFIX || 'STORE';
         const timestamp = Date.now().toString(36).toUpperCase().slice(-4);
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
         return `${prefix}-${timestamp}-${random}`;
@@ -61,13 +136,19 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
     ];
     const sizePresets = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
 
-    // Parse existing variants to extract unique colors and sizes
-    const existingVariants = (initialData?.product_variants || []).map((v: any) => ({
-        ...v,
-        stock: v.stock ?? v.quantity ?? 0,
-        color: v.color ?? v.option2 ?? '',
-        size: v.name || ''
-    }));
+    // Parse existing variants — distinguish color-only SKUs from real sizes
+    const existingVariants = (initialData?.product_variants || []).map((v: any) => {
+        const color = (v.color ?? v.option2 ?? '').trim();
+        const rawName = (v.name || v.option1 || '').trim();
+        const size = inferVariantSizeName(color, rawName);
+        return {
+            ...v,
+            stock: v.stock ?? v.quantity ?? 0,
+            color,
+            size,
+            displayName: rawName || color || 'Default',
+        };
+    });
 
     const [selectedColors, setSelectedColors] = useState<{ name: string; hex: string }[]>(() => {
         const colors = new Map<string, string>();
@@ -95,61 +176,99 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
     // Build variants from colors × sizes (or just sizes, or just colors)
     const buildVariantKey = (color: string, size: string) => `${color}|||${size}`;
 
-    // Store variant data (price, stock) in a map keyed by "color|||size"
-    const [variantData, setVariantData] = useState<Record<string, { price: string; stock: string; sku: string }>>(() => {
-        const data: Record<string, { price: string; stock: string; sku: string }> = {};
+    // Store variant data (RMB price, stock) in a map keyed by "color|||size"
+    const [variantData, setVariantData] = useState<Record<string, { priceRmb: string; stock: string; sku: string; id?: string }>>(() => {
+        const data: Record<string, { priceRmb: string; stock: string; sku: string; id?: string }> = {};
         existingVariants.forEach((v: any) => {
             const key = buildVariantKey(v.color || '', v.size || '');
-            data[key] = {
-                price: v.price?.toString() || '',
-                stock: v.stock?.toString() || '0',
-                sku: v.sku || ''
-            };
+            const stock = v.stock?.toString() || '0';
+            const variantRmb = parseVariantBasePriceRmb(v.metadata);
+            const priceRmbValue = variantRmb != null ? String(variantRmb) : '';
+            const existing = data[key];
+            if (!existing || (parseInt(stock) || 0) >= (parseInt(existing.stock) || 0)) {
+                data[key] = {
+                    priceRmb: priceRmbValue || existing?.priceRmb || '',
+                    stock,
+                    sku: v.sku || existing?.sku || '',
+                    id: v.id,
+                };
+            }
         });
         return data;
     });
 
-    // Computed: all variant combinations
+    // Computed: variant combinations — colors only, sizes only, or colors × sizes (never colors × colors)
     const variantCombinations = (() => {
         const combos: { color: string; colorHex: string; size: string; key: string }[] = [];
-        const colors = selectedColors.length > 0 ? selectedColors : [{ name: '', hex: '' }];
-        const sizes = selectedSizes.length > 0 ? selectedSizes : [''];
+        const hasColors = selectedColors.length > 0;
+        const hasSizes = selectedSizes.length > 0;
 
-        for (const color of colors) {
-            for (const size of sizes) {
-                if (!color.name && !size) continue; // skip if both empty
-                const key = buildVariantKey(color.name, size);
-                combos.push({ color: color.name, colorHex: color.hex, size, key });
+        if (hasColors && hasSizes) {
+            for (const color of selectedColors) {
+                for (const size of selectedSizes) {
+                    combos.push({
+                        color: color.name,
+                        colorHex: color.hex,
+                        size,
+                        key: buildVariantKey(color.name, size),
+                    });
+                }
+            }
+        } else if (hasColors) {
+            for (const color of selectedColors) {
+                combos.push({
+                    color: color.name,
+                    colorHex: color.hex,
+                    size: '',
+                    key: buildVariantKey(color.name, ''),
+                });
+            }
+        } else if (hasSizes) {
+            for (const size of selectedSizes) {
+                combos.push({
+                    color: '',
+                    colorHex: '',
+                    size,
+                    key: buildVariantKey('', size),
+                });
             }
         }
+
         return combos;
     })();
 
     // Build the flat variants array for saving (used by handleSubmit)
-    const variants = variantCombinations.map(combo => {
-        const d = variantData[combo.key] || { price: price, stock: '0', sku: '' };
+    const variants = variantCombinations.map((combo) => {
+        const d = variantData[combo.key] || { priceRmb: '', stock: '0', sku: '' };
+        const hasColors = selectedColors.length > 0;
+        const hasSizes = selectedSizes.length > 0;
+        let variantName = 'Default';
+        if (hasColors && hasSizes) variantName = combo.size;
+        else if (hasColors) variantName = combo.color;
+        else if (hasSizes) variantName = combo.size;
+
         return {
-            name: combo.size,
+            name: variantName,
             color: combo.color,
             sku: d.sku,
-            price: d.price || price,
-            stock: d.stock || '0'
+            priceRmb: d.priceRmb,
+            stock: d.stock || '0',
         };
     });
 
     const updateVariantField = (key: string, field: string, value: string) => {
         setVariantData(prev => ({
             ...prev,
-            [key]: { ...prev[key] || { price: price, stock: '0', sku: '' }, [field]: value }
+            [key]: { ...prev[key] || { priceRmb: '', stock: '0', sku: '' }, [field]: value }
         }));
     };
 
-    // Bulk set price/stock for all variants
-    const bulkSetField = (field: 'price' | 'stock', value: string) => {
+    // Bulk set RMB price/stock for all variants
+    const bulkSetField = (field: 'priceRmb' | 'stock', value: string) => {
         setVariantData(prev => {
             const updated = { ...prev };
             variantCombinations.forEach(combo => {
-                updated[combo.key] = { ...updated[combo.key] || { price: price, stock: '0', sku: '' }, [field]: value };
+                updated[combo.key] = { ...updated[combo.key] || { priceRmb: '', stock: '0', sku: '' }, [field]: value };
             });
             return updated;
         });
@@ -201,6 +320,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
     const tabs = [
         { id: 'general', label: 'General', icon: 'ri-information-line' },
         { id: 'pricing', label: 'Pricing & Inventory', icon: 'ri-price-tag-3-line' },
+        { id: 'import', label: 'Import & Checkout', icon: 'ri-ship-line' },
         { id: 'variants', label: 'Variants', icon: 'ri-layout-grid-line' },
         { id: 'images', label: 'Images', icon: 'ri-image-line' },
         { id: 'seo', label: 'SEO', icon: 'ri-search-line' }
@@ -240,26 +360,13 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
 
             setUploading(true);
             const file = e.target.files[0];
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('products')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('products')
-                .getPublicUrl(filePath);
-
+            const publicUrl = await uploadAdminImage(file, 'product');
             setImages([...images, { url: publicUrl, position: images.length }]);
-
         } catch (error: any) {
             alert('Error uploading image: ' + error.message);
         } finally {
             setUploading(false);
+            e.target.value = '';
         }
     };
 
@@ -273,6 +380,31 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
         try {
             setLoading(true);
 
+            const rmbValue = parseFloat(priceRmb);
+            if (!(rmbValue > 0)) {
+                alert('Enter a supplier price in RMB.');
+                setActiveTab('pricing');
+                return;
+            }
+            if (!(buyRmbRate != null && buyRmbRate > 0)) {
+                alert('Buy RMB rate is not available. Set the Ghana rate on the Buy RMB desk first.');
+                setActiveTab('pricing');
+                return;
+            }
+
+            const computedGhsPrice = rmbToGhsPrice(rmbValue, buyRmbRate);
+            const compareRmbValue = comparePriceRmb.trim() ? parseFloat(comparePriceRmb) : null;
+            const computedCompareGhs =
+                compareRmbValue != null && compareRmbValue > 0
+                    ? rmbToGhsPrice(compareRmbValue, buyRmbRate)
+                    : null;
+
+            if (compareRmbValue != null && compareRmbValue > 0 && computedCompareGhs != null && computedCompareGhs <= computedGhsPrice) {
+                alert('Compare price in RMB should be higher than the selling price.');
+                setActiveTab('pricing');
+                return;
+            }
+
             // If product has variants, auto-sync main stock = sum of variant stocks
             const hasVariants = variants.length > 0;
             const variantStockTotal = hasVariants
@@ -284,19 +416,25 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                 slug: urlSlug || productName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
                 description,
                 category_id: categoryId || null,
-                price: parseFloat(price) || 0,
-                compare_at_price: comparePrice ? parseFloat(comparePrice) : null,
+                price: computedGhsPrice,
+                compare_at_price: computedCompareGhs,
                 sku: sku || generateSku(), // Auto-generate if empty
                 quantity: hasVariants ? variantStockTotal : (parseInt(stock) || 0),
                 moq: parseInt(moq) || 1,
-                status: status.toLowerCase(),
-                featured,
+                status: String(status || 'active').toLowerCase(),
+                featured: Boolean(featured),
                 seo_title: seoTitle,
                 seo_description: metaDescription,
                 tags: (keywords as string).split(',').map((k: string) => k.trim()).filter(Boolean),
                 metadata: {
                     low_stock_threshold: parseInt(lowStockThreshold) || 5,
-                    preorder_shipping: preorderShipping.trim() || null
+                    preorder_shipping: preorderShipping.trim() || null,
+                    direct_payment: directPaymentEnabled,
+                    import_type: importType || null,
+                    import_notes: importNotes.trim() || null,
+                    base_price_rmb: rmbValue,
+                    compare_at_price_rmb: compareRmbValue,
+                    last_buy_rmb_rate: buyRmbRate,
                 }
             };
 
@@ -343,38 +481,96 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                     await supabase.from('product_images').insert(imageInserts);
                 }
 
-                // 2. Variants
-                if (isEditMode) {
-                    // Be careful not to delete ALL variants if we want to preserve IDs etc, 
-                    // but for now, full replacement is safer to ensure sync.
-                    // Note: This might break order-item references if they rely on variant_id hard constraints without cascading.
-                    // Our Schema migration has ON DELETE SET NULL for order_items -> variant_id, so this is safe for now (but distinct from "archiving").
-                    await supabase.from('product_variants').delete().eq('product_id', productId);
-                }
-
+                // 2. Variants — update rows in place so order history keeps valid links when possible
                 if (variants.length > 0) {
-                    const variantInserts = variants.map(v => {
-                        const colorHex = selectedColors.find(c => c.name === v.color)?.hex || null;
-                        return {
+                    const hasSizes = selectedSizes.length > 0;
+                    const keptVariantIds: string[] = [];
+
+                    for (const combo of variantCombinations) {
+                        const d = variantData[combo.key] || { priceRmb: '', stock: '0', sku: '' };
+                        const colorHex = selectedColors.find((c) => c.name === combo.color)?.hex || null;
+                        let variantName = 'Default';
+                        if (selectedColors.length > 0 && hasSizes) variantName = combo.size;
+                        else if (selectedColors.length > 0) variantName = combo.color;
+                        else if (hasSizes) variantName = combo.size;
+
+                        const variantRmbRaw = d.priceRmb.trim() || priceRmb;
+                        const variantRmbValue = parseFloat(variantRmbRaw);
+                        if (!(variantRmbValue > 0)) {
+                            alert(`Enter an RMB price for variant ${variantName}.`);
+                            setActiveTab('variants');
+                            throw new Error('variant-rmb-required');
+                        }
+                        const variantGhsPrice = rmbToGhsPrice(variantRmbValue, buyRmbRate);
+
+                        const row = {
                             product_id: productId,
-                            name: v.name || v.color || 'Default',
-                            sku: v.sku || null,
-                            price: parseFloat(v.price) || 0,
-                            quantity: parseInt(v.stock) || 0,
-                            option1: v.name || null,
-                            option2: v.color?.trim() || null,
-                            metadata: colorHex ? { color_hex: colorHex } : {}
+                            name: variantName,
+                            sku: d.sku || null,
+                            price: variantGhsPrice,
+                            quantity: parseInt(d.stock) || 0,
+                            option1: hasSizes ? variantName : null,
+                            option2: combo.color?.trim() || null,
+                            metadata: {
+                                ...(colorHex ? { color_hex: colorHex } : {}),
+                                base_price_rmb: variantRmbValue,
+                            },
                         };
-                    });
-                    const { error: varError } = await supabase.from('product_variants').insert(variantInserts);
-                    if (varError) throw varError;
+
+                        if (isEditMode && d.id) {
+                            const { error: updateVariantError } = await supabase
+                                .from('product_variants')
+                                .update(row)
+                                .eq('id', d.id);
+                            if (updateVariantError) throw updateVariantError;
+                            keptVariantIds.push(d.id);
+                            continue;
+                        }
+
+                        const { data: inserted, error: insertVariantError } = await supabase
+                            .from('product_variants')
+                            .insert(row)
+                            .select('id')
+                            .single();
+                        if (insertVariantError) throw insertVariantError;
+                        if (inserted?.id) keptVariantIds.push(inserted.id);
+                    }
+
+                    if (isEditMode && keptVariantIds.length > 0) {
+                        const { data: currentVariants, error: listVariantsError } = await supabase
+                            .from('product_variants')
+                            .select('id')
+                            .eq('product_id', productId);
+                        if (listVariantsError) throw listVariantsError;
+
+                        const removeIds = (currentVariants || [])
+                            .map((variant) => variant.id)
+                            .filter((id) => !keptVariantIds.includes(id));
+
+                        if (removeIds.length > 0) {
+                            const { error: removeVariantsError } = await supabase
+                                .from('product_variants')
+                                .delete()
+                                .in('id', removeIds);
+                            if (removeVariantsError) throw removeVariantsError;
+                        }
+                    }
+                } else if (isEditMode) {
+                    const { error: clearVariantsError } = await supabase
+                        .from('product_variants')
+                        .delete()
+                        .eq('product_id', productId);
+                    if (clearVariantsError) throw clearVariantsError;
                 }
             }
+
+            await revalidateStorefrontFromAdmin();
 
             alert(isEditMode ? 'Product updated successfully!' : 'Product created successfully!');
             router.push('/admin/products');
 
         } catch (err: any) {
+            if (err?.message === 'variant-rmb-required') return;
             console.error('Error saving product:', err);
             alert(`Error: ${err.message}`);
         } finally {
@@ -405,7 +601,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                 <div className="flex items-center space-x-3">
                     {isEditMode && (
                         <Link
-                            href={`/product/${initialData?.id}`}
+                            href={`/product/${urlSlug || initialData?.slug || initialData?.id}`}
                             target="_blank"
                             className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors font-semibold whitespace-nowrap cursor-pointer flex items-center"
                         >
@@ -416,7 +612,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className={`px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer flex items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`px-6 py-3 bg-brand-primary hover:bg-brand-accent text-white rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer flex items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                         {loading ? (
                             <>
@@ -441,7 +637,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center space-x-2 px-6 py-4 font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer ${activeTab === tab.id
-                                    ? 'border-blue-700 text-blue-700 bg-blue-50'
+                                    ? 'border-brand-primary text-brand-primary bg-brand-primary/5'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                     }`}
                             >
@@ -463,7 +659,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     type="text"
                                     value={productName}
                                     onChange={(e) => setProductName(e.target.value)}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                     placeholder="Enter product name"
                                 />
                             </div>
@@ -477,7 +673,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={6}
                                     maxLength={500}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent resize-none"
                                     placeholder="Describe your product..."
                                 />
                                 <p className="text-sm text-gray-500 mt-2">{description.length}/500 characters</p>
@@ -491,7 +687,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <select
                                         value={categoryId}
                                         onChange={(e) => setCategoryId(e.target.value)}
-                                        className="w-full px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                                        className="w-full px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent cursor-pointer"
                                     >
                                         {categories.length === 0 && <option value="">Loading categories...</option>}
                                         {categories.length > 0 && <option value="">Select a category</option>}
@@ -508,11 +704,11 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <select
                                         value={status}
                                         onChange={(e) => setStatus(e.target.value)}
-                                        className="w-full px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                                        className="w-full px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent cursor-pointer"
                                     >
-                                        <option>Active</option>
-                                        <option>Draft</option>
-                                        <option>Archived</option>
+                                        <option value="active">Active</option>
+                                        <option value="draft">Draft</option>
+                                        <option value="archived">Archived</option>
                                     </select>
                                 </div>
                             </div>
@@ -522,7 +718,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     type="checkbox"
                                     checked={featured}
                                     onChange={(e) => setFeatured(e.target.checked)}
-                                    className="w-5 h-5 text-blue-700 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                    className="w-5 h-5 text-brand-primary border-gray-300 rounded focus:ring-brand-accent/25 cursor-pointer"
                                 />
                                 <label className="text-gray-900 font-medium">
                                     Feature this product on homepage
@@ -538,7 +734,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     value={preorderShipping}
                                     onChange={(e) => setPreorderShipping(e.target.value)}
                                     placeholder="e.g., Ships in 14 days, Available March 15"
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-accent/25 focus:border-transparent transition-all"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Leave empty if product ships immediately. Otherwise, enter estimated shipping time.</p>
                             </div>
@@ -547,54 +743,117 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
 
                     {activeTab === 'pricing' && (
                         <div className="space-y-6 max-w-3xl">
+                            <div className="rounded-xl border border-brand-primary/15 bg-brand-primary/5 p-4">
+                                <p className="text-sm font-semibold text-brand-primary">RMB to cedis pricing</p>
+                                <p className="mt-1 text-sm text-slate-600">
+                                    Enter all prices in RMB. Customer prices in cedis are calculated from today&apos;s Buy RMB rate and rounded to the nearest GH¢10.
+                                </p>
+                                {buyRmbRate != null && buyRmbRate > 0 ? (
+                                    <p className="mt-2 text-xs font-medium text-slate-500">
+                                        Using Buy RMB rate: {formatCorridorBuyRate(buyRmbRate, 'GH', 3)}
+                                    </p>
+                                ) : buyRateLoading ? (
+                                    <p className="mt-2 text-xs text-slate-500">Loading Buy RMB rate…</p>
+                                ) : (
+                                    <p className="mt-2 text-xs font-medium text-amber-700">
+                                        Set the Ghana Buy RMB rate before adding products.
+                                    </p>
+                                )}
+                            </div>
+
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                        Price (GH₵) *
+                                        Supplier price (RMB) *
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">GH₵</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">¥</span>
                                         <input
                                             type="number"
-                                            value={price}
-                                            onChange={(e) => setPrice(e.target.value)}
-                                            className="w-full pl-16 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            step="0.01"
-                                            placeholder="0.00"
+                                            value={priceRmb}
+                                            onChange={(e) => setPriceRmb(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
+                                            step="1"
+                                            min="1"
+                                            placeholder="23580"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                        Compare at Price (GH₵)
+                                        Customer price (GH¢)
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">GH₵</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">GH¢</span>
                                         <input
-                                            type="number"
-                                            value={comparePrice}
-                                            onChange={(e) => setComparePrice(e.target.value)}
-                                            className="w-full pl-16 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            step="0.01"
-                                            placeholder="0.00"
+                                            type="text"
+                                            readOnly
+                                            value={
+                                                price && parseFloat(price) > 0
+                                                    ? formatGhsAmount(parseFloat(price))
+                                                    : ''
+                                            }
+                                            className="w-full pl-16 pr-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-800 font-semibold"
+                                            placeholder="Auto"
                                         />
                                     </div>
-                                    <p className="text-sm text-gray-500 mt-2">Show original price for comparison</p>
+                                    {priceRmb && price && parseFloat(priceRmb) > 0 && buyRmbRate != null && buyRmbRate > 0 ? (
+                                        <p className="text-sm text-gray-500 mt-2">
+                                            ¥{formatRmbAmount(parseFloat(priceRmb))} ÷ {buyRmbRate} = GH¢{formatGhsAmount(parseFloat(price))}
+                                        </p>
+                                    ) : null}
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p className="text-blue-900 font-semibold mb-1">Discount Calculation</p>
-                                {price && comparePrice && parseFloat(comparePrice) > parseFloat(price) ? (
-                                    <p className="text-blue-800">
-                                        Savings: GH₵ {(parseFloat(comparePrice) - parseFloat(price)).toFixed(2)}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                        Compare at price (RMB)
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">¥</span>
+                                        <input
+                                            type="number"
+                                            value={comparePriceRmb}
+                                            onChange={(e) => setComparePriceRmb(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
+                                            step="1"
+                                            min="1"
+                                            placeholder="Optional"
+                                        />
+                                    </div>
+                                    <p className="text-sm text-gray-500 mt-2">Optional strike-through price. Enter in RMB.</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                        Compare at price (GH¢)
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">GH¢</span>
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={comparePriceGhs > 0 ? formatGhsAmount(comparePriceGhs) : ''}
+                                            className="w-full pl-16 pr-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-800 font-semibold"
+                                            placeholder="Auto"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-brand-primary/5 border border-brand-primary/20 rounded-lg">
+                                <p className="text-brand-primary font-semibold mb-1">Discount preview</p>
+                                {price && comparePriceGhs > parseFloat(price) ? (
+                                    <p className="text-brand-primary">
+                                        Savings: GH¢{(comparePriceGhs - parseFloat(price)).toFixed(0)}
                                         <span className="ml-2">
-                                            ({(((parseFloat(comparePrice) - parseFloat(price)) / parseFloat(comparePrice)) * 100).toFixed(0)}% off)
+                                            ({(((comparePriceGhs - parseFloat(price)) / comparePriceGhs) * 100).toFixed(0)}% off)
                                         </span>
                                     </p>
                                 ) : (
-                                    <p className="text-blue-800 text-sm">Enter a valid compare price higher than the price to see discount.</p>
+                                    <p className="text-brand-primary text-sm">Enter a compare RMB price higher than the selling RMB price to see discount.</p>
                                 )}
                             </div>
 
@@ -611,14 +870,14 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                 type="text"
                                                 value={sku}
                                                 onChange={(e) => setSku(e.target.value)}
-                                                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono bg-gray-50"
+                                                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent font-mono bg-gray-50"
                                                 placeholder="Auto-generated"
                                                 readOnly
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setSku(generateSku())}
-                                                className="px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
+                                                className="px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-brand-accent hover:bg-brand-primary/5 transition-colors cursor-pointer"
                                                 title="Generate new SKU"
                                             >
                                                 <i className="ri-refresh-line text-lg"></i>
@@ -649,7 +908,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                 type="number"
                                                 value={stock}
                                                 onChange={(e) => setStock(e.target.value)}
-                                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                                 placeholder="0"
                                             />
                                         )}
@@ -666,7 +925,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                             value={moq}
                                             onChange={(e) => setMoq(e.target.value)}
                                             min="1"
-                                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                             placeholder="1"
                                         />
                                         <p className="text-sm text-gray-500 mt-1">Minimum quantity customers must order</p>
@@ -680,7 +939,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                             type="number"
                                             value={lowStockThreshold}
                                             onChange={(e) => setLowStockThreshold(e.target.value)}
-                                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                         />
                                         <p className="text-sm text-gray-500 mt-1">Get notified when stock falls below this number</p>
                                     </div>
@@ -689,20 +948,89 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                         </div>
                     )}
 
+                    {activeTab === 'import' && (
+                        <div className="space-y-6 max-w-3xl">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-1">Import & checkout</h3>
+                                <p className="text-gray-600">
+                                    Control how customers buy or inquire about this product. Share link:{' '}
+                                    <span className="font-mono text-sm text-brand-primary">
+                                        /product/{urlSlug || 'your-slug'}
+                                    </span>
+                                </p>
+                            </div>
+
+                            <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-gray-200 p-4 hover:border-brand-accent/40">
+                                <input
+                                    type="checkbox"
+                                    checked={directPaymentEnabled}
+                                    onChange={(e) => setDirectPaymentEnabled(e.target.checked)}
+                                    className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-accent"
+                                />
+                                <div>
+                                    <span className="block text-sm font-semibold text-gray-900">Enable direct online payment</span>
+                                    <span className="mt-1 block text-sm text-gray-600">
+                                        When on, customers see <strong>Buy Now</strong> and can checkout with Moolre.
+                                        When off, they see <strong>Chat on WhatsApp</strong> and{' '}
+                                        <strong>Request Availability</strong> instead.
+                                    </span>
+                                    {!isEditMode && !directPaymentEnabled && (
+                                        <span className="mt-2 block text-xs text-gray-500">
+                                            Leave unchecked for high-value imports (vehicles, equipment) or quote-first items.
+                                        </span>
+                                    )}
+                                </div>
+                            </label>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">Import type</label>
+                                <select
+                                    value={importType}
+                                    onChange={(e) => setImportType(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
+                                >
+                                    <option value="">— Not set —</option>
+                                    {IMPORT_TYPE_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {importType && IMPORT_TYPE_DESCRIPTIONS[importType] ? (
+                                    <p className="mt-2 text-sm text-gray-600">{IMPORT_TYPE_DESCRIPTIONS[importType]}</p>
+                                ) : null}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">Import notes</label>
+                                <textarea
+                                    rows={4}
+                                    value={importNotes}
+                                    onChange={(e) => setImportNotes(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent resize-none"
+                                    placeholder="What is included in the price? Clearing, delivery, warranty, lead time..."
+                                />
+                                <p className="text-sm text-gray-500 mt-2">Shown on the product page import details card.</p>
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'variants' && (
                         <div className="space-y-8">
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900">Product Variants</h3>
-                                <p className="text-gray-600 mt-1">Select colors and sizes below — variants are generated automatically</p>
+                                <p className="text-gray-600 mt-1">
+                                    Add colors, sizes, or both. Sizes are optional. Color-only products get one variant per color.
+                                </p>
                             </div>
 
                             {/* STEP 1: Colors */}
                             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                                 <h4 className="text-sm font-bold text-gray-900 mb-1 flex items-center">
-                                    <i className="ri-palette-line mr-2 text-lg text-blue-700"></i>
+                                    <i className="ri-palette-line mr-2 text-lg text-brand-primary"></i>
                                     Step 1: Select Colors
                                     {selectedColors.length > 0 && (
-                                        <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                        <span className="ml-2 bg-brand-primary/10 text-brand-primary text-xs font-semibold px-2 py-0.5 rounded-full">
                                             {selectedColors.length} selected
                                         </span>
                                     )}
@@ -717,7 +1045,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                 key={color.name}
                                                 onClick={() => toggleColor(color)}
                                                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg border-2 transition-all text-sm font-medium ${isSelected
-                                                        ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                                                        ? 'border-brand-accent bg-brand-primary/5 ring-1 ring-brand-accent'
                                                         : 'border-gray-200 hover:border-gray-300 bg-white'
                                                     }`}
                                                 title={color.name}
@@ -726,8 +1054,8 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                     className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
                                                     style={{ backgroundColor: color.hex }}
                                                 ></span>
-                                                <span className={isSelected ? 'text-blue-800' : 'text-gray-700'}>{color.name}</span>
-                                                {isSelected && <i className="ri-check-line text-blue-700"></i>}
+                                                <span className={isSelected ? 'text-brand-primary' : 'text-gray-700'}>{color.name}</span>
+                                                {isSelected && <i className="ri-check-line text-brand-primary"></i>}
                                             </button>
                                         );
                                     })}
@@ -753,7 +1081,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <button
                                         onClick={addCustomColor}
                                         disabled={!customColorName.trim()}
-                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-brand-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                     >
                                         Add Color
                                     </button>
@@ -778,15 +1106,17 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                             {/* STEP 2: Sizes */}
                             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                                 <h4 className="text-sm font-bold text-gray-900 mb-1 flex items-center">
-                                    <i className="ri-ruler-line mr-2 text-lg text-blue-600"></i>
+                                    <i className="ri-ruler-line mr-2 text-lg text-brand-primary"></i>
                                     Step 2: Select Sizes
                                     {selectedSizes.length > 0 && (
-                                        <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                        <span className="ml-2 bg-brand-primary/10 text-brand-primary text-xs font-semibold px-2 py-0.5 rounded-full">
                                             {selectedSizes.length} selected
                                         </span>
                                     )}
                                 </h4>
-                                <p className="text-xs text-gray-500 mb-4">Click sizes to add/remove. Use custom for volumes (100ml), weights, etc.</p>
+                                <p className="text-xs text-gray-500 mb-4">
+                                    Optional. Skip this step if the product has no sizes (e.g. vehicles by color only).
+                                </p>
 
                                 <div className="flex flex-wrap gap-2 mb-4">
                                     {sizePresets.map(size => {
@@ -796,12 +1126,12 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                 key={size}
                                                 onClick={() => toggleSize(size)}
                                                 className={`px-5 py-2.5 rounded-lg border-2 font-semibold text-sm transition-all ${isSelected
-                                                        ? 'border-blue-600 bg-blue-50 text-blue-800 ring-1 ring-blue-600'
+                                                        ? 'border-brand-accent bg-brand-primary/5 text-brand-primary ring-1 ring-brand-accent'
                                                         : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
                                                     }`}
                                             >
                                                 {size}
-                                                {isSelected && <i className="ri-check-line ml-1.5 text-blue-600"></i>}
+                                                {isSelected && <i className="ri-check-line ml-1.5 text-brand-primary"></i>}
                                             </button>
                                         );
                                     })}
@@ -820,7 +1150,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <button
                                         onClick={addCustomSize}
                                         disabled={!customSize.trim()}
-                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-brand-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                     >
                                         Add Size
                                     </button>
@@ -847,19 +1177,19 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <div className="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                                         <div>
                                             <h4 className="text-sm font-bold text-gray-900 flex items-center">
-                                                <i className="ri-grid-line mr-2 text-lg text-purple-600"></i>
-                                                Step 3: Set Price & Stock ({variantCombinations.length} variant{variantCombinations.length > 1 ? 's' : ''})
+                                                <i className="ri-grid-line mr-2 text-lg text-brand-primary"></i>
+                                                Step 3: Set RMB price & stock ({variantCombinations.length} variant{variantCombinations.length > 1 ? 's' : ''})
                                             </h4>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => {
-                                                    const val = prompt('Set price for ALL variants:', price?.toString() || '0');
-                                                    if (val !== null) bulkSetField('price', val);
+                                                    const val = prompt('Set RMB price for ALL variants:', priceRmb || '');
+                                                    if (val !== null) bulkSetField('priceRmb', val);
                                                 }}
                                                 className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
                                             >
-                                                Bulk Set Price
+                                                Bulk set RMB price
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -883,13 +1213,15 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                     {selectedSizes.length > 0 && (
                                                         <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Size</th>
                                                     )}
-                                                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Price (GH₵)</th>
+                                                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Price (RMB)</th>
+                                                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer (GH¢)</th>
                                                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Stock</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {variantCombinations.map((combo) => {
-                                                    const d = variantData[combo.key] || { price: price, stock: '0', sku: '' };
+                                                    const d = variantData[combo.key] || { priceRmb: '', stock: '0', sku: '' };
+                                                    const variantGhs = previewGhsFromRmb(d.priceRmb);
                                                     return (
                                                         <tr key={combo.key} className="border-b border-gray-100 hover:bg-gray-50">
                                                             {selectedColors.length > 0 && (
@@ -913,19 +1245,23 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                                             <td className="py-3 px-4">
                                                                 <input
                                                                     type="number"
-                                                                    value={d.price}
-                                                                    onChange={(e) => updateVariantField(combo.key, 'price', e.target.value)}
-                                                                    className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                                                                    step="0.01"
-                                                                    placeholder={price?.toString() || '0'}
+                                                                    value={d.priceRmb}
+                                                                    onChange={(e) => updateVariantField(combo.key, 'priceRmb', e.target.value)}
+                                                                    className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-brand-accent/25 focus:border-brand-accent"
+                                                                    step="1"
+                                                                    min="1"
+                                                                    placeholder={priceRmb || 'RMB'}
                                                                 />
+                                                            </td>
+                                                            <td className="py-3 px-4 text-sm font-semibold text-brand-primary">
+                                                                {variantGhs > 0 ? `GH¢${formatGhsAmount(variantGhs)}` : '—'}
                                                             </td>
                                                             <td className="py-3 px-4">
                                                                 <input
                                                                     type="number"
                                                                     value={d.stock}
                                                                     onChange={(e) => updateVariantField(combo.key, 'stock', e.target.value)}
-                                                                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                                                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-brand-accent/25 focus:border-brand-accent"
                                                                     placeholder="0"
                                                                 />
                                                             </td>
@@ -936,8 +1272,8 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                         </table>
                                     </div>
 
-                                    <div className="p-3 bg-blue-50 border-t border-blue-100">
-                                        <p className="text-xs text-blue-800 flex items-center">
+                                    <div className="p-3 bg-brand-primary/5 border-t border-brand-primary/15">
+                                        <p className="text-xs text-brand-primary flex items-center">
                                             <i className="ri-information-line mr-1.5"></i>
                                             Total stock across all variants: <strong className="ml-1">{variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0)}</strong>
                                         </p>
@@ -970,7 +1306,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                             <img src={img.url} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
                                         </div>
                                         {index === 0 && (
-                                            <span className="absolute top-2 left-2 bg-blue-700 text-white px-2 py-1 rounded text-xs font-semibold whitespace-nowrap">
+                                            <span className="absolute top-2 left-2 bg-brand-primary text-white px-2 py-1 rounded text-xs font-semibold whitespace-nowrap">
                                                 Primary
                                             </span>
                                         )}
@@ -988,7 +1324,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     </div>
                                 ))}
 
-                                <label className={`aspect-square border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-700 hover:bg-blue-50 transition-colors flex flex-col items-center justify-center space-y-2 text-gray-600 hover:text-blue-700 cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <label className={`aspect-square border-2 border-dashed border-gray-300 rounded-xl hover:border-brand-primary hover:bg-brand-primary/5 transition-colors flex flex-col items-center justify-center space-y-2 text-gray-600 hover:text-brand-accent cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                     {uploading ? (
                                         <i className="ri-loader-4-line animate-spin text-3xl"></i>
                                     ) : (
@@ -997,7 +1333,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <span className="text-sm font-semibold">{uploading ? 'Uploading...' : 'Upload Image'}</span>
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/jpeg,image/png,image/webp"
                                         className="hidden"
                                         onChange={handleImageUpload}
                                         disabled={uploading}
@@ -1029,7 +1365,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     type="text"
                                     value={seoTitle}
                                     onChange={(e) => setSeoTitle(e.target.value)}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                     placeholder="Seo friendly title"
                                 />
                                 <p className="text-sm text-gray-500 mt-2">60 characters recommended</p>
@@ -1044,7 +1380,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     maxLength={500}
                                     value={metaDescription}
                                     onChange={(e) => setMetaDescription(e.target.value)}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent resize-none"
                                     placeholder="Seo friendly description"
                                 />
                                 <p className="text-sm text-gray-500 mt-2">160 characters recommended</p>
@@ -1062,7 +1398,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                         type="text"
                                         value={urlSlug}
                                         onChange={(e) => setUrlSlug(e.target.value)}
-                                        className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-r-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                         placeholder="product-slug"
                                     />
                                 </div>
@@ -1076,7 +1412,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     type="text"
                                     value={keywords}
                                     onChange={(e) => setKeywords(e.target.value)}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent"
                                     placeholder="keyword1, keyword2"
                                 />
                                 <p className="text-sm text-gray-500 mt-2">Separate keywords with commas</p>

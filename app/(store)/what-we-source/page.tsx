@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import CategoryCard from '@/components/CategoryCard';
+import SourceCategoryCard from '@/components/SourceCategoryCard';
 import { leadConfig } from '@/lib/leadConfig';
 
 export const metadata: Metadata = {
@@ -20,12 +20,12 @@ export default function WhatWeSourcePage() {
           </p>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <CategoryCard title="Electronics & Gadgets" description="Phones, accessories, computers, and smart devices." icon="ri-smartphone-line" />
-          <CategoryCard title="Home Appliances" description="Kitchen, laundry, and utility appliances." icon="ri-home-gear-line" />
-          <CategoryCard title="Furniture" description="Office and home furniture with pre-shipment checks." icon="ri-sofa-line" />
-          <CategoryCard title="Fashion & Accessories" description="Shoes, bags, fabrics, and private label options." icon="ri-t-shirt-2-line" />
-          <CategoryCard title="Industrial & Tools" description="Machinery parts, hand tools, and workshop equipment." icon="ri-tools-line" />
-          <CategoryCard title="Bulk Wholesale Goods" description="Container and mixed goods for retail and distribution." icon="ri-box-3-line" />
+          <SourceCategoryCard title="Electronics & Gadgets" description="Phones, accessories, computers, and smart devices." icon="ri-smartphone-line" />
+          <SourceCategoryCard title="Home Appliances" description="Kitchen, laundry, and utility appliances." icon="ri-home-gear-line" />
+          <SourceCategoryCard title="Furniture" description="Office and home furniture with pre-shipment checks." icon="ri-sofa-line" />
+          <SourceCategoryCard title="Fashion & Accessories" description="Shoes, bags, fabrics, and private label options." icon="ri-t-shirt-2-line" />
+          <SourceCategoryCard title="Industrial & Tools" description="Machinery parts, hand tools, and workshop equipment." icon="ri-tools-line" />
+          <SourceCategoryCard title="Bulk Wholesale Goods" description="Container and mixed goods for retail and distribution." icon="ri-box-3-line" />
         </div>
         <div className="mt-10 rounded-card-lg bg-brand p-8 text-white">
           <h2 className="text-2xl font-bold">Need something not listed?</h2>

@@ -1,0 +1,9 @@
+# Gizmoz Trades — AI / agent discovery
+# https://www.gizmoztrades.com/llms.txt
+
+contact: support@gizmoztrades.com
+preferred-name: Gizmoz Trades
+description: China to Ghana imports, ecommerce storefront, and Buy RMB with Ghana Cedis.
+llms-txt: https://www.gizmoztrades.com/llms.txt
+llms-full-txt: https://www.gizmoztrades.com/llms-full.txt
+sitemap: https://www.gizmoztrades.com/sitemap.xml

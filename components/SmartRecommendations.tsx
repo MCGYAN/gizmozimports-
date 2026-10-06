@@ -25,10 +25,10 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
   const allProducts: Product[] = [
     {
       id: '1',
-      name: 'Wireless Noise-Cancelling Headphones',
+      name: 'Premium Wireless Headphones',
       price: 450,
       originalPrice: 599,
-      image: 'https://picsum.photos/seed/rec1/300/300',
+      image: 'https://picsum.photos/seed/ph-SmartRecommendations-1/300/300',
       rating: 4.8,
       reviews: 234
     },
@@ -36,7 +36,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
       id: '2',
       name: 'Smart Fitness Watch',
       price: 320,
-      image: 'https://picsum.photos/seed/rec2/300/300',
+      image: 'https://picsum.photos/seed/ph-SmartRecommendations-2/300/300',
       rating: 4.6,
       reviews: 189
     },
@@ -45,7 +45,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
       name: 'Leather Crossbody Bag',
       price: 289,
       originalPrice: 399,
-      image: 'https://picsum.photos/seed/rec3/300/300',
+      image: 'https://picsum.photos/seed/ph-SmartRecommendations-3/300/300',
       rating: 4.9,
       reviews: 312
     },
@@ -53,7 +53,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
       id: '4',
       name: 'Minimalist Ceramic Vase Set',
       price: 159,
-      image: 'https://picsum.photos/seed/rec4/300/300',
+      image: 'https://picsum.photos/seed/ph-SmartRecommendations-4/300/300',
       rating: 4.7,
       reviews: 156
     }
@@ -62,6 +62,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
   useEffect(() => {
     const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
     setProducts(shuffled.slice(0, 4));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- shuffle from allProducts; listing allProducts would re-run on every parent re-render
   }, [productId, type]);
 
   const getTitleByType = () => {
@@ -126,7 +127,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
                     {[...Array(5)].map((_, i) => (
                       <i
                         key={i}
-                        className={`ri-star-${i < Math.floor(product.rating) ? 'fill' : 'line'} text-sm ${
+                        className={`ri-star-GH¢{i < Math.floor(product.rating) ? 'fill' : 'line'} text-sm ${
                           i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
                         }`}
                       ></i>
@@ -135,9 +136,9 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
                   <span className="text-xs text-gray-500">({product.reviews})</span>
                 </div>
                 <div className="flex items-baseline space-x-2">
-                  <span className="text-lg font-bold text-gray-900">GH₵{product.price}</span>
+                  <span className="text-lg font-bold text-gray-900">GH¢{product.price}</span>
                   {product.originalPrice && (
-                    <span className="text-sm text-gray-400 line-through">GH₵{product.originalPrice}</span>
+                    <span className="text-sm text-gray-400 line-through">GH¢{product.originalPrice}</span>
                   )}
                 </div>
               </div>

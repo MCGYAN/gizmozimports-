@@ -3,16 +3,35 @@ import { supabase } from '@/lib/supabase';
 import { escapeHtml } from '@/lib/sanitize';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'missing_api_key');
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@standardecom.com';
-const EMAIL_FROM = process.env.EMAIL_FROM || 'Demo Storefront <noreply@example.com>';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
 const BRAND = {
-    name: 'Demo Storefront',
+    name: process.env.NEXT_PUBLIC_SITE_NAME || 'Store',
     color: '#2563eb',
     colorLight: '#eff6ff',
     colorDark: '#064e3b',
     url: (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, ''),
-    phone: '+233209597443',
+    phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '',
 };
+
+/** Accepts "Name <email>", "email", or "<email>" and returns a Resend-safe From. */
+function resolveEmailFrom(): string {
+    const raw = (process.env.EMAIL_FROM || '').trim();
+    const site = BRAND.name;
+
+    if (!raw) {
+        const admin = (process.env.ADMIN_EMAIL || '').trim();
+        return admin.includes('@') ? `${site} <${admin}>` : `${site} <admin@example.com>`;
+    }
+
+    const angleOnly = raw.match(/^<([^<>\s]+@[^<>\s]+)>$/);
+    if (angleOnly) return `${site} <${angleOnly[1]}>`;
+
+    if (/^[^<>\s]+@[^<>\s]+$/.test(raw)) return `${site} <${raw}>`;
+
+    return raw;
+}
+
+const EMAIL_FROM = resolveEmailFrom();
 
 // Reusable branded email layout
 export function emailLayout(body: string, preheader?: string): string {
@@ -30,7 +49,7 @@ ${preheader ? `<span style="display:none;max-height:0;overflow:hidden;">${prehea
 <!-- Header -->
 <tr><td style="background:linear-gradient(135deg,${BRAND.color},${BRAND.colorDark});padding:32px 40px;text-align:center;">
 <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">${BRAND.name}</h1>
-<p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Premium Quality Products</p>
+<p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Online Store</p>
 </td></tr>
 
 <!-- Body -->
@@ -87,47 +106,86 @@ function maskPhone(phone: string): string {
 }
 
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-    if (!process.env.RESEND_API_KEY) {
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'missing_api_key') {
         console.warn('[Email] RESEND_API_KEY not configured');
-        return null;
+        throw new Error('Email is not configured. Please set RESEND_API_KEY.');
+    }
+    if (!to || !to.includes('@')) {
+        throw new Error('Invalid recipient email');
     }
     try {
+        const replyTo = (process.env.ADMIN_EMAIL || '').trim();
         const data = await resend.emails.send({
             from: EMAIL_FROM,
-            to,
+            to: [to.trim()],
             subject,
             html,
+            ...(replyTo.includes('@') ? { replyTo } : {}),
         });
+        if (data.error) {
+            const errMsg = (data.error as { message?: string }).message || String(data.error);
+            console.error('[Email] Resend error:', data.error);
+            throw new Error(errMsg);
+        }
         console.log('[Email] Sent successfully to:', to.split('@')[0] + '@***');
         return data;
-    } catch (error: any) {
-        console.error('[Email] Failed:', error.message);
-        return null;
+    } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to send email';
+        console.error('[Email] Failed:', msg);
+        throw err instanceof Error ? err : new Error(msg);
     }
 }
 
-// Helper to format phone number for SMS (Ghana specific for now)
-// Helper to format phone number for SMS (Ghana specific for now)
+export async function sendReceiptReadyEmail({
+  to,
+  documentNumber,
+  amount,
+  currency,
+  label,
+  documentId,
+}: {
+  to: string;
+  documentNumber: string;
+  amount: number;
+  currency: string;
+  label: string;
+  documentId: string;
+}) {
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  const amountLabel =
+    currency === 'GHS'
+      ? `GH¢${Number(amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}`
+      : `${currency} ${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  await sendEmail({
+    to,
+    subject: `Payment confirmed. Receipt ${documentNumber}`,
+    html: emailLayout(`
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Payment confirmed</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  We received <strong>${escapeHtml(amountLabel)}</strong> for your ${escapeHtml(label)}.
+  Your official receipt is ready in your Gizmoz Trades account.
+</p>
+${emailButton('View receipt', `${baseUrl}/account?tab=documents&document=${encodeURIComponent(documentId)}`)}
+<p style="color:#6b7280;font-size:12px;line-height:1.5;margin:18px 0 0;">
+  Receipt ${escapeHtml(documentNumber)}. Keep it as proof of payment.
+</p>
+`, `Receipt ready. ${documentNumber}`),
+  });
+}
+
+// Helper to format phone numbers for SMS (adjust country code / rules for your provider)
 function formatPhoneNumber(phone: string): string {
-    // Remove all non-digit characters (including + for now)
+    const cc = (process.env.MOOLRE_SMS_COUNTRY_CODE || process.env.NEXT_PUBLIC_DEFAULT_PHONE_COUNTRY_CODE || '1').replace(/\D/g, '') || '1';
     let cleaned = phone.replace(/\D/g, '');
 
-    // If starts with 0 (e.g. 024...), replace 0 with 233
     if (cleaned.startsWith('0')) {
-        cleaned = '233' + cleaned.substring(1);
+        cleaned = cc + cleaned.substring(1);
     }
 
-    // If length is 9 (e.g. 24...), prepend 233
     if (cleaned.length === 9) {
-        cleaned = '233' + cleaned;
+        cleaned = cc + cleaned;
     }
 
-    // Ensure it starts with correct country code before prepending +
-    if (!cleaned.startsWith('233') && cleaned.length === 12) {
-        // Assuming it's some other format, but if it starts with 233, it's fine.
-    }
-
-    // Return with + prefix as per E.164
     return '+' + cleaned;
 }
 
@@ -154,7 +212,7 @@ export async function sendSMS({ to, message }: { to: string; message: string }) 
             },
             body: JSON.stringify({
                 type: 1,
-                senderid: 'DemoStore',
+                senderid: process.env.MOOLRE_SENDER_ID || process.env.SMS_SENDER_ID || 'Store',
                 messages: [
                     {
                         recipient: recipient,
@@ -251,7 +309,7 @@ export async function sendOrderConfirmation(order: any) {
   ${emailInfoRow('Order Number', `#${order_number || id}`)}
   ${emailInfoRow('Order Date', new Date(created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }))}
   ${trackingNumber ? emailInfoRow('Tracking', trackingNumber) : ''}
-  ${emailInfoRow('Total', `GH₵${Number(total).toFixed(2)}`)}
+  ${emailInfoRow('Total', `GH¢${Number(total).toFixed(2)}`)}
 </table>
 
 ${emailShippingNotes(shippingNotes)}
@@ -277,7 +335,7 @@ ${emailButton('Track Your Order', trackingUrl)}
   ${emailInfoRow('Order', `#${order_number || id}`)}
   ${emailInfoRow('Customer', `${name}`)}
   ${emailInfoRow('Email', email)}
-  ${emailInfoRow('Total', `GH₵${Number(total).toFixed(2)}`)}
+  ${emailInfoRow('Total', `GH¢${Number(total).toFixed(2)}`)}
   ${trackingNumber ? emailInfoRow('Tracking', trackingNumber) : ''}
 </table>
 
@@ -296,7 +354,7 @@ ${emailButton('View Order in Admin', `${baseUrl}/admin/orders/${id}`)}
     if (phone) {
         const smsMessage = trackingNumber
             ? `Hi ${name}, your order #${order_number || id} is confirmed! Tracking: ${trackingNumber}. Track here: ${trackingUrl}${shippingNotesSms}`
-            : `Hi ${name}, your order #${order_number || id} at Demo Storefront is confirmed! Track here: ${trackingUrl}${shippingNotesSms}`;
+            : `Hi ${name}, your order #${order_number || id} is confirmed! Track here: ${trackingUrl}${shippingNotesSms}`;
 
         await sendSMS({
             to: phone,
@@ -392,6 +450,187 @@ ${emailButton('Track Your Order', trackingUrl)}
     }
 }
 
+/** Admin-only: customer tapped “I’ve paid” and payment needs review. */
+export async function sendPaymentAwaitingAdminAlert(order: {
+    id: string;
+    email?: string | null;
+    phone?: string | null;
+    total?: number | string | null;
+    order_number?: string | null;
+    shipping_address?: any;
+    metadata?: any;
+}) {
+    const { id, email, phone: orderPhone, shipping_address, total, order_number, metadata } = order;
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+
+    const name = (() => {
+        if (shipping_address?.full_name) return shipping_address.full_name;
+        if (shipping_address?.firstName) {
+            return shipping_address.lastName
+                ? `${shipping_address.firstName} ${shipping_address.lastName}`
+                : shipping_address.firstName;
+        }
+        if (metadata?.first_name) {
+            return metadata.last_name
+                ? `${metadata.first_name} ${metadata.last_name}`
+                : metadata.first_name;
+        }
+        return 'Customer';
+    })();
+    const phone = orderPhone || shipping_address?.phone || '';
+    const note = metadata?.payment_sent_note || '';
+    const amount = Number(total || 0).toFixed(2);
+
+    await sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `Payment to confirm #${order_number || id}`,
+        html: emailLayout(`
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Customer says they have paid</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Check the bank or MoMo transfer, then confirm payment in admin.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:12px;overflow:hidden;margin:16px 0;">
+  ${emailInfoRow('Order', `#${order_number || id}`)}
+  ${emailInfoRow('Customer', escapeHtml(String(name)))}
+  ${emailInfoRow('Email', escapeHtml(String(email || '')))}
+  ${phone ? emailInfoRow('Phone', escapeHtml(String(phone))) : ''}
+  ${emailInfoRow('Amount', `GH¢${amount}`)}
+  ${note ? emailInfoRow('Customer note', escapeHtml(String(note))) : ''}
+</table>
+
+${emailButton('Confirm payment in admin', `${baseUrl}/admin/orders/${id}`)}
+`, `Payment awaiting confirmation for #${order_number || id}`),
+    });
+}
+
+/** Admin-only: Buy RMB customer tapped “I’ve paid”. */
+export async function sendExchangePaymentAwaitingAdminAlert(exchange: {
+    id: string;
+    exchange_number?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    customer_name?: string | null;
+    full_name?: string | null;
+    amount_from?: number | string | null;
+    amount_to?: number | string | null;
+    payment_note?: string | null;
+    alipay_account_name?: string | null;
+    has_alipay_qr?: boolean;
+    alipay_qr_path?: string | null;
+    country_code?: string | null;
+    currency_from?: string | null;
+    metadata?: Record<string, any> | null;
+}) {
+    const {
+        id,
+        exchange_number,
+        email,
+        phone,
+        customer_name,
+        full_name,
+        amount_from,
+        amount_to,
+        payment_note,
+        alipay_account_name,
+        has_alipay_qr,
+        alipay_qr_path,
+        country_code,
+        currency_from,
+        metadata,
+    } = exchange;
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+    const ref = exchange_number || id;
+    const detailUrl = `${baseUrl}/admin/exchange/${encodeURIComponent(String(ref))}`;
+    const gh = Number(amount_from || 0).toFixed(2);
+    const rmb = Number(amount_to || 0).toFixed(2);
+    const customerLabel = customer_name || full_name || 'Customer';
+    const qrReady = has_alipay_qr || Boolean(alipay_qr_path);
+    const countryLabel =
+      country_code === 'NG'
+        ? 'Nigeria'
+        : country_code === 'TZ'
+          ? 'Tanzania'
+          : metadata?.country_name || 'Ghana';
+    const localCurrency = currency_from || 'GHS';
+
+    await sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `Buy RMB payment to confirm #${ref} (${countryLabel})`,
+        html: emailLayout(`
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Buy RMB. Customer says they have paid</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Check the ${escapeHtml(countryLabel)} transfer, open the invoice with Alipay QR, then confirm and send RMB.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:12px;overflow:hidden;margin:16px 0;">
+  ${emailInfoRow('Exchange', `#${escapeHtml(String(ref))}`)}
+  ${emailInfoRow('Country', escapeHtml(countryLabel))}
+  ${emailInfoRow('Customer', escapeHtml(String(customerLabel)))}
+  ${email ? emailInfoRow('Email', escapeHtml(String(email))) : ''}
+  ${phone ? emailInfoRow('Phone', escapeHtml(String(phone))) : ''}
+  ${emailInfoRow(localCurrency, gh)}
+  ${emailInfoRow('RMB', rmb)}
+  ${emailInfoRow('Alipay QR', qrReady ? 'On file' : 'Missing')}
+  ${alipay_account_name ? emailInfoRow('Alipay name', escapeHtml(String(alipay_account_name))) : ''}
+  ${payment_note ? emailInfoRow('Customer note', escapeHtml(String(payment_note))) : ''}
+</table>
+
+${emailButton('Open invoice + Alipay QR', detailUrl)}
+`, `Buy RMB payment awaiting confirmation for #${ref}`),
+    });
+}
+
+export async function sendExchangeBuyerStatusEmail(
+  exchange: {
+    exchange_number?: string | null;
+    email?: string | null;
+    customer_name?: string | null;
+    amount_from?: number | string | null;
+    amount_to?: number | string | null;
+  },
+  stage: 'confirmed' | 'completed',
+) {
+  const email = (exchange.email || '').trim();
+  if (!email) return;
+
+  const ref = exchange.exchange_number || '';
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  const invoiceUrl = `${baseUrl}/exchange/${encodeURIComponent(ref)}`;
+  const name = exchange.customer_name || 'there';
+  const rmb = Number(exchange.amount_to || 0).toFixed(2);
+  const gh = Number(exchange.amount_from || 0).toFixed(2);
+
+  if (stage === 'confirmed') {
+    await sendEmail({
+      to: email,
+      subject: `Cedis confirmed. Sending your RMB #${ref}`,
+      html: emailLayout(`
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Payment confirmed</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Hi ${escapeHtml(name)}, we confirmed your GH¢${gh} transfer for Buy RMB <strong>#${escapeHtml(ref)}</strong>.
+  We are sending <strong>${rmb} RMB</strong> to your Alipay receive QR.
+</p>
+${emailButton('View your invoice', invoiceUrl)}
+`, `Cedis confirmed for Buy RMB #${ref}`),
+    });
+    return;
+  }
+
+  await sendEmail({
+    to: email,
+    subject: `RMB sent #${ref}`,
+    html: emailLayout(`
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Your RMB is on the way</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Hi ${escapeHtml(name)}, we sent <strong>${rmb} RMB</strong> to your Alipay for Buy RMB <strong>#${escapeHtml(ref)}</strong>.
+  Check Alipay for the credit. If anything looks off, reply on WhatsApp with your invoice number.
+</p>
+${emailButton('View your invoice', invoiceUrl)}
+`, `RMB sent for Buy RMB #${ref}`),
+  });
+}
+
 export async function sendWelcomeMessage(user: { email: string, firstName: string, phone?: string }) {
     const { email, firstName, phone } = user;
 
@@ -406,7 +645,7 @@ export async function sendWelcomeMessage(user: { email: string, firstName: strin
   <p style="margin:0;color:#6b7280;font-size:15px;">We're so glad you're here.</p>
 </div>
 
-<p style="color:#374151;font-size:14px;line-height:1.7;margin:16px 0;">Thank you for joining the ${BRAND.name} family. We source premium quality products directly from China at unbeatable prices &mdash; perfect for homes, businesses, and resellers.</p>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:16px 0;">Thank you for joining ${BRAND.name}. We're glad to have you.</p>
 
 <div style="background-color:#f9fafb;border-radius:12px;padding:20px;margin:20px 0;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -438,7 +677,7 @@ ${emailButton('Start Shopping', `${BRAND.url}/shop`)}
     if (phone) {
         await sendSMS({
             to: phone,
-            message: `Welcome ${firstName}! Thanks for joining Demo Storefront.`
+            message: `Welcome ${firstName}! Thanks for joining ${BRAND.name}.`
         });
     }
 }
@@ -482,12 +721,12 @@ export async function sendPaymentLink(order: any) {
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:12px;overflow:hidden;margin:20px 0;">
   ${emailInfoRow('Order Number', `#${order_number}`)}
-  ${emailInfoRow('Amount Due', `<span style="color:${BRAND.color};font-size:18px;font-weight:700;">GH₵${Number(total).toFixed(2)}</span>`)}
+  ${emailInfoRow('Amount Due', `<span style="color:${BRAND.color};font-size:18px;font-weight:700;">GH¢${Number(total).toFixed(2)}</span>`)}
 </table>
 
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:16px 0;">Click the button below to securely complete your payment. This link will remain active until your order is completed or cancelled.</p>
 
-${emailButton('Pay Now — GH₵' + Number(total).toFixed(2), paymentUrl, '#d97706')}
+${emailButton('Pay Now (GH¢' + Number(total).toFixed(2) + ')', paymentUrl, '#d97706')}
 
 <p style="color:#9ca3af;font-size:12px;text-align:center;margin:0;">Or copy this link: <a href="${paymentUrl}" style="color:${BRAND.color};">${paymentUrl}</a></p>
 `, `Complete payment for order #${order_number}`)
@@ -495,7 +734,7 @@ ${emailButton('Pay Now — GH₵' + Number(total).toFixed(2), paymentUrl, '#d977
 
     // SMS with payment link
     if (phone) {
-        const smsMessage = `Hi ${name}, complete your order #${order_number} (GH₵${Number(total).toFixed(2)}) here: ${paymentUrl}`;
+        const smsMessage = `Hi ${name}, complete your order #${order_number} (GH¢${Number(total).toFixed(2)}) here: ${paymentUrl}`;
 
         await sendSMS({
             to: phone,
@@ -539,9 +778,9 @@ export async function sendContactMessage(data: { name: string, email: string, su
     // 2. Alert Admin
     await sendEmail({
         to: ADMIN_EMAIL,
-        subject: `Contact: ${subject}`,
+        subject: subject,
         html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">&#128233; New Contact Message</h2>
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">New contact message</h2>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:12px;overflow:hidden;margin:16px 0;">
   ${emailInfoRow('From', safeName)}

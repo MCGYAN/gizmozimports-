@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ProductSalesStats from './ProductSalesStats';
+import {
+  deriveFulfillmentStage,
+  FULFILLMENT_STAGES,
+  type FulfillmentStage,
+} from '@/lib/order-journey';
 
 interface Order {
   id: string;
@@ -42,21 +47,26 @@ export default function AdminOrdersPage() {
   const [sortBy, setSortBy] = useState('date');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [orderViewTab, setOrderViewTab] = useState<'confirmed' | 'abandoned'>('confirmed');
+  const [orderViewTab, setOrderViewTab] = useState<'paid' | 'open'>('paid');
   const [sendingPaymentLink, setSendingPaymentLink] = useState<string | null>(null);
   const [orderStats, setOrderStats] = useState<OrderStats[]>([
-    { label: 'All Orders', count: 0, status: 'all' },
-    { label: 'Pending', count: 0, status: 'pending' },
-    { label: 'Processing', count: 0, status: 'processing' },
-    { label: 'Packaged', count: 0, status: 'shipped' },
+    { label: 'All paid', count: 0, status: 'all' },
+    { label: 'Payment confirmed', count: 0, status: 'paid' },
+    { label: 'Sourcing', count: 0, status: 'sourcing' },
+    { label: 'To Ghana', count: 0, status: 'en_route_ghana' },
+    { label: 'In Ghana', count: 0, status: 'in_ghana' },
+    { label: 'Ready', count: 0, status: 'ready' },
     { label: 'Delivered', count: 0, status: 'delivered' },
-    { label: 'Cancelled', count: 0, status: 'cancelled' }
   ]);
   const [abandonedCount, setAbandonedCount] = useState(0);
   const [confirmedCount, setConfirmedCount] = useState(0);
+  const [needsConfirmCount, setNeedsConfirmCount] = useState(0);
   const [showProductStats, setShowProductStats] = useState(false);
   const [productFilter, setProductFilter] = useState('all');
   const [availableProducts, setAvailableProducts] = useState<string[]>([]);
+  const [bulkStage, setBulkStage] = useState<FulfillmentStage>('sourcing');
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [undoOrders, setUndoOrders] = useState<{ number: string; until: number }[]>([]);
 
   useEffect(() => {
     fetchOrders();
@@ -102,21 +112,50 @@ export default function AdminOrdersPage() {
       });
       setAvailableProducts(Array.from(productNames).sort());
 
-      // Separate confirmed (paid) from abandoned (pending payment)
+      // Paid vs still open (awaiting transfer / awaiting your confirmation)
       const confirmedOrders = ordersData?.filter(o => o.payment_status === 'paid') || [];
       const abandonedOrders = ordersData?.filter(o => o.payment_status !== 'paid') || [];
       
       setConfirmedCount(confirmedOrders.length);
       setAbandonedCount(abandonedOrders.length);
+      setNeedsConfirmCount(
+        abandonedOrders.filter(o => o.payment_status === 'awaiting_confirmation').length
+      );
 
-      // Calculate stats based on confirmed orders only
+      // Calculate stats from import journey milestones (paid orders)
+      const journeyOf = (o: Order) => deriveFulfillmentStage(o);
       const stats = [
-        { label: 'All Orders', count: confirmedOrders.length, status: 'all' },
-        { label: 'Pending', count: confirmedOrders.filter(o => o.status === 'pending').length, status: 'pending' },
-        { label: 'Processing', count: confirmedOrders.filter(o => o.status === 'processing').length, status: 'processing' },
-        { label: 'Packaged', count: confirmedOrders.filter(o => o.status === 'shipped').length, status: 'shipped' },
-        { label: 'Delivered', count: confirmedOrders.filter(o => o.status === 'delivered').length, status: 'delivered' },
-        { label: 'Cancelled', count: confirmedOrders.filter(o => o.status === 'cancelled').length, status: 'cancelled' }
+        { label: 'All paid', count: confirmedOrders.length, status: 'all' },
+        {
+          label: 'Payment confirmed',
+          count: confirmedOrders.filter((o) => journeyOf(o) === 'paid').length,
+          status: 'paid',
+        },
+        {
+          label: 'Sourcing',
+          count: confirmedOrders.filter((o) => journeyOf(o) === 'sourcing').length,
+          status: 'sourcing',
+        },
+        {
+          label: 'To Ghana',
+          count: confirmedOrders.filter((o) => journeyOf(o) === 'en_route_ghana').length,
+          status: 'en_route_ghana',
+        },
+        {
+          label: 'In Ghana',
+          count: confirmedOrders.filter((o) => journeyOf(o) === 'in_ghana').length,
+          status: 'in_ghana',
+        },
+        {
+          label: 'Ready',
+          count: confirmedOrders.filter((o) => journeyOf(o) === 'ready').length,
+          status: 'ready',
+        },
+        {
+          label: 'Delivered',
+          count: confirmedOrders.filter((o) => journeyOf(o) === 'delivered').length,
+          status: 'delivered',
+        },
       ];
       setOrderStats(stats);
 
@@ -127,18 +166,24 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const statusColors: Record<string, string> = {
-    'pending': 'bg-amber-100 text-amber-700 border-amber-200',
-    'processing': 'bg-blue-100 text-blue-700 border-blue-200',
-    'shipped': 'bg-purple-100 text-purple-700 border-purple-200',
-    'delivered': 'bg-blue-100 text-blue-700 border-blue-200',
-    'cancelled': 'bg-red-100 text-red-700 border-red-200',
-    'awaiting_payment': 'bg-gray-100 text-gray-700 border-gray-200'
+  const journeyColors: Record<string, string> = {
+    awaiting_payment: 'bg-gray-100 text-gray-700 border-gray-200',
+    payment_sent: 'bg-amber-100 text-amber-700 border-amber-200',
+    paid: 'bg-green-100 text-green-700 border-green-200',
+    sourcing: 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
+    en_route_ghana: 'bg-sky-100 text-sky-800 border-sky-200',
+    in_ghana: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    ready: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    delivered: 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
+    cancelled: 'bg-red-100 text-red-700 border-red-200',
   };
 
-  const formatStatus = (status: string) => {
-    if (status === 'shipped') return 'Packaged';
-    return status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
+  const formatJourney = (order: Order) => {
+    const stage = deriveFulfillmentStage(order);
+    return (
+      FULFILLMENT_STAGES.find((s) => s.key === stage)?.title ||
+      stage.replace(/_/g, ' ')
+    );
   };
 
   const getCustomerName = (order: Order) => {
@@ -206,6 +251,93 @@ export default function AdminOrdersPage() {
       setSelectedOrders(selectedOrders.filter(id => id !== orderId));
     } else {
       setSelectedOrders([...selectedOrders, orderId]);
+    }
+  };
+
+  const authHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      'Content-Type': 'application/json',
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    };
+  };
+
+  const runBulk = async (
+    action: 'confirm_payment' | 'move_stage',
+    ids: string[] = selectedOrders,
+  ) => {
+    const selected = orders.filter((order) => ids.includes(order.id));
+    if (!selected.length) return;
+    if (action === 'confirm_payment') {
+      const confirmable = selected.filter((order) => order.payment_status === 'awaiting_confirmation');
+      const total = confirmable.reduce((sum, order) => sum + Number(order.total || 0), 0);
+      if (!confirmable.length) return alert('Select orders where the customer said they paid.');
+      if (!confirm(
+        `Confirm ${confirmable.length} payment${confirmable.length === 1 ? '' : 's'} totalling GH¢${total.toLocaleString('en-GH', { minimumFractionDigits: 2 })}? Check your bank or MoMo first.`,
+      )) return;
+    } else {
+      const label = FULFILLMENT_STAGES.find((stage) => stage.key === bulkStage)?.title || bulkStage;
+      if (!confirm(`Move ${selected.length} selected order${selected.length === 1 ? '' : 's'} to ${label}?`)) return;
+    }
+
+    setBulkBusy(true);
+    try {
+      const headers = await authHeaders();
+      const response = await fetch('/api/orders/bulk', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action,
+          orderIds: ids,
+          ...(action === 'move_stage' ? { stage: bulkStage } : {}),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Bulk action failed.');
+      if (action === 'confirm_payment' && result.completed?.length) {
+        const until = new Date(result.undoUntil).getTime();
+        setUndoOrders(
+          selected
+            .filter((order) => result.completed.includes(order.id))
+            .map((order) => ({ number: order.order_number, until })),
+        );
+        window.setTimeout(async () => {
+          const freshHeaders = await authHeaders();
+          void fetch('/api/cron/receipt-outbox', { method: 'POST', headers: freshHeaders });
+          setUndoOrders([]);
+        }, 125_000);
+      }
+      await fetchOrders();
+      setSelectedOrders([]);
+      if (result.skipped?.length) {
+        alert(`${result.completed.length} updated. ${result.skipped.length} skipped because they were not eligible.`);
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Bulk action failed.');
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const undoConfirmedPayments = async () => {
+    const active = undoOrders.filter((entry) => entry.until > Date.now());
+    if (!active.length) return setUndoOrders([]);
+    setBulkBusy(true);
+    const headers = await authHeaders();
+    const results = await Promise.all(
+      active.map((entry) =>
+        fetch('/api/orders/undo-payment', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ orderNumber: entry.number }),
+        }),
+      ),
+    );
+    setUndoOrders([]);
+    setBulkBusy(false);
+    await fetchOrders();
+    if (results.some((response) => !response.ok)) {
+      alert('Some payments could not be undone because their safety window closed.');
     }
   };
 
@@ -311,37 +443,46 @@ export default function AdminOrdersPage() {
     const customerEmail = getCustomerEmail(order).toLowerCase();
     const orderId = (order.order_number || order.id).toLowerCase();
 
-    // First filter by view tab (confirmed vs abandoned)
+    // First filter by view tab (paid vs open)
     const isConfirmed = order.payment_status === 'paid';
-    const matchesViewTab = orderViewTab === 'confirmed' ? isConfirmed : !isConfirmed;
+    const matchesViewTab = orderViewTab === 'paid' ? isConfirmed : !isConfirmed;
 
     const matchesSearch = orderId.includes(searchQuery.toLowerCase()) ||
       customerName.includes(searchQuery.toLowerCase()) ||
       customerEmail.includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'all' ||
+      deriveFulfillmentStage(order) === (statusFilter as FulfillmentStage) ||
+      order.status === statusFilter;
     const matchesProduct = productFilter === 'all' || 
       order.order_items?.some((item: any) => item.product_name === productFilter);
     return matchesViewTab && matchesSearch && matchesStatus && matchesProduct;
+  }).sort((a, b) => {
+    // On the open tab, transfers waiting for admin confirmation come first
+    if (orderViewTab !== 'open') return 0;
+    const aNeeds = a.payment_status === 'awaiting_confirmation' ? 0 : 1;
+    const bNeeds = b.payment_status === 'awaiting_confirmation' ? 0 : 1;
+    return aNeeds - bNeeds;
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-5 md:space-y-6">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-600 mt-1">Manage and track all customer orders</p>
+          <h1 className="font-heading text-2xl font-bold text-brand-primary md:text-3xl">Orders</h1>
+          <p className="mt-1 text-sm text-slate-600 md:text-base">Manage and track all customer orders</p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex w-full items-center gap-3 md:w-auto">
           <button
             onClick={() => setShowProductStats(true)}
-            className="flex-1 md:flex-none bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer shadow-sm flex items-center justify-center"
+            className="admin-btn-secondary flex flex-1 items-center justify-center px-5 py-3 shadow-sm md:flex-none"
           >
             <i className="ri-bar-chart-groupped-line mr-2"></i>
             Stats
           </button>
           <button
             onClick={handleExportAll}
-            className="flex-1 md:flex-none bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer shadow-sm flex items-center justify-center"
+            className="admin-btn-primary flex flex-1 items-center justify-center px-5 py-3 shadow-sm md:flex-none"
           >
             <i className="ri-download-line mr-2"></i>
             Export
@@ -349,67 +490,93 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* View Tabs: Confirmed Orders vs Abandoned Carts */}
-      <div className="flex border-b border-gray-200">
+      {/* View Tabs: Paid orders vs Open orders */}
+      <div className="flex border-b border-white/50">
         <button
-          onClick={() => { setOrderViewTab('confirmed'); setStatusFilter('all'); }}
-          className={`px-6 py-3 font-semibold text-sm border-b-2 transition-colors cursor-pointer ${
-            orderViewTab === 'confirmed'
-              ? 'border-blue-700 text-blue-700'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          onClick={() => { setOrderViewTab('paid'); setStatusFilter('all'); }}
+          className={`cursor-pointer px-4 py-3 text-sm font-semibold transition-colors md:px-6 ${
+            orderViewTab === 'paid' ? 'admin-tab-active' : 'admin-tab-idle'
           }`}
         >
           <i className="ri-check-double-line mr-2"></i>
-          Confirmed Orders ({confirmedCount})
+          Paid orders ({confirmedCount})
         </button>
         <button
-          onClick={() => { setOrderViewTab('abandoned'); setStatusFilter('all'); }}
-          className={`px-6 py-3 font-semibold text-sm border-b-2 transition-colors cursor-pointer ${
-            orderViewTab === 'abandoned'
-              ? 'border-amber-600 text-amber-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          onClick={() => { setOrderViewTab('open'); setStatusFilter('all'); }}
+          className={`cursor-pointer px-4 py-3 text-sm font-semibold transition-colors md:px-6 ${
+            orderViewTab === 'open'
+              ? 'border-b-2 border-brand-accent font-semibold text-brand-accent'
+              : 'admin-tab-idle'
           }`}
         >
-          <i className="ri-shopping-cart-2-line mr-2"></i>
-          Abandoned Carts ({abandonedCount})
+          <i className="ri-time-line mr-2"></i>
+          Open orders ({abandonedCount})
+          {needsConfirmCount > 0 && (
+            <span className="ml-2 inline-flex items-center rounded-full bg-amber-500 px-2 py-0.5 text-[11px] font-bold text-white">
+              {needsConfirmCount} to confirm
+            </span>
+          )}
         </button>
       </div>
 
-      {orderViewTab === 'confirmed' && (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {orderViewTab === 'paid' && (
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4 lg:grid-cols-6">
         {orderStats.map((stat) => (
           <button
             key={stat.status}
             onClick={() => setStatusFilter(stat.status)}
-            className={`p-4 rounded-xl border-2 transition-all text-left cursor-pointer ${statusFilter === stat.status
-              ? 'border-blue-700 bg-blue-50'
-              : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
+            className={`cursor-pointer rounded-xl p-3 text-left transition-all md:p-4 ${
+              statusFilter === stat.status ? 'admin-stat-pill-active' : 'admin-stat-pill'
+            }`}
           >
-            <p className="text-2xl font-bold text-gray-900">{stat.count}</p>
-            <p className="text-sm text-gray-600 mt-1">{stat.label}</p>
+            <p className="text-xl font-bold text-brand-primary md:text-2xl">{stat.count}</p>
+            <p className="mt-0.5 text-xs text-slate-600 md:mt-1 md:text-sm">{stat.label}</p>
           </button>
         ))}
       </div>
       )}
 
-      {/* Abandoned carts info banner */}
-      {orderViewTab === 'abandoned' && abandonedCount > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+      {orderViewTab === 'open' && needsConfirmCount > 0 && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
           <div className="flex items-start space-x-3">
-            <i className="ri-information-line text-xl text-amber-600 mt-0.5"></i>
+            <i className="ri-alarm-warning-line mt-0.5 text-xl text-amber-600"></i>
             <div>
-              <p className="text-sm font-semibold text-amber-800">Abandoned Carts</p>
-              <p className="text-sm text-amber-700 mt-1">
-                These orders were created but payment was not completed. You can resend payment links to customers.
+              <p className="text-sm font-bold text-amber-900">
+                {needsConfirmCount} customer{needsConfirmCount > 1 ? 's' : ''} said they paid. Check your bank or MoMo, then confirm.
+              </p>
+              <p className="mt-1 text-sm text-amber-700">
+                These are at the top of the list. Open the order and tap Confirm payment.
               </p>
             </div>
           </div>
         </div>
       )}
+      {undoOrders.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-sm font-semibold text-emerald-900">
+            {undoOrders.length} payment{undoOrders.length === 1 ? '' : 's'} confirmed. Receipt email waits 2 minutes.
+          </p>
+          <button
+            type="button"
+            onClick={() => void undoConfirmedPayments()}
+            disabled={bulkBusy}
+            className="rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-bold text-emerald-800"
+          >
+            Undo confirmation
+          </button>
+        </div>
+      )}
+      {orderViewTab === 'open' && needsConfirmCount === 0 && abandonedCount > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm text-slate-600">
+            <i className="ri-time-line mr-2 text-slate-400"></i>
+            All open orders are waiting on the customer to pay. Nothing needs you right now.
+          </p>
+        </div>
+      )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
+      <div className="admin-card overflow-hidden">
+        <div className="border-b border-white/50 p-4 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <div className="flex-1 max-w-md">
               <div className="relative">
@@ -419,12 +586,12 @@ export default function AdminOrdersPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by order ID, customer name, or email..."
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent text-sm"
                 />
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors font-medium whitespace-nowrap cursor-pointer"
@@ -435,7 +602,7 @@ export default function AdminOrdersPage() {
               <select
                 value={productFilter}
                 onChange={(e) => setProductFilter(e.target.value)}
-                className="px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium cursor-pointer"
+                className="min-w-0 flex-1 md:flex-none px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent font-medium cursor-pointer"
               >
                 <option value="all">All Products</option>
                 {availableProducts.map((name) => (
@@ -445,7 +612,7 @@ export default function AdminOrdersPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium cursor-pointer"
+                className="min-w-0 flex-1 md:flex-none px-4 py-3 pr-8 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent font-medium cursor-pointer"
               >
                 <option value="date">Sort by Date</option>
                 <option value="total">Sort by Total</option>
@@ -484,23 +651,39 @@ export default function AdminOrdersPage() {
         </div>
 
         {selectedOrders.length > 0 && (
-          <div className="p-4 bg-blue-50 border-b border-blue-200 flex items-center justify-between">
-            <p className="text-blue-800 font-semibold">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-primary/20 bg-brand-primary/5 p-4">
+            <p className="text-brand-primary font-semibold">
               {selectedOrders.length} order{selectedOrders.length > 1 ? 's' : ''} selected
             </p>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => handleBulkAction('Mark as Processing', 'processing')}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
-              >
-                Mark Processing
-              </button>
-              <button
-                onClick={() => handleBulkAction('Mark as Packaged', 'shipped')}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
-              >
-                Mark Packaged
-              </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {orderViewTab === 'open' ? (
+                <button
+                  onClick={() => void runBulk('confirm_payment')}
+                  disabled={bulkBusy}
+                  className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                >
+                  Confirm selected payments
+                </button>
+              ) : (
+                <>
+                  <select
+                    value={bulkStage}
+                    onChange={(event) => setBulkStage(event.target.value as FulfillmentStage)}
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
+                  >
+                    {FULFILLMENT_STAGES.filter((stage) => stage.key === 'sourcing').map((stage) => (
+                      <option key={stage.key} value={stage.key}>{stage.title}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => void runBulk('move_stage')}
+                    disabled={bulkBusy}
+                    className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  >
+                    Start sourcing
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => handleBulkAction('Export')}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
@@ -512,7 +695,80 @@ export default function AdminOrdersPage() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        {/* Mobile: card list. No sideways scrolling to reach actions. */}
+        <div className="md:hidden">
+          {loading ? (
+            <div className="py-12 text-center text-gray-500">
+              <i className="ri-loader-4-line animate-spin text-3xl text-brand-primary"></i>
+              <p className="mt-2">Loading orders...</p>
+            </div>
+          ) : filteredOrders.length === 0 ? (
+            <div className="py-12 text-center text-gray-500">
+              <i className="ri-inbox-line text-4xl text-gray-300"></i>
+              <p className="mt-2">No orders found</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {filteredOrders.map((order) => {
+                const needsConfirm =
+                  orderViewTab === 'open' && order.payment_status === 'awaiting_confirmation';
+                return (
+                  <li key={order.id}>
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className={`block p-4 active:bg-gray-50 ${needsConfirm ? 'bg-amber-50/70' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-brand-primary">
+                            {order.order_number || order.id.substring(0, 8)}
+                          </p>
+                          <p className="truncate text-sm text-gray-600">{getCustomerName(order)}</p>
+                          <p className="mt-0.5 text-xs text-gray-400">{formatDate(order.created_at)}</p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className="font-bold text-gray-900">GH¢{order.total?.toFixed(2) || '0.00'}</p>
+                          <span
+                            className={`mt-1 inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                              journeyColors[deriveFulfillmentStage(order)] ||
+                              'border-gray-200 bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {formatJourney(order)}
+                          </span>
+                        </div>
+                      </div>
+                      {orderViewTab === 'open' && (
+                        needsConfirm ? (
+                          <span className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-500 py-2.5 text-sm font-bold text-white">
+                            <i className="ri-hand-coin-line"></i>
+                            Customer says payment was sent
+                          </span>
+                        ) : (
+                          <p className={`mt-2 text-xs ${order.payment_status === 'failed' ? 'text-red-600' : 'text-slate-500'}`}>
+                            {order.payment_status === 'failed' ? 'Payment failed' : 'Waiting on customer to pay'}
+                          </p>
+                        )
+                      )}
+                    </Link>
+                    {needsConfirm ? (
+                      <button
+                        type="button"
+                        onClick={() => void runBulk('confirm_payment', [order.id])}
+                        disabled={bulkBusy}
+                        className="mx-4 mb-4 w-[calc(100%-2rem)] rounded-xl bg-brand-primary py-3 text-sm font-bold text-white disabled:opacity-50"
+                      >
+                        Confirm payment from this list
+                      </button>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -521,7 +777,7 @@ export default function AdminOrdersPage() {
                     type="checkbox"
                     checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
                     onChange={handleSelectAll}
-                    className="w-4 h-4 text-blue-700 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-accent/25 cursor-pointer"
                   />
                 </th>
                 <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Order ID</th>
@@ -538,7 +794,7 @@ export default function AdminOrdersPage() {
               {loading ? (
                 <tr>
                   <td colSpan={9} className="py-12 text-center text-gray-500">
-                    <i className="ri-loader-4-line animate-spin text-3xl text-blue-700"></i>
+                    <i className="ri-loader-4-line animate-spin text-3xl text-brand-primary"></i>
                     <p className="mt-2">Loading orders...</p>
                   </td>
                 </tr>
@@ -552,17 +808,24 @@ export default function AdminOrdersPage() {
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={order.id}
+                    className={`border-b border-gray-100 transition-colors ${
+                      orderViewTab === 'open' && order.payment_status === 'awaiting_confirmation'
+                        ? 'bg-amber-50/70 hover:bg-amber-50'
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
                     <td className="py-4 px-6">
                       <input
                         type="checkbox"
                         checked={selectedOrders.includes(order.id)}
                         onChange={() => handleSelectOrder(order.id)}
-                        className="w-4 h-4 text-blue-700 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                        className="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-accent/25 cursor-pointer"
                       />
                     </td>
                     <td className="py-4 px-4">
-                      <Link href={`/admin/orders/${order.id}`} className="text-blue-700 hover:text-blue-800 font-semibold whitespace-nowrap cursor-pointer">
+                      <Link href={`/admin/orders/${order.id}`} className="text-brand-primary hover:text-brand-accent font-semibold whitespace-nowrap cursor-pointer">
                         {order.order_number || order.id.substring(0, 8)}
                       </Link>
                     </td>
@@ -579,32 +842,49 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="py-4 px-4 text-gray-700 text-sm whitespace-nowrap">{formatDate(order.created_at)}</td>
                     <td className="py-4 px-4 text-gray-700">{getItemCount(order)}</td>
-                    <td className="py-4 px-4 font-semibold text-gray-900 whitespace-nowrap">GH₵ {order.total?.toFixed(2) || '0.00'}</td>
+                    <td className="py-4 px-4 font-semibold text-gray-900 whitespace-nowrap">GH¢{order.total?.toFixed(2) || '0.00'}</td>
                     <td className="py-4 px-4 text-sm whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-gray-700">{order.payment_method || 'N/A'}</span>
-                        {orderViewTab === 'abandoned' && (
-                          <span className={`text-xs mt-1 ${order.payment_status === 'failed' ? 'text-red-600' : 'text-amber-600'}`}>
-                            {order.payment_status === 'failed' ? 'Failed' : 'Pending'}
-                          </span>
+                        {orderViewTab === 'open' && (
+                          order.payment_status === 'awaiting_confirmation' ? (
+                            <button
+                              type="button"
+                              onClick={() => void runBulk('confirm_payment', [order.id])}
+                              disabled={bulkBusy}
+                              className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-xs font-bold text-white hover:bg-amber-600"
+                            >
+                              <i className="ri-hand-coin-line"></i>
+                              Confirm payment
+                            </button>
+                          ) : (
+                            <span className={`text-xs mt-1 ${order.payment_status === 'failed' ? 'text-red-600' : 'text-slate-500'}`}>
+                              {order.payment_status === 'failed' ? 'Payment failed' : 'Waiting on customer'}
+                            </span>
+                          )
                         )}
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${statusColors[order.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
-                        {formatStatus(order.status)}
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold whitespace-nowrap ${
+                          journeyColors[deriveFulfillmentStage(order)] ||
+                          'border-gray-200 bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {formatJourney(order)}
                       </span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-2">
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand-accent hover:bg-brand-primary/5 rounded-lg transition-colors cursor-pointer"
                           title="View Order"
                         >
                           <i className="ri-eye-line text-lg w-4 h-4 flex items-center justify-center"></i>
                         </Link>
-                        {orderViewTab === 'abandoned' && order.payment_status !== 'paid' && (
+                        {orderViewTab === 'open' && order.payment_status !== 'paid' && (
                           <button
                             onClick={() => handleResendPaymentLink(order)}
                             disabled={sendingPaymentLink === order.id}
@@ -620,7 +900,7 @@ export default function AdminOrdersPage() {
                         )}
                         <button
                           onClick={() => handlePrintInvoice(order.id)}
-                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand-accent hover:bg-brand-primary/5 rounded-lg transition-colors cursor-pointer"
                           title="Print Invoice"
                         >
                           <i className="ri-printer-line text-lg w-4 h-4 flex items-center justify-center"></i>

@@ -4,29 +4,21 @@ import { useState } from 'react';
 import Link from 'next/link';
 import LazyImage from './LazyImage';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { useCMS } from '@/context/CMSContext';
+import { getImportProductMode, type ImportProductMode } from '@/lib/store-config';
+import { ShoppingCart, Heart } from 'lucide-react';
 
-// Map common color names to hex values for swatches
 const COLOR_MAP: Record<string, string> = {
   black: '#000000', white: '#FFFFFF', red: '#EF4444', blue: '#3B82F6',
   navy: '#1E3A5F', green: '#22C55E', yellow: '#EAB308', orange: '#F97316',
-  pink: '#EC4899', purple: '#A855F7', brown: '#92400E', beige: '#D4C5A9',
-  grey: '#6B7280', gray: '#6B7280', cream: '#FFFDD0', teal: '#14B8A6',
-  maroon: '#800000', coral: '#FF7F50', burgundy: '#800020', olive: '#808000',
-  tan: '#D2B48C', khaki: '#C3B091', charcoal: '#36454F', ivory: '#FFFFF0',
-  gold: '#FFD700', silver: '#C0C0C0', rose: '#FF007F', lavender: '#E6E6FA',
-  mint: '#98FB98', peach: '#FFDAB9', wine: '#722F37', denim: '#1560BD',
-  nude: '#E3BC9A', camel: '#C19A6B', sage: '#BCB88A', rust: '#B7410E',
-  mustard: '#FFDB58', plum: '#8E4585', lilac: '#C8A2C8', stone: '#928E85',
-  sand: '#C2B280', taupe: '#483C32', mauve: '#E0B0FF', sky: '#87CEEB',
-  forest: '#228B22', cobalt: '#0047AB', emerald: '#50C878', scarlet: '#FF2400',
-  aqua: '#00FFFF', turquoise: '#40E0D0', indigo: '#4B0082', crimson: '#DC143C',
-  magenta: '#FF00FF', cyan: '#00FFFF', chocolate: '#7B3F00', coffee: '#6F4E37',
+  grey: '#6B7280', gray: '#6B7280', silver: '#C0C0C0', gold: '#FFD700',
+  bronze: '#CD7F32', brown: '#8B4513'
 };
 
 export function getColorHex(colorName: string): string | null {
   const lower = colorName.toLowerCase().trim();
   if (COLOR_MAP[lower]) return COLOR_MAP[lower];
-  // Try partial match (e.g. "Light Blue" -> "blue")
   for (const [key, val] of Object.entries(COLOR_MAP)) {
     if (lower.includes(key)) return val;
   }
@@ -54,17 +46,11 @@ interface ProductCardProps {
   hasVariants?: boolean;
   minVariantPrice?: number;
   colorVariants?: ColorVariant[];
-  /** Quick Specs modal (image click) */
-  brand?: string;
-  productType?: string;
-  netVolume?: string;
-  unit?: string;
-  /** Item details drawer */
-  description?: string;
-  ingredients?: string;
-  nutrition?: string;
-  specification?: string;
-  size?: string;
+  shortDescription?: string;
+  categoryName?: string;
+  categorySlug?: string;
+  /** Tighter layout for homepage 2×2 mobile grid */
+  compact?: boolean;
 }
 
 export default function ProductCard({
@@ -83,205 +69,194 @@ export default function ProductCard({
   hasVariants = false,
   minVariantPrice,
   colorVariants = [],
-  brand,
-  productType,
-  netVolume,
-  unit,
-  description,
-  ingredients,
-  nutrition,
-  specification,
-  size,
+  shortDescription,
+  categoryName,
+  categorySlug,
+  compact = false,
 }: ProductCardProps) {
   const { addToCart } = useCart();
+  const wishlist = useWishlist();
+  const { getSetting } = useCMS();
   const [activeColor, setActiveColor] = useState<string | null>(null);
-  const [quickSpecsOpen, setQuickSpecsOpen] = useState(false);
-  const [itemDetailsOpen, setItemDetailsOpen] = useState(false);
-  const [addQty, setAddQty] = useState(moq);
-  const [showQtySelector, setShowQtySelector] = useState(false);
+
+  const sym = getSetting('currency_symbol') || 'GH¢';
   const displayPrice = hasVariants && minVariantPrice ? minVariantPrice : price;
   const discount = originalPrice ? Math.round((1 - displayPrice / originalPrice) * 100) : 0;
-  const MAX_SWATCHES = 5;
+  const isWishlisted = wishlist?.isInWishlist(id) ?? false;
+  const MAX_SWATCHES = 4;
+  const mode: ImportProductMode = getImportProductMode(categoryName, categorySlug);
 
-  const formatPrice = (val: number) => `GH\u20B5${val.toFixed(2)}`;
+  const formatPrice = (val: number) => `${sym}${val.toFixed(2)}`;
+
+  const priceLabel = () => {
+    if (mode === 'equipment') return 'Request quote';
+    if (hasVariants && minVariantPrice) return formatPrice(minVariantPrice);
+    return formatPrice(price);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isWishlisted) wishlist?.removeFromWishlist(id);
+    else wishlist?.addToWishlist({ id, name, price, originalPrice, image, rating, reviewCount, badge, inStock, slug });
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (hasVariants) {
-      window.location.href = `/product/${slug}`;
-      return;
-    }
-    setAddQty(Math.max(moq, addQty));
-    setShowQtySelector(true);
+    addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq });
   };
 
-  const confirmAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({ id, name, price, image, quantity: addQty, slug, maxStock, moq });
-    setShowQtySelector(false);
-  };
+  const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-white font-bold transition-all shadow-[0_4px_12px_rgba(249,115,22,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(249,115,22,0.35)] disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
+    compact ? 'h-8 rounded-lg px-3 text-[10px] lg:h-9 lg:rounded-xl lg:px-4 lg:text-xs' : 'h-9 rounded-xl px-3 text-[11px] sm:h-10 sm:px-5 sm:text-xs'
+  }`;
+  const openProductForOptions =
+    mode === 'vehicles' || mode === 'equipment' || hasVariants;
 
   return (
-    <div className="group relative bg-white rounded-card border border-gray-100 h-full flex flex-col shadow-sm hover:shadow-md transition-all">
-      <div className="relative block aspect-[3/4] overflow-hidden rounded-t-card bg-gray-100">
-        <Link href={`/product/${slug}`} className="absolute inset-0 z-0">
-          <LazyImage
-            src={image}
-            alt={name}
-            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
-          />
-        </Link>
-        <button
-          type="button"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickSpecsOpen(true); }}
-          className="absolute inset-0 z-10 cursor-pointer"
-          aria-label="Quick specs"
+    <div className={`group liquid-glass-card liquid-glass-card-interactive flex h-full flex-col overflow-hidden ${compact ? 'max-lg:rounded-xl' : ''}`}>
+      {/* Product Image */}
+      <Link
+        href={`/product/${slug}`}
+        className={`relative block w-full shrink-0 overflow-hidden liquid-glass-well ${
+          compact
+            ? 'aspect-square max-lg:p-2.5 lg:aspect-[4/3] lg:p-6'
+            : 'aspect-[4/3] p-3.5 sm:p-5 md:p-6'
+        }`}
+      >
+        <LazyImage
+          src={image}
+          alt={name}
+          fit="contain"
+          className="h-full w-full object-contain transition-transform duration-500 ease-out mix-blend-multiply md:group-hover:scale-[1.05]"
+          sizes={compact ? '(max-width: 1024px) 45vw, 25vw' : '(max-width: 640px) 72vw, 260px'}
         />
-        <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
+
+        <div className={`absolute left-3 top-3 z-10 flex flex-col gap-1.5 ${compact ? 'max-lg:left-2 max-lg:top-2' : ''}`}>
           {badge && (
-            <span className="bg-white/90 backdrop-blur text-gray-900 border border-gray-100 text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-md shadow-sm">
+            <span className="rounded-full bg-brand-primary/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
               {badge}
             </span>
           )}
           {discount > 0 && (
-            <span className="bg-red-50 text-red-700 border border-red-100 text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-md shadow-sm">
+            <span className="rounded-full bg-brand-accent/95 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur-sm">
               -{discount}%
             </span>
           )}
         </div>
 
+        <button
+          type="button"
+          onClick={handleWishlistToggle}
+          className={`absolute right-3 top-3 z-20 flex items-center justify-center rounded-full bg-white/80 text-slate-400 shadow-sm backdrop-blur-sm ring-1 ring-slate-200 transition-all duration-300 hover:scale-110 hover:bg-white hover:text-red-500 hover:shadow-md ${
+            compact ? 'h-7 w-7 max-lg:right-2 max-lg:top-2 lg:h-8 lg:w-8' : 'h-8 w-8'
+          }`}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        >
+          <Heart className={`transition-colors ${compact ? 'h-3.5 w-3.5 lg:h-4 lg:w-4' : 'h-4 w-4'} ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+        </button>
+
         {!inStock && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-20">
-            <span className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium">Out of Stock</span>
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+            <span className="liquid-glass-inset rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+              Out of Stock
+            </span>
           </div>
         )}
+      </Link>
 
-        {inStock && (
-          <>
-            <div className="absolute bottom-3 left-3 z-20">
-              <button
-                onClick={handleAddToCart}
-                className="bg-white text-gray-900 hover:bg-brand-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors flex items-center gap-1 text-sm"
-              >
-                <i className="ri-add-line"></i>
-                <span>+ Add</span>
-              </button>
-            </div>
-            <div className="absolute bottom-3 right-3 z-20">
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setItemDetailsOpen(true); }}
-                className="bg-white text-gray-900 hover:bg-brand-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors text-sm"
-              >
-                Item details
-              </button>
-            </div>
-            {showQtySelector && (
-              <div className="absolute bottom-14 left-3 z-30 flex items-center gap-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2">
-                <input
-                  type="number"
-                  min={moq}
-                  max={maxStock}
-                  value={addQty}
-                  onChange={(e) => setAddQty(Math.max(moq, Math.min(maxStock, parseInt(e.target.value, 10) || moq)))}
-                  className="w-14 py-1 px-2 border border-gray-300 rounded text-center text-sm"
-                />
-                <button onClick={confirmAdd} className="bg-brand-purple text-white py-1.5 px-3 rounded text-sm font-medium">
-                  Add
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Quick Specs modal */}
-      {quickSpecsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setQuickSpecsOpen(false)}>
-          <div className="bg-white rounded-card p-6 max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-gray-900 mb-4">Quick Specs</h3>
-            <dl className="space-y-2 text-sm">
-              <div><dt className="text-gray-500">Brand</dt><dd className="font-medium">{brand || '—'}</dd></div>
-              <div><dt className="text-gray-500">Type</dt><dd className="font-medium">{productType || '—'}</dd></div>
-              <div><dt className="text-gray-500">Net Volume</dt><dd className="font-medium">{netVolume || '—'}</dd></div>
-              <div><dt className="text-gray-500">Unit</dt><dd className="font-medium">{unit || '—'}</dd></div>
-            </dl>
-            <Link href={`/product/${slug}`} className="mt-4 inline-block text-brand-purple font-medium hover:underline">View full product</Link>
-            <button type="button" onClick={() => setQuickSpecsOpen(false)} className="mt-4 w-full border border-gray-300 py-2 rounded-lg">Close</button>
-          </div>
-        </div>
-      )}
-
-      {/* Item details drawer/modal */}
-      {itemDetailsOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={() => setItemDetailsOpen(false)}>
-          <div className="bg-white rounded-t-2xl sm:rounded-card max-h-[85vh] w-full sm:max-w-md overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-              <h3 className="font-bold text-gray-900">Item details</h3>
-              <button type="button" onClick={() => setItemDetailsOpen(false)} className="p-2" aria-label="Close">×</button>
-            </div>
-            <div className="p-6 space-y-4 text-sm">
-              {description && <div><h4 className="font-semibold text-gray-900 mb-1">Description</h4><p className="text-gray-600">{description}</p></div>}
-              {ingredients && <div><h4 className="font-semibold text-gray-900 mb-1">Ingredients</h4><p className="text-gray-600">{ingredients}</p></div>}
-              {nutrition && <div><h4 className="font-semibold text-gray-900 mb-1">Nutrition</h4><p className="text-gray-600">{nutrition}</p></div>}
-              {specification && <div><h4 className="font-semibold text-gray-900 mb-1">Specification</h4><p className="text-gray-600">{specification}</p></div>}
-              {(!description && !ingredients && !nutrition && !specification) && <p className="text-gray-500">See product page for full details.</p>}
-            </div>
-            <div className="p-6 border-t">
-              <Link href={`/product/${slug}`} className="block w-full text-center bg-brand-purple text-white py-3 rounded-lg font-medium">View product</Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col flex-grow p-4">
-        <div className="flex items-baseline gap-2 mb-1">
-          {hasVariants && minVariantPrice ? (
-            <span className="text-gray-900 font-semibold">From {formatPrice(minVariantPrice)}</span>
+      <div className={`flex flex-1 flex-col ${compact ? 'p-3 max-lg:pt-2.5 lg:p-6' : 'p-3.5 sm:p-5 md:p-6'}`}>
+        <div className={`mb-1.5 flex items-center justify-between gap-2 ${compact ? 'max-lg:mb-1' : ''}`}>
+          {categoryName ? (
+            <span className={`truncate font-bold uppercase tracking-widest text-brand-accent ${compact ? 'max-lg:hidden text-[10px] lg:text-[10px]' : 'text-[9px] sm:text-[10px]'}`}>
+              {categoryName}
+            </span>
           ) : (
-            <span className="text-gray-900 font-semibold">{formatPrice(price)}</span>
+            <span />
           )}
-          {originalPrice && (
-            <span className="text-sm text-gray-400 line-through">{formatPrice(originalPrice)}</span>
+          {(rating > 0 || reviewCount > 0) && (
+            <div className={`flex shrink-0 items-center gap-0.5 ${compact ? 'max-lg:ml-auto' : ''}`}>
+              <svg className="h-3 w-3 text-brand-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span className="text-[10px] font-semibold text-slate-600 sm:text-[11px]">
+                {rating.toFixed(1)}
+                {reviewCount > 0 && <span className="text-slate-400"> ({reviewCount})</span>}
+              </span>
+            </div>
           )}
         </div>
+
         <Link href={`/product/${slug}`}>
-          <h3 className="font-medium text-gray-900 mb-1 group-hover:text-brand-purple transition-colors line-clamp-2">
-            {name}{size ? ` · ${size}` : ''}
+          <h3 className={`font-heading line-clamp-2 font-bold leading-snug text-brand-primary transition-colors group-hover:text-brand-accent ${compact ? 'text-[12px] max-lg:line-clamp-2 lg:text-[15px]' : 'text-[14px] sm:text-[15px]'}`}>
+            {name}
           </h3>
         </Link>
-        <p className="text-xs text-gray-500">Min order: {moq} {moq === 1 ? 'piece' : 'pieces'}</p>
+
+        {shortDescription && (
+          <p className="mt-1 hidden line-clamp-1 text-xs text-slate-500 sm:block">{shortDescription}</p>
+        )}
 
         {colorVariants.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className={`mt-2 flex items-center gap-1 ${compact ? 'max-lg:hidden' : ''}`}>
             {colorVariants.slice(0, MAX_SWATCHES).map((color) => (
               <button
                 key={color.name}
                 title={color.name}
-                onClick={(e) => { e.preventDefault(); setActiveColor(activeColor === color.name ? null : color.name); }}
-                className={`w-4 h-4 rounded-full border flex-shrink-0 ${activeColor === color.name ? 'ring-2 ring-offset-1 ring-brand-purple scale-110' : ''} ${color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveColor(activeColor === color.name ? null : color.name);
+                }}
+                className={`h-3.5 w-3.5 rounded-full border border-white shadow-sm transition-all sm:h-4 sm:w-4 ${activeColor === color.name ? 'ring-2 ring-brand-accent ring-offset-1' : 'hover:scale-110'}`}
                 style={{ backgroundColor: color.hex }}
               />
             ))}
+            {colorVariants.length > MAX_SWATCHES && (
+              <span className="ml-0.5 text-[9px] font-bold text-slate-400">
+                +{colorVariants.length - MAX_SWATCHES}
+              </span>
+            )}
           </div>
         )}
 
-        <div className="mt-auto pt-3 lg:hidden">
-          {hasVariants ? (
-            <Link href={`/product/${slug}`} className="w-full border border-gray-200 text-gray-900 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center justify-center gap-1">
-              <i className="ri-list-check"></i>
-              <span>Select Options</span>
-            </Link>
-          ) : (
-            <button
-              onClick={(e) => { e.preventDefault(); setShowQtySelector(true); }}
-              disabled={!inStock}
-              className="w-full border border-gray-200 text-gray-900 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
-            >
-              + Add (min {moq})
-            </button>
-          )}
+        <div className={`mt-auto flex flex-col gap-2 border-t border-slate-100 sm:flex-row sm:items-end sm:justify-between ${compact ? 'max-lg:pt-2.5 sm:gap-2 lg:gap-3 lg:pt-5' : 'pt-3 sm:gap-3 sm:pt-5'}`}>
+          <div className="min-w-0 sm:flex-1">
+            {originalPrice && originalPrice > displayPrice && (
+              <span className={`block font-medium text-slate-400 line-through ${compact ? 'text-[10px] lg:text-xs' : 'text-[11px] sm:text-xs'}`}>
+                {formatPrice(originalPrice)}
+              </span>
+            )}
+            <span className={`font-heading block break-words font-black leading-tight text-brand-primary ${compact ? 'text-[13px] lg:text-lg' : 'text-base sm:text-lg'}`}>
+              {priceLabel()}
+            </span>
+          </div>
+
+          <div className="sm:mt-0.5 sm:shrink-0">
+            {openProductForOptions ? (
+              <Link
+                href={`/product/${slug}`}
+                className={cartButtonClass}
+                aria-label="View product options to order"
+              >
+                Order now
+              </Link>
+            ) : (
+              <button
+                onClick={(e) => {
+                  // Direct Buy Now functionality
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq }, { openCart: false });
+                  window.location.href = '/checkout';
+                }}
+                disabled={!inStock}
+                className={cartButtonClass}
+                aria-label={moq > 1 ? `Order ${moq} now` : 'Order now'}
+              >
+                Order now
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

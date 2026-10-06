@@ -1,28 +1,19 @@
 'use client';
 
 import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ScrollToTop from '@/components/ScrollToTop';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NavigationProgress from '@/components/NavigationProgress';
-import CookieConsent from '@/components/CookieConsent';
-import WhatsAppButton from '@/components/WhatsAppButton';
-import CallButton from '@/components/CallButton';
 import { CMSProvider } from '@/context/CMSContext';
 
-// Lazy-load non-critical components
-import dynamic from 'next/dynamic';
-const SessionTimeoutWarning = dynamic(() => import('@/components/SessionTimeoutWarning'), { ssr: false });
-const PWAPrompt = dynamic(() => import('@/components/PWAPrompt'), { ssr: false });
+// Silent PWA registration only. No cookie / install / update popups on first visit.
 const PWAInstaller = dynamic(() => import('@/components/PWAInstaller'), { ssr: false });
-const PWASplash = dynamic(() => import('@/components/PWASplash'), { ssr: false });
-const PushNotificationManager = dynamic(() => import('@/components/PushNotificationManager'), { ssr: false });
 const OfflineIndicator = dynamic(() => import('@/components/OfflineIndicator'), { ssr: false });
-const NetworkStatusMonitor = dynamic(() => import('@/components/NetworkStatusMonitor'), { ssr: false });
-const UpdatePrompt = dynamic(() => import('@/components/UpdatePrompt'), { ssr: false });
-const LiveSalesNotification = dynamic(() => import('@/components/LiveSalesNotification'), { ssr: false });
+const StickyConversionDock = dynamic(() => import('@/components/store/StickyConversionDock'), { ssr: false });
 
 export default function StoreLayout({
   children,
@@ -35,27 +26,18 @@ export default function StoreLayout({
         <NavigationProgress />
       </Suspense>
       <ScrollToTop />
-      <div className="min-h-screen bg-gray-50">
-        <PWASplash />
+      <div className="min-h-screen store-site-bg">
         <PWAInstaller />
         <Header />
         <ErrorBoundary>
-          <div className="pwa-page-enter">
+          <main className="pwa-page-enter pb-[max(5.25rem,env(safe-area-inset-bottom,0px)+4.5rem)] md:pb-0">
             {children}
-          </div>
+          </main>
         </ErrorBoundary>
         <Footer />
         <MobileBottomNav />
-        <WhatsAppButton />
-        <CallButton />
-        <SessionTimeoutWarning />
-        <PWAPrompt />
-        <PushNotificationManager />
+        <StickyConversionDock />
         <OfflineIndicator />
-        <NetworkStatusMonitor />
-        <UpdatePrompt />
-        <LiveSalesNotification />
-        <CookieConsent />
       </div>
     </CMSProvider>
   );

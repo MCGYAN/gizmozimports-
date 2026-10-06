@@ -1,40 +1,41 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Outfit } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { SEO } from "@/lib/seo";
+import { buildSiteJsonLdGraph } from "@/lib/structured-data";
 import "./globals.css";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+  preload: true,
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#1D4ED8',
+  themeColor: '#1E3A8A',
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gizmoztrades.com';
+const siteUrl = SEO.siteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Gizmoz Trades | Affordable Online Store",
-    template: "%s | Gizmoz Trades"
+    default: SEO.defaultTitle,
+    template: `%s | ${SEO.siteName}`,
   },
-  description: "Shop affordable and trusted products with Gizmoz Trades.",
-  keywords: [
-    "Gizmoz Trades",
-    "Online Store Ghana",
-    "Buy Dresses Online Ghana",
-    "Electronics Ghana",
-    "Bags and Shoes Accra",
-    "China Import Ghana",
-    "Affordable Fashion Ghana",
-    "Accra Online Shopping",
-    "Ghana E-commerce",
-    "Quality Products Accra"
-  ],
-  authors: [{ name: "Gizmoz Trades" }],
-  creator: "Gizmoz Trades",
-  publisher: "Gizmoz Trades",
+  description: SEO.defaultDescription,
+  keywords: SEO.keywords,
+  authors: [{ name: SEO.brandName }],
+  creator: SEO.brandName,
+  publisher: SEO.brandName,
+  applicationName: SEO.brandName,
+  referrer: "origin-when-cross-origin",
   robots: {
     index: true,
     follow: true,
@@ -47,137 +48,111 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/icon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/icons/icon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/icon-48x48.png', sizes: '48x48', type: 'image/png' },
-      { url: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/icons/icon-152x152.png', sizes: '152x152', type: 'image/png' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-384x384.png', sizes: '384x384', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    shortcut: '/favicon.png',
+    icon: [{ url: '/icon', type: 'image/png' }],
+    apple: [{ url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Gizmoz Trades',
+    title: SEO.brandName,
   },
   formatDetection: {
     telephone: true,
+    email: false,
+    address: false,
   },
   verification: {
-    // Add your Google Search Console verification code here
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
   openGraph: {
     type: "website",
-    locale: "en_GH",
+    locale: SEO.locale,
     url: siteUrl,
-    title: "Gizmoz Trades | Affordable Online Store",
-    description: "Shop affordable and trusted products with Gizmoz Trades.",
-    siteName: "Gizmoz Trades",
+    title: SEO.defaultTitle,
+    description: SEO.defaultDescription,
+    siteName: SEO.brandName,
     images: [
       {
-        url: "/og-image.png",
+        url: SEO.ogImages.default,
         width: 1200,
         height: 630,
-        alt: "Gizmoz Trades",
+        alt: SEO.taglineLong,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gizmoz Trades | Affordable Online Store",
-    description: "Affordable products and reliable delivery from Gizmoz Trades.",
-    images: ["/og-image.png"],
-    creator: "@gizmoztrades",
+    title: SEO.defaultTitle,
+    description: SEO.defaultDescription,
+    images: [SEO.ogImages.twitter],
+    creator: SEO.social.twitter || undefined,
   },
   alternates: {
     canonical: siteUrl,
   },
+  category: "shopping",
 };
 
-// Google Analytics Measurement ID
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-// Google reCAPTCHA v3 Site Key
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = buildSiteJsonLdGraph();
+
   return (
-    <html lang="en">
+    <html lang="en-GH" className={outfit.variable} suppressHydrationWarning>
       <head>
-        {/* PWA Meta Tags */}
-        <meta name="theme-color" content="#1D4ED8" />
+        <meta name="theme-color" content="#1E3A8A" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Gizmoz Trades" />
+        <meta name="apple-mobile-web-app-title" content={SEO.brandName} />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#1D4ED8" />
+        <meta name="msapplication-TileColor" content="#1E3A8A" />
         <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="geo.region" content="GH" />
+        <meta name="geo.placename" content="Ghana" />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt" />
 
-        {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
-        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="384x384" href="/icons/icon-384x384.png" />
-        <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
-
-        {/* Apple Splash Screens */}
-        <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png" />
-
+        <link rel="icon" href="/icon" type="image/png" sizes="any" />
+        {/* Single deferred Remixicon load (icons are non-critical for first paint). */}
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link
-          href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"
+          id="remixicon-css"
           rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"
+          media="print"
+          suppressHydrationWarning
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-        {/* Structured Data - Organization */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var l=document.getElementById('remixicon-css');if(!l)return;l.onload=function(){l.media='all'};if(l.sheet)l.media='all';setTimeout(function(){l.media='all'},2500);})();`,
+          }}
+        />
+        <noscript>
+          <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"
+            rel="stylesheet"
+          />
+        </noscript>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Gizmoz Trades",
-              "url": "https://gizmoztrades.com",
-              "logo": "https://gizmoztrades.com/gizmoz-logo.png",
-              "description": "Affordable and trusted online shopping in Ghana.",
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "GH",
-                "addressLocality": "Accra"
-              },
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": "customer service",
-                "availableLanguage": "English"
-              }
-            })
+            __html: JSON.stringify(jsonLd),
           }}
         />
       </head>
 
-      {/* Google Analytics */}
       {GA_MEASUREMENT_ID && (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
-          <Script id="google-analytics" strategy="afterInteractive">
+          <Script id="google-analytics" strategy="lazyOnload">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
@@ -190,18 +165,10 @@ export default function RootLayout({
         </>
       )}
 
-      {/* Google reCAPTCHA v3 */}
-      {RECAPTCHA_SITE_KEY && (
-        <Script
-          src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
-          strategy="afterInteractive"
-        />
-      )}
-
-      <body className="antialiased font-sans overflow-x-hidden pwa-body">
+      <body className="antialiased font-sans overflow-x-hidden pwa-body bg-brand-surface text-brand-foreground [scrollbar-gutter:stable]" suppressHydrationWarning>
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[10000] focus:px-6 focus:py-3 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:font-semibold focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[10000] focus:px-6 focus:py-3 focus:bg-brand-primary focus:text-white focus:rounded-lg focus:font-semibold focus:shadow-lg"
         >
           Skip to main content
         </a>

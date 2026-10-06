@@ -1,0 +1,8 @@
+{
+  "name": "Store",
+  "short_name": "Store",
+  "icons": [],
+  "theme_color": "#1E3A8A",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

@@ -10,7 +10,33 @@ import ProductReviews from '@/components/ProductReviews';
 import { StructuredData, generateProductSchema, generateBreadcrumbSchema } from '@/components/SEOHead';
 import { notFound } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useCMS } from '@/context/CMSContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { buildTelHref, buildWhatsAppHref, getImportProductMode, resolveContactWhatsApp } from '@/lib/store-config';
+import { formatStoreMoney, STORE_CURRENCY } from '@/lib/currency';
+import {
+  buildAvailabilityWhatsAppText,
+  buildProductInquiryWhatsAppText,
+  getProductShareUrl,
+  parseProductCommerce,
+  resolveDirectPayment,
+} from '@/lib/product-commerce';
+import {
+  getProductColorOptions,
+  getSizeOptionsForColor,
+  getVariantColor,
+  getVariantSizeLabel,
+  isColorOnlyCatalog,
+  variantsForColor,
+  formatVariantLabel,
+  dedupeStoreVariants,
+  pickVariantForColor,
+  sumVariantStock,
+  getVariantStock,
+} from '@/lib/product-variants';
+import SocialShareButtons from '@/components/SocialShareButtons';
+import ImportDetailsCard from '@/components/store/ImportDetailsCard';
+import { ChevronRight, Heart, Star, Minus, Plus, ShoppingCart, ShieldCheck, RefreshCcw, Info, CheckCircle, AlertTriangle, XCircle, Store, Barcode, CheckCircle2, MessageCircle } from 'lucide-react';
 
 // Map common color names to hex values for the swatch preview
 function colorNameToHex(name: string): string {
@@ -29,6 +55,8 @@ function colorNameToHex(name: string): string {
 
 export default function ProductDetailClient({ slug }: { slug: string }) {
   const [product, setProduct] = useState<any>(null);
+  const { getSetting } = useCMS();
+  const money = (n: number) => formatStoreMoney(n, getSetting('currency') || STORE_CURRENCY);
   usePageTitle(product?.name || 'Product');
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -54,7 +82,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               .from('products')
               .select(`
                 *,
-                categories(name),
+                categories(name, slug),
                 product_variants(*),
                 product_images(url, position, alt_text)
               `);
@@ -80,11 +108,13 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
         // Transform product data
         // Map variant colors from option2, and extract color_hex from metadata
-        const rawVariants = (productData.product_variants || []).map((v: any) => ({
-          ...v,
-          color: v.option2 || '',
-          colorHex: v.metadata?.color_hex || ''
-        }));
+        const rawVariants = dedupeStoreVariants(
+          (productData.product_variants || []).map((v: any) => ({
+            ...v,
+            color: v.option2 || '',
+            colorHex: v.metadata?.color_hex || '',
+          })),
+        );
 
         // Build a color-to-hex map from variants (prefer stored hex, fallback to colorNameToHex)
         const colorHexMap: Record<string, string> = {};
@@ -100,18 +130,22 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           ...productData,
           images: productData.product_images?.sort((a: any, b: any) => a.position - b.position).map((img: any) => img.url) || [],
           category: productData.categories?.name || 'Shop',
+          categorySlug: productData.categories?.slug || '',
           rating: productData.rating_avg || 0,
           reviewCount: 0,
-          stockCount: productData.quantity,
+          stockCount: dedupeStoreVariants(rawVariants).length
+            ? sumVariantStock(rawVariants)
+            : productData.quantity,
           moq: productData.moq || 1,
-          colors: [...new Set(rawVariants.map((v: any) => v.color).filter(Boolean))],
+          colors: getProductColorOptions(rawVariants),
           colorHexMap,
           variants: rawVariants,
           sizes: rawVariants.map((v: any) => v.name) || [],
-          features: ['Great Value', 'Authentic Design'],
-          featured: ['Great Value', 'Authentic Design'],
+          features: ['Premium Quality', 'Authentic Design'],
+          featured: ['Premium Quality', 'Authentic Design'],
           care: 'Handle with care.',
-          preorderShipping: productData.metadata?.preorder_shipping || null
+          preorderShipping: productData.metadata?.preorder_shipping || null,
+          commerce: parseProductCommerce(productData.metadata),
         };
 
         // Ensure at least one image/placeholder
@@ -126,7 +160,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           setQuantity(transformedProduct.moq);
         }
 
-        // If variants exist, do NOT pre-select — force user to choose
+        // If variants exist, do NOT pre-select; force user to choose
         // Reset variant and color selection
         setSelectedVariant(null);
         setSelectedSize('');
@@ -183,53 +217,70 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
   }, [slug]);
 
   const hasVariants = product?.variants?.length > 0;
-  const hasColors = product?.colors?.length > 0;
-  const needsVariantSelection = hasVariants && !selectedVariant;
+  const hasColors = (product?.colors?.length ?? 0) > 0;
+  const colorOnlyCatalog = hasVariants && isColorOnlyCatalog(product?.variants || []);
   const needsColorSelection = hasColors && !selectedColor;
+  const needsVariantSelection =
+    hasVariants &&
+    !selectedVariant &&
+    (!hasColors || (Boolean(selectedColor) && !colorOnlyCatalog && getSizeOptionsForColor(product.variants, selectedColor, product.colors || []).length > 0));
 
   // Determine the active price: variant price if selected, otherwise base price
   const activePrice = selectedVariant?.price ?? product?.price ?? 0;
-  const activeStock = selectedVariant ? (selectedVariant.stock ?? selectedVariant.quantity ?? product?.stockCount ?? 0) : (product?.stockCount ?? 0);
+  const activeStock = selectedVariant
+    ? getVariantStock(selectedVariant)
+    : hasVariants
+      ? sumVariantStock(product?.variants || [])
+      : (product?.stockCount ?? 0);
 
-  const handleAddToCart = () => {
-    if (!product) return;
-    if (needsVariantSelection) return; // Safety check
+  const addCurrentSelectionToCart = (openCart: boolean): boolean => {
+    if (!product) return false;
+    if (needsColorSelection || needsVariantSelection) return false;
 
-    // Build variant display string: "Color / Name" or just "Name" or just "Color"
-    let variantLabel: string | undefined;
-    if (selectedVariant) {
-      const color = selectedVariant.color || selectedColor || '';
-      const name = selectedVariant.name || '';
-      if (color && name) {
-        variantLabel = `${color} / ${name}`;
-      } else {
-        variantLabel = color || name || undefined;
-      }
+    // Color-only catalog: ensure a concrete variant row is attached
+    let variantRow = selectedVariant;
+    if (!variantRow && selectedColor && colorOnlyCatalog) {
+      variantRow = pickVariantForColor(product.variants || [], selectedColor);
     }
 
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: activePrice,
-      image: product.images[0],
-      quantity: quantity,
-      variant: variantLabel,
-      slug: product.slug,
-      maxStock: activeStock,
-      moq: product.moq || 1
-    });
+    if (hasVariants && !variantRow) return false;
+
+    const variantLabel = formatVariantLabel(variantRow, selectedColor) || undefined;
+
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        price: activePrice,
+        image: product.images[0],
+        quantity: quantity,
+        variant: variantLabel,
+        variantId: variantRow?.id || undefined,
+        slug: product.slug,
+        maxStock: activeStock,
+        moq: product.moq || 1
+      },
+      { openCart },
+    );
+    return true;
+  };
+
+  const handleAddToCart = () => {
+    addCurrentSelectionToCart(true);
   };
 
   const handleBuyNow = () => {
-    handleAddToCart();
-    window.location.href = '/checkout';
+    // Add silently and go straight to checkout. No basket detour.
+    if (addCurrentSelectionToCart(false)) {
+      window.location.href = '/checkout';
+    }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white py-12 flex justify-center items-center">
+      <div className="store-page py-12 flex justify-center items-center">
         <div className="text-center">
-          <i className="ri-loader-4-line text-4xl text-blue-700 animate-spin mb-4 block"></i>
+          <RefreshCcw className="w-10 h-10 text-brand-primary animate-spin mb-4 block mx-auto" />
           <p className="text-gray-500">Loading product...</p>
         </div>
       </div>
@@ -238,24 +289,53 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-white py-20 flex justify-center items-center">
+      <div className="store-page py-20 flex justify-center items-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h2>
-          <Link href="/shop" className="text-blue-700 hover:underline">Return to Shop</Link>
+          <h2 className="text-2xl font-bold text-brand-primary mb-4">Product Not Found</h2>
+          <Link href="/shop" className="text-brand-primary hover:underline">Return to Shop</Link>
         </div>
       </div>
     );
   }
 
   const discount = product.compare_at_price ? Math.round((1 - activePrice / product.compare_at_price) * 100) : 0;
-  const minVariantPrice = hasVariants ? Math.min(...product.variants.map((v: any) => v.price || product.price)) : product.price;
+  const minVariantPrice = hasVariants
+    ? Math.min(...product.variants.map((v: any) => Number(v.price) || product.price))
+    : product.price;
+  const maxVariantPrice = hasVariants
+    ? Math.max(...product.variants.map((v: any) => Number(v.price) || product.price))
+    : product.price;
+  const variantPricesDiffer = hasVariants && Math.abs(maxVariantPrice - minVariantPrice) > 0.009;
+  const listedPrice = hasVariants ? minVariantPrice : product.price;
+  const displayPrice = selectedVariant ? activePrice : listedPrice;
+  const optionConfirmed = Boolean(selectedVariant) || !hasVariants;
+
+  const colorPriceHints =
+    hasVariants && product.colors?.length > 0
+      ? product.colors
+          .map((color: string) => {
+            const matching = variantsForColor(product.variants, color);
+            if (!matching.length) return null;
+            const price = Math.min(
+              ...matching.map((v: any) => Number(v.price) || product.price),
+            );
+            return { color, price };
+          })
+          .filter(Boolean) as { color: string; price: number }[]
+      : [];
+  const colorPricesDiffer =
+    colorPriceHints.length > 1 &&
+    Math.abs(
+      Math.max(...colorPriceHints.map((h) => h.price)) -
+        Math.min(...colorPriceHints.map((h) => h.price)),
+    ) > 0.009;
 
   const productSchema = generateProductSchema({
     name: product.name,
     description: product.description,
     image: product.images[0],
     price: hasVariants ? minVariantPrice : product.price,
-    currency: 'GHS',
+    currency: STORE_CURRENCY,
     sku: product.sku,
     rating: product.rating,
     reviewCount: product.reviewCount,
@@ -263,29 +343,60 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
     category: product.category
   });
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: 'Home', url: 'https://standardecom.com' },
-    { name: 'Shop', url: 'https://standardecom.com/shop' },
-    { name: product.category, url: `https://standardecom.com/shop?category=${product.category.toLowerCase().replace(/\s+/g, '-')}` },
-    { name: product.name, url: `https://standardecom.com/product/${slug}` }
+    { name: 'Home', url: baseUrl },
+    { name: 'Shop', url: `${baseUrl}/shop` },
+    { name: product.category, url: `${baseUrl}/shop?category=${product.category.toLowerCase().replace(/\s+/g, '-')}` },
+    { name: product.name, url: `${baseUrl}/product/${slug}` }
   ]);
+
+  const importMode = getImportProductMode(product.category, product.categorySlug);
+  const shareUrl = getProductShareUrl(product.slug || slug);
+  const waBase = buildWhatsAppHref(resolveContactWhatsApp(getSetting('contact_whatsapp')));
+  const waInquiry = waBase
+    ? `${waBase}${waBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(buildProductInquiryWhatsAppText(product.name, shareUrl))}`
+    : '';
+  const waAvailability = waBase
+    ? `${waBase}${waBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(buildAvailabilityWhatsAppText(product.name, shareUrl))}`
+    : '';
+  const telDirect = buildTelHref(getSetting('contact_phone'));
+  const allowOnlineCheckout = resolveDirectPayment(product.commerce?.directPayment ?? null, importMode);
+  const showImportDetails = Boolean(product.commerce?.importType || product.commerce?.importNotes);
+  const variantsForSelectedColor = selectedColor
+    ? variantsForColor(product.variants, selectedColor)
+    : [];
+  const sizeOptionsForColor = selectedColor
+    ? getSizeOptionsForColor(product.variants, selectedColor, product.colors || [])
+    : [];
+  const showSizeSelector =
+    hasColors &&
+    Boolean(selectedColor) &&
+    !colorOnlyCatalog &&
+    sizeOptionsForColor.length > 0;
+  const variantsWithoutColors = hasVariants && !hasColors ? product.variants : [];
 
   return (
     <>
       <StructuredData data={productSchema} />
       <StructuredData data={breadcrumbSchema} />
 
-      <main className="min-h-screen bg-white">
+      <main className="store-page">
         <section className="py-8 bg-gray-50 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <nav className="flex items-center space-x-2 text-sm flex-wrap gap-y-2">
-              <Link href="/" className="text-gray-600 hover:text-blue-700 transition-colors">Home</Link>
-              <i className="ri-arrow-right-s-line text-gray-400"></i>
-              <Link href="/shop" className="text-gray-600 hover:text-blue-700 transition-colors">Shop</Link>
-              <i className="ri-arrow-right-s-line text-gray-400"></i>
-              <Link href="#" className="text-gray-600 hover:text-blue-700 transition-colors">{product.category}</Link>
-              <i className="ri-arrow-right-s-line text-gray-400"></i>
-              <span className="text-gray-900 font-medium truncate max-w-[200px]">{product.name}</span>
+              <Link href="/" className="text-gray-600 hover:text-brand-primary transition-colors">Home</Link>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <Link href="/shop" className="text-gray-600 hover:text-brand-primary transition-colors">Shop</Link>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <Link
+                href={product.categorySlug ? `/shop?category=${product.categorySlug}` : '/shop'}
+                className="text-gray-600 hover:text-brand-primary transition-colors"
+              >
+                {product.category}
+              </Link>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <span className="text-brand-primary font-bold truncate max-w-[200px]">{product.name}</span>
             </nav>
           </div>
         </section>
@@ -294,37 +405,41 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="grid lg:grid-cols-2 gap-12">
               <div>
-                <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 mb-4 shadow-lg border border-gray-100">
+                <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                   <Image
                     src={product.images[selectedImage]}
                     alt={product.name}
                     fill
-                    className="object-cover object-center"
+                    className="object-contain object-center p-5 sm:p-8 md:p-10"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority
-                    quality={80}
+                    quality={85}
                   />
                   {discount > 0 && (
-                    <span className="absolute top-6 right-6 bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-full">
+                    <span className="absolute top-4 right-4 z-10 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm">
                       Save {discount}%
                     </span>
                   )}
                 </div>
 
                 {product.images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-4 gap-3 sm:gap-4">
                     {product.images.map((image: string, index: number) => (
                       <button
                         key={index}
+                        type="button"
                         onClick={() => setSelectedImage(index)}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${selectedImage === index ? 'border-blue-700 shadow-md' : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                        className={`relative aspect-square overflow-hidden rounded-xl border-2 bg-white transition-all cursor-pointer ${
+                          selectedImage === index
+                            ? 'border-brand-primary shadow-md'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
                       >
                         <Image
                           src={image}
                           alt={`${product.name} view ${index + 1}`}
                           fill
-                          className="object-cover object-center"
+                          className="object-contain object-center p-2"
                           sizes="(max-width: 1024px) 25vw, 12vw"
                           quality={60}
                         />
@@ -335,52 +450,82 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               </div>
 
               <div>
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-blue-700 font-semibold mb-2">{product.category}</p>
-                    <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
+                <div className="flex items-start justify-between mb-4 gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-brand-primary font-semibold mb-2">{product.category}</p>
+                    <h1 className="text-3xl lg:text-4xl font-extrabold text-brand-primary mb-3">{product.name}</h1>
                   </div>
-                  <button
-                    onClick={() => setIsWishlisted(!isWishlisted)}
-                    className="w-12 h-12 flex items-center justify-center border-2 border-gray-200 hover:border-blue-700 rounded-full transition-colors cursor-pointer"
-                  >
-                    <i className={`${isWishlisted ? 'ri-heart-fill text-red-600' : 'ri-heart-line text-gray-700'} text-xl`}></i>
-                  </button>
+                  <div className="flex shrink-0 items-start gap-2">
+                    <SocialShareButtons
+                      url={shareUrl}
+                      title={product.name}
+                      description={product.description}
+                      image={product.images[0]}
+                    />
+                    <button
+                      onClick={() => setIsWishlisted(!isWishlisted)}
+                      className="w-12 h-12 flex items-center justify-center border border-gray-200 hover:border-brand-accent rounded-full transition-all hover:shadow-md cursor-pointer"
+                      aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <Heart className={`w-6 h-6 transition-colors ${isWishlisted ? 'fill-brand-accent text-brand-accent' : 'text-gray-700'}`} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center mb-6">
                   <div className="flex items-center space-x-1 mr-3">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <i
+                      <Star
                         key={star}
-                        className={`${star <= Math.round(product.rating) ? 'ri-star-fill text-amber-400' : 'ri-star-line text-gray-300'} text-lg`}
-                      ></i>
+                        className={`w-5 h-5 ${star <= Math.round(product.rating) ? 'fill-brand-accent text-brand-accent' : 'text-gray-300'}`}
+                      />
                     ))}
                   </div>
                   <span className="text-gray-700 font-medium">{Number(product.rating).toFixed(1)}</span>
                 </div>
 
-                <div className="flex items-baseline space-x-4 mb-6">
-                  {hasVariants && !selectedVariant ? (
-                    <span className="text-3xl lg:text-4xl font-bold text-gray-900">
-                      From GH₵{minVariantPrice.toFixed(2)}
+                <div className="mb-6">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="text-3xl font-bold text-gray-900 lg:text-4xl">
+                      {money(displayPrice)}
                     </span>
-                  ) : (
-                    <span className="text-3xl lg:text-4xl font-bold text-gray-900">GH₵{activePrice.toFixed(2)}</span>
-                  )}
-                  {product.compare_at_price && product.compare_at_price > activePrice && (
-                    <span className="text-xl text-gray-400 line-through">GH₵{product.compare_at_price.toFixed(2)}</span>
-                  )}
+                    {product.compare_at_price && product.compare_at_price > displayPrice ? (
+                      <span className="text-xl text-gray-400 line-through">
+                        {money(product.compare_at_price)}
+                      </span>
+                    ) : null}
+                  </div>
+                  {hasVariants && !optionConfirmed ? (
+                    <p className="mt-1.5 text-sm text-gray-500">
+                      Price updates when you pick an option.
+                      {variantPricesDiffer
+                        ? ` Options run ${money(minVariantPrice)} to ${money(maxVariantPrice)}.`
+                        : ''}
+                    </p>
+                  ) : null}
+                  {hasVariants && optionConfirmed ? (
+                    <p className="mt-1.5 text-sm font-medium text-brand-primary">
+                      Your price for this option.
+                    </p>
+                  ) : null}
                 </div>
 
-                <p className="text-gray-700 leading-relaxed mb-8 text-lg">{product.description}</p>
+                <p className="text-gray-700 leading-relaxed mb-6 text-lg">{product.description}</p>
+
+                {showImportDetails ? (
+                  <ImportDetailsCard
+                    importType={product.commerce.importType}
+                    importNotes={product.commerce.importNotes}
+                    priceLabel={product.commerce.importType ? undefined : 'as shown'}
+                  />
+                ) : null}
 
                 {/* Color Selector */}
                 {hasVariants && product.colors.length > 0 && (
                   <div className="mb-6">
                     <label className="block font-semibold text-gray-900 mb-3">
                       Color: {selectedColor ? (
-                        <span className="text-blue-700 font-normal">{selectedColor}</span>
+                        <span className="text-brand-primary font-normal">{selectedColor}</span>
                       ) : (
                         <span className="text-red-500 font-normal text-sm">Please select a color</span>
                       )}
@@ -388,28 +533,29 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     <div className="flex flex-wrap gap-3">
                       {product.colors.map((color: string) => {
                         const isSelected = selectedColor === color;
-                        const colorVariants = product.variants.filter((v: any) => v.color === color);
-                        const colorStock = colorVariants.reduce((sum: number, v: any) => sum + (v.stock ?? v.quantity ?? 0), 0);
+                        const colorVariants = dedupeStoreVariants(variantsForColor(product.variants, color));
+                        const colorStock = colorVariants.reduce(
+                          (sum: number, v: any) => sum + getVariantStock(v),
+                          0,
+                        );
                         const isOutOfStock = colorStock === 0 && product.stockCount === 0;
                         return (
                           <button
                             key={color}
                             onClick={() => {
                               setSelectedColor(color);
-                              // If only one variant for this color, auto-select it
-                              const matching = product.variants.filter((v: any) => v.color === color);
-                              if (matching.length === 1) {
-                                setSelectedVariant(matching[0]);
-                                setSelectedSize(matching[0].name);
+                              const picked = pickVariantForColor(product.variants, color);
+                              if (picked) {
+                                setSelectedVariant(picked);
+                                setSelectedSize(getVariantSizeLabel(picked));
                               } else {
-                                // Reset variant selection so user picks a size too
                                 setSelectedVariant(null);
                                 setSelectedSize('');
                               }
                             }}
                             disabled={isOutOfStock}
                             className={`px-5 py-2.5 rounded-full border-2 font-medium transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 ${isSelected
-                              ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-sm'
+                              ? 'border-brand-primary bg-brand-light text-brand-primary shadow-sm'
                               : isOutOfStock
                                 ? 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
                                 : 'border-gray-300 text-gray-700 hover:border-gray-400'
@@ -421,203 +567,271 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                         );
                       })}
                     </div>
+                    {colorPricesDiffer ? (
+                      <p className="mt-3 text-sm text-gray-600">
+                        {colorPriceHints
+                          .map((h) => `${h.color} ${money(h.price)}`)
+                          .join(', ')}
+                      </p>
+                    ) : null}
                   </div>
                 )}
 
-                {/* Size / Name Variant Selector */}
-                {hasVariants && (() => {
-                  // Filter variants: if colors exist and one is selected, show only matching; otherwise show all
-                  const hasColors = product.colors.length > 0;
-                  const visibleVariants = hasColors && selectedColor
-                    ? product.variants.filter((v: any) => v.color === selectedColor)
-                    : hasColors
-                      ? [] // Don't show name variants until a color is picked
-                      : product.variants;
-
-                  // Check if we need to show the name selector (skip if all visible variants have the same name or only 1)
-                  const uniqueNames = [...new Set(visibleVariants.map((v: any) => v.name).filter(Boolean))];
-                  const showNameSelector = visibleVariants.length > 1 || (!hasColors && visibleVariants.length > 0);
-
-                  if (!showNameSelector && !hasColors) {
-                    // Single variant with no colors — show standard picker
-                    return (
-                      <div className="mb-8">
-                        <label className="block font-semibold text-gray-900 mb-3">
-                          Variant: {selectedVariant ? (
-                            <span className="text-blue-700 font-normal">{selectedVariant.name} — GH₵{selectedVariant.price?.toFixed(2)}</span>
-                          ) : (
-                            <span className="text-red-500 font-normal text-sm">Please select a variant</span>
-                          )}
-                        </label>
-                        <div className="flex flex-wrap gap-3">
-                          {product.variants.map((variant: any) => {
-                            const isSelected = selectedVariant?.id === variant.id || selectedVariant?.name === variant.name;
-                            const variantStock = variant.stock ?? variant.quantity ?? 0;
-                            const isOutOfStock = variantStock === 0 && product.stockCount === 0;
-                            return (
-                              <button
-                                key={variant.id || variant.name}
-                                onClick={() => {
-                                  setSelectedVariant(variant);
-                                  setSelectedSize(variant.name);
-                                }}
-                                disabled={isOutOfStock}
-                                className={`px-6 py-3 rounded-lg border-2 font-medium transition-all whitespace-nowrap cursor-pointer flex flex-col items-center ${isSelected
-                                  ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-sm'
-                                  : isOutOfStock
-                                    ? 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
-                                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                                  }`}
-                              >
-                                <span>{variant.name}</span>
-                                <span className={`text-xs mt-0.5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
-                                  GH₵{(variant.price || product.price).toFixed(2)}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  if (visibleVariants.length > 1) {
-                    return (
-                      <div className="mb-8">
-                        <label className="block font-semibold text-gray-900 mb-3">
-                          Size / Type: {selectedVariant ? (
-                            <span className="text-blue-700 font-normal">{selectedVariant.name} — GH₵{selectedVariant.price?.toFixed(2)}</span>
-                          ) : (
-                            <span className="text-red-500 font-normal text-sm">Please select</span>
-                          )}
-                        </label>
-                        <div className="flex flex-wrap gap-3">
-                          {visibleVariants.map((variant: any) => {
-                            const isSelected = selectedVariant?.id === variant.id;
-                            const variantStock = variant.stock ?? variant.quantity ?? 0;
-                            const isOutOfStock = variantStock === 0 && product.stockCount === 0;
-                            return (
-                              <button
-                                key={variant.id || variant.name}
-                                onClick={() => {
-                                  setSelectedVariant(variant);
-                                  setSelectedSize(variant.name);
-                                }}
-                                disabled={isOutOfStock}
-                                className={`px-6 py-3 rounded-lg border-2 font-medium transition-all whitespace-nowrap cursor-pointer flex flex-col items-center ${isSelected
-                                  ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-sm'
-                                  : isOutOfStock
-                                    ? 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
-                                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                                  }`}
-                              >
-                                <span>{variant.name}</span>
-                                <span className={`text-xs mt-0.5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
-                                  GH₵{(variant.price || product.price).toFixed(2)}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return null;
-                })()}
-
-                <div className="mb-8">
-                  <label className="block font-semibold text-gray-900 mb-3">Quantity</label>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center border-2 border-gray-300 rounded-lg">
-                      <button
-                        onClick={() => setQuantity(Math.max(product.moq || 1, quantity - 1))}
-                        className="w-12 h-12 flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-                        disabled={activeStock === 0 || quantity <= (product.moq || 1)}
-                      >
-                        <i className="ri-subtract-line text-xl"></i>
-                      </button>
-                      <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(product.moq || 1, Math.min(activeStock, parseInt(e.target.value) || (product.moq || 1))))}
-                        className="w-16 h-12 text-center border-x-2 border-gray-300 focus:outline-none text-lg font-semibold"
-                        min={product.moq || 1}
-                        max={activeStock}
-                        disabled={activeStock === 0}
-                      />
-                      <button
-                        onClick={() => setQuantity(Math.min(activeStock, quantity + 1))}
-                        className="w-12 h-12 flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-                        disabled={activeStock === 0}
-                      >
-                        <i className="ri-add-line text-xl"></i>
-                      </button>
+                {/* Size / Type — only options for the selected color */}
+                {showSizeSelector && (
+                  <div className="mb-8">
+                    <label className="block font-semibold text-gray-900 mb-3">
+                      Size / Type: {selectedVariant ? (
+                        <span className="text-brand-primary font-normal">
+                          {getVariantSizeLabel(selectedVariant)}: {money(selectedVariant.price || 0)}
+                        </span>
+                      ) : (
+                        <span className="text-red-500 font-normal text-sm">Please select</span>
+                      )}
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {variantsForSelectedColor
+                        .filter((variant: any) => {
+                          const label = getVariantSizeLabel(variant);
+                          return label && label.toLowerCase() !== selectedColor.trim().toLowerCase();
+                        })
+                        .map((variant: any) => {
+                          const isSelected = selectedVariant?.id === variant.id;
+                          const variantStock = getVariantStock(variant);
+                          const isOutOfStock = variantStock === 0 && product.stockCount === 0;
+                          const sizeLabel = getVariantSizeLabel(variant);
+                          return (
+                            <button
+                              key={variant.id || `${getVariantColor(variant)}-${sizeLabel}`}
+                              onClick={() => {
+                                setSelectedVariant(variant);
+                                setSelectedSize(sizeLabel);
+                              }}
+                              disabled={isOutOfStock}
+                              className={`px-6 py-3 rounded-lg border-2 font-medium transition-all whitespace-nowrap cursor-pointer flex flex-col items-center ${isSelected
+                                ? 'border-brand-primary bg-brand-light text-brand-primary shadow-sm'
+                                : isOutOfStock
+                                  ? 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
+                                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                                }`}
+                            >
+                              <span>{sizeLabel}</span>
+                              <span className={`text-xs mt-0.5 ${isSelected ? 'text-brand-accent' : 'text-gray-500'}`}>
+                                {money(variant.price || product.price)}
+                              </span>
+                            </button>
+                          );
+                        })}
                     </div>
-                    <div className="flex flex-col">
-                      {product.moq > 1 && (
-                        <span className="text-blue-700 font-medium text-sm">
-                          <i className="ri-information-line mr-1"></i>
-                          Min. order: {product.moq} units
+                  </div>
+                )}
+
+                {/* Products without colors — pick variant directly */}
+                {variantsWithoutColors.length > 0 && (
+                  <div className="mb-8">
+                    <label className="block font-semibold text-gray-900 mb-3">
+                      Variant: {selectedVariant ? (
+                        <span className="text-brand-primary font-normal">
+                          {getVariantSizeLabel(selectedVariant)}: {money(selectedVariant.price || 0)}
                         </span>
+                      ) : (
+                        <span className="text-red-500 font-normal text-sm">Please select a variant</span>
                       )}
-                      {activeStock > 10 && (
-                        <span className="text-gray-600 font-medium text-sm">
-                          <i className="ri-checkbox-circle-line mr-1 text-blue-600"></i>
-                          {activeStock} in stock
-                        </span>
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {variantsWithoutColors.map((variant: any) => {
+                        const isSelected = selectedVariant?.id === variant.id;
+                        const variantStock = getVariantStock(variant);
+                        const isOutOfStock = variantStock === 0 && product.stockCount === 0;
+                        const label = getVariantSizeLabel(variant) || 'Default';
+                        return (
+                          <button
+                            key={variant.id || label}
+                            onClick={() => {
+                              setSelectedVariant(variant);
+                              setSelectedSize(label);
+                            }}
+                            disabled={isOutOfStock}
+                            className={`px-6 py-3 rounded-lg border-2 font-medium transition-all whitespace-nowrap cursor-pointer flex flex-col items-center ${isSelected
+                              ? 'border-brand-primary bg-brand-light text-brand-primary shadow-sm'
+                              : isOutOfStock
+                                ? 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
+                                : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                              }`}
+                          >
+                            <span>{label}</span>
+                            <span className={`text-xs mt-0.5 ${isSelected ? 'text-brand-accent' : 'text-gray-500'}`}>
+                              {money(variant.price || product.price)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Combined Purchase Actions Panel */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm mb-8">
+                  {allowOnlineCheckout && (
+                    <div className="mb-5 flex flex-col sm:flex-row sm:items-end gap-4">
+                      <div className="flex-1">
+                        <label className="block font-semibold text-gray-900 mb-2">Quantity</label>
+                        <div className="flex items-center border-2 border-gray-300 rounded-xl max-w-[140px] bg-white">
+                          <button
+                            onClick={() => setQuantity(Math.max(product.moq || 1, quantity - 1))}
+                            className="w-12 h-12 flex items-center justify-center text-gray-600 hover:text-brand-primary transition-colors cursor-pointer disabled:opacity-50"
+                            disabled={activeStock === 0 || quantity <= (product.moq || 1)}
+                            aria-label="Decrease quantity"
+                          >
+                            <Minus className="w-5 h-5" />
+                          </button>
+                          <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(Math.max(product.moq || 1, Math.min(activeStock, parseInt(e.target.value) || (product.moq || 1))))}
+                            className="w-full h-12 text-center border-x-2 border-gray-300 focus:outline-none text-lg font-bold text-gray-900"
+                            min={product.moq || 1}
+                            max={activeStock}
+                            disabled={activeStock === 0}
+                          />
+                          <button
+                            onClick={() => setQuantity(Math.min(activeStock, quantity + 1))}
+                            className="w-12 h-12 flex items-center justify-center text-gray-600 hover:text-brand-primary transition-colors cursor-pointer disabled:opacity-50"
+                            disabled={activeStock === 0}
+                            aria-label="Increase quantity"
+                          >
+                            <Plus className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-1 text-sm pt-1">
+                        {product.moq > 1 && (
+                          <span className="text-brand-primary font-medium flex items-center">
+                            <Info className="w-4 h-4 mr-1.5" />
+                            Min. order: {product.moq} units
+                          </span>
+                        )}
+                        {activeStock > 10 && (
+                          <span className="text-gray-600 font-medium flex items-center">
+                            <CheckCircle className="w-4 h-4 text-green-600 mr-1.5" />
+                            {activeStock} in stock
+                          </span>
+                        )}
+                        {activeStock > 0 && activeStock <= 10 && (
+                          <span className="text-brand-accent font-medium flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1.5" />
+                            Only {activeStock} left
+                          </span>
+                        )}
+                        {activeStock === 0 && (
+                          <span className="text-red-600 font-bold flex items-center">
+                            <XCircle className="w-4 h-4 mr-1.5" />
+                            Out of Stock
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-3">
+                    {allowOnlineCheckout && (
+                      <>
+                        <button
+                          disabled={activeStock === 0 || needsVariantSelection || needsColorSelection}
+                          className={`w-full flex items-center justify-center gap-2 rounded-xl py-4 text-lg font-bold text-white transition-all shadow-sm ${
+                            activeStock === 0 || needsVariantSelection || needsColorSelection
+                              ? 'bg-brand-primary/50 cursor-not-allowed'
+                              : 'bg-brand-primary hover:bg-brand-primary/90 hover:shadow-md hover:-translate-y-0.5'
+                          }`}
+                          onClick={handleBuyNow}
+                        >
+                          <span>
+                            {activeStock === 0
+                              ? 'Out of Stock'
+                              : needsColorSelection
+                                ? 'Select a Color'
+                                : needsVariantSelection
+                                  ? 'Select a Variant'
+                                  : 'Buy now'}
+                          </span>
+                        </button>
+
+                        {activeStock > 0 && !needsVariantSelection && !needsColorSelection && (
+                          <button
+                            onClick={handleAddToCart}
+                            className="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-brand-primary/20 bg-white px-5 py-3 text-base font-bold text-brand-primary transition-all hover:border-brand-primary/40 hover:bg-brand-light"
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                            Add to basket instead
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                      {waInquiry && (
+                        <a
+                          href={waInquiry}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-base font-bold text-white shadow-sm transition-all hover:bg-[#20bd5a] hover:shadow-md"
+                        >
+                          <MessageCircle className="h-5 w-5" />
+                          Chat on WhatsApp
+                        </a>
                       )}
-                      {activeStock > 0 && activeStock <= 10 && (
-                        <span className="text-amber-600 font-medium text-sm">
-                          <i className="ri-error-warning-line mr-1"></i>
-                          Only {activeStock} left in stock
-                        </span>
-                      )}
-                      {activeStock === 0 && (
-                        <span className="text-red-600 font-medium">
-                          <i className="ri-close-circle-line mr-1"></i>
-                          Out of Stock
-                        </span>
+                      {!allowOnlineCheckout && waAvailability && (
+                        <a
+                          href={waAvailability}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-brand-primary bg-white px-5 py-3 text-base font-bold text-brand-primary transition-colors hover:bg-brand-light"
+                        >
+                          <MessageCircle className="h-5 w-5 text-brand-accent" />
+                          Request Availability
+                        </a>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                  <button
-                    disabled={activeStock === 0 || needsVariantSelection || needsColorSelection}
-                    className={`flex-1 bg-gray-900 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 text-lg whitespace-nowrap cursor-pointer ${(activeStock === 0 || needsVariantSelection || needsColorSelection) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    onClick={handleAddToCart}
-                  >
-                    <i className="ri-shopping-cart-line text-xl"></i>
-                    <span>{activeStock === 0 ? 'Out of Stock' : needsColorSelection ? 'Select a Color' : needsVariantSelection ? 'Select a Variant' : 'Add to Cart'}</span>
-                  </button>
-                  {activeStock > 0 && !needsVariantSelection && !needsColorSelection && (
-                    <button
-                      onClick={handleBuyNow}
-                      className="sm:w-auto bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
-                    >
-                      Buy Now
-                    </button>
-                  )}
-                </div>
+                {!allowOnlineCheckout && (
+                  <div className="mb-8 rounded-xl border border-brand-accent/25 bg-brand-accent/10 px-4 py-3 text-sm text-brand-primary flex items-start gap-3">
+                    <Info className="w-5 h-5 shrink-0 text-brand-accent mt-0.5" />
+                    <p>
+                      {importMode === 'vehicles' && 'Want this vehicle? Message us to reserve it. We walk you through every step.'}
+                      {importMode === 'equipment' && 'Need a quote first? We confirm specs and full cost before you pay.'}
+                      {importMode !== 'vehicles' && importMode !== 'equipment' && 'Online checkout is not enabled for this item. Chat with us or request availability first.'}
+                    </p>
+                  </div>
+                )}
+
+                {telDirect ? (
+                  <p className="mb-6 text-sm text-gray-500">
+                    Prefer a call?{' '}
+                    <a href={telDirect} className="font-semibold text-brand-primary hover:text-brand-accent">
+                      Phone us
+                    </a>
+                  </p>
+                ) : null}
 
                 <div className="border-t border-gray-200 pt-6 space-y-4">
                   <div className="flex items-center text-gray-700">
-                    <i className="ri-store-2-line text-xl text-blue-700 mr-3"></i>
-                    <span>Free store pickup available</span>
+                    <Store className="w-5 h-5 text-brand-primary mr-3" />
+                    <span>Ghana only. Pickup or delivery after arrival</span>
                   </div>
                   <div className="flex items-center text-gray-700">
-                    <i className="ri-arrow-left-right-line text-xl text-blue-700 mr-3"></i>
-                    <span>30-day easy returns and exchanges</span>
+                    <RefreshCcw className="w-5 h-5 text-brand-primary mr-3" />
+                    <span>Message us if something is wrong with your import</span>
                   </div>
                   <div className="flex items-center text-gray-700">
-                    <i className="ri-shield-check-line text-xl text-blue-700 mr-3"></i>
+                    <ShieldCheck className="w-5 h-5 text-brand-primary mr-3" />
                     <span>Secure payment & buyer protection</span>
                   </div>
                   {product.sku && (
                     <div className="flex items-center text-gray-700">
-                      <i className="ri-barcode-line text-xl text-blue-700 mr-3"></i>
+                      <Barcode className="w-5 h-5 text-brand-primary mr-3" />
                       <span>SKU: {product.sku}</span>
                     </div>
                   )}
@@ -635,9 +849,9 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-4 font-semibold transition-colors relative whitespace-nowrap cursor-pointer ${activeTab === tab
-                      ? 'text-blue-700 border-b-2 border-blue-700'
-                      : 'text-gray-600 hover:text-gray-900'
+                    className={`pb-4 font-bold transition-colors relative whitespace-nowrap cursor-pointer ${activeTab === tab
+                      ? 'text-brand-primary border-b-2 border-brand-accent'
+                      : 'text-gray-500 hover:text-brand-primary'
                       }`}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -654,11 +868,11 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
             {activeTab === 'features' && (
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Key Features</h3>
+                <h3 className="text-2xl font-bold text-brand-primary mb-6">Key Features</h3>
                 <ul className="grid md:grid-cols-2 gap-4">
                   {product.features.map((feature: string, index: number) => (
                     <li key={index} className="flex items-start">
-                      <i className="ri-checkbox-circle-fill text-blue-700 text-xl mr-3 mt-1"></i>
+                      <CheckCircle2 className="w-5 h-5 text-brand-accent mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700 text-lg">{feature}</span>
                     </li>
                   ))}
@@ -668,7 +882,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
             {activeTab === 'care' && (
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Care Instructions</h3>
+                <h3 className="text-2xl font-bold text-brand-primary mb-6">Care Instructions</h3>
                 <p className="text-gray-700 text-lg leading-relaxed">{product.care}</p>
               </div>
             )}
@@ -682,11 +896,11 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
         </section>
 
         {relatedProducts.length > 0 && (
-          <section className="py-20 bg-white" data-product-shop>
+          <section className="store-section bg-white/20 backdrop-blur-sm" data-product-shop>
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="text-center mb-12">
-                <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">You May Also Like</h2>
-                <p className="text-lg text-gray-600">Curated recommendations based on this product</p>
+                <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-primary mb-4">You May Also Like</h2>
+                <p className="text-lg text-gray-500 font-medium">Curated recommendations based on this product</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -697,6 +911,54 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             </div>
           </section>
         )}
+
+        {/* Mobile: price + add to basket always within thumb reach (sits above MobileBottomNav on phones) */}
+        {allowOnlineCheckout && (
+          <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(30,58,138,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="flex items-center gap-2.5">
+              <div className="min-w-0">
+                <p className="text-lg font-extrabold leading-tight text-brand-primary">{money(displayPrice)}</p>
+                <p className="truncate text-[11px] text-gray-500">
+                  {activeStock === 0
+                    ? 'Out of stock'
+                    : !optionConfirmed
+                      ? 'Pick an option above'
+                      : quantity > 1
+                        ? `Qty ${quantity}`
+                        : 'Full price'}
+                </p>
+              </div>
+              {activeStock > 0 && !needsVariantSelection && !needsColorSelection && (
+                <button
+                  onClick={handleAddToCart}
+                  aria-label="Add to basket"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-brand-primary/20 bg-white text-brand-primary active:bg-brand-light"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                </button>
+              )}
+              <button
+                disabled={activeStock === 0 || needsVariantSelection || needsColorSelection}
+                onClick={handleBuyNow}
+                className={`flex-1 rounded-xl py-3.5 text-base font-bold text-white transition-colors ${
+                  activeStock === 0 || needsVariantSelection || needsColorSelection
+                    ? 'bg-brand-primary/40'
+                    : 'bg-brand-primary active:bg-brand-primary/90'
+                }`}
+              >
+                {activeStock === 0
+                  ? 'Out of stock'
+                  : needsColorSelection
+                    ? 'Pick a color above'
+                    : needsVariantSelection
+                      ? 'Pick an option above'
+                      : 'Buy now'}
+              </button>
+            </div>
+          </div>
+        )}
+        {/* Keep page content clear of the fixed bar + bottom nav */}
+        {allowOnlineCheckout && <div className="h-36 md:h-20 lg:hidden" aria-hidden />}
       </main>
     </>
   );

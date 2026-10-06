@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { cleanVariantDisplayLabel } from '@/lib/product-variants';
+import { formatStoreMoney } from '@/lib/currency';
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -22,21 +23,14 @@ function OrderSuccessContent() {
       }
 
       try {
-        const { data: orderData, error } = await supabase
-          .from('orders')
-          .select(`
-                    *,
-                    order_items (*)
-                `)
-          .eq('order_number', orderNumber)
-          .single();
-
-        if (error) throw error;
-        setOrder(orderData);
-
-        // If redirected from payment and order is still pending, try to verify
-        if (paymentSuccess === 'true' && orderData && orderData.payment_status !== 'paid') {
-          verifyPayment(orderNumber, orderData);
+        const res = await fetch(`/api/order-success?order=${encodeURIComponent(orderNumber)}`);
+        if (res.ok) {
+          const orderData = await res.json();
+          setOrder(orderData);
+        } else if (paymentSuccess === 'true') {
+          // Order not yet marked as paid: trigger verification
+          await verifyPayment(orderNumber);
+          return;
         }
       } catch (err) {
         console.error('Error fetching order:', err);
@@ -45,78 +39,105 @@ function OrderSuccessContent() {
       }
     }
     fetchOrder();
-  }, [orderNumber]);
+  }, [orderNumber, paymentSuccess]);
 
-  // Payment verification - called when user is redirected from Moolre with payment_success=true
-  const verifyPayment = async (orderNum: string, initialOrder: any) => {
+  const verifyPayment = async (orderNum: string) => {
     setVerifying(true);
-    
-    // Wait 3 seconds to give the callback a chance to process first
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Re-fetch order to check if callback already updated it
-    const { data: refreshed } = await supabase
-      .from('orders')
-      .select('*, order_items (*)')
-      .eq('order_number', orderNum)
-      .single();
-    
-    if (refreshed?.payment_status === 'paid') {
-      setOrder(refreshed);
-      setVerifying(false);
-      return;
+
+    // Retry up to 3 times with increasing delays to give the callback time to process
+    const delays = [3000, 5000, 8000];
+
+    for (let attempt = 0; attempt < delays.length; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+
+      // Check if callback already processed the payment
+      const orderRes = await fetch(`/api/order-success?order=${encodeURIComponent(orderNum)}`);
+      if (orderRes.ok) {
+        const refreshed = await orderRes.json();
+        if (refreshed?.payment_status === 'paid') {
+          setOrder(refreshed);
+          setVerifying(false);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // On last attempt, actively verify via Moolre API
+      if (attempt === delays.length - 1) {
+        try {
+          const res = await fetch('/api/payment/moolre/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderNumber: orderNum })
+          });
+
+          const result = await res.json();
+
+          if (result.success && result.payment_status === 'paid') {
+            const finalRes = await fetch(`/api/order-success?order=${encodeURIComponent(orderNum)}`);
+            if (finalRes.ok) {
+              const updated = await finalRes.json();
+              setOrder(updated);
+              setVerifying(false);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Payment verification failed:', err);
+        }
+      }
     }
 
-    // Callback hasn't fired - verify via our endpoint
-    // Verify payment via Moolre API — we no longer trust the redirect alone
-    try {
-      const res = await fetch('/api/payment/moolre/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderNumber: orderNum })
-      });
-      
-      const result = await res.json();
-      console.log('Payment verification result:', result);
-      
-      if (result.success && result.payment_status === 'paid') {
-        // Re-fetch full order data
-        const { data: updated } = await supabase
-          .from('orders')
-          .select('*, order_items (*)')
-          .eq('order_number', orderNum)
-          .single();
-        if (updated) setOrder(updated);
-      }
-    } catch (err) {
-      console.error('Payment verification failed:', err);
-    } finally {
-      setVerifying(false);
-    }
+    setVerifying(false);
+    setLoading(false);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <i className="ri-loader-4-line text-4xl text-blue-700 animate-spin mb-4 block"></i>
+          <i className="ri-loader-4-line text-4xl text-brand-primary animate-spin mb-4 block"></i>
           <p className="text-gray-500">Loading order details...</p>
         </div>
       </div>
     );
   }
 
-  // Use a fallback or nice error if order not found
+  if (verifying) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto px-4">
+          <i className="ri-loader-4-line text-5xl text-brand-primary animate-spin mb-6 block"></i>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">Checking your payment</h1>
+          <p className="text-gray-600 mb-2">Please wait while we confirm your payment with the provider.</p>
+          <p className="text-sm text-gray-500">This usually takes a few seconds...</p>
+        </div>
+      </main>
+    );
+  }
+
   if (!order) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <i className="ri-error-warning-line text-4xl text-red-500 mb-4 block"></i>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
-          <p className="text-gray-600 mb-6">We couldn't locate the order details.</p>
-          <Link href="/shop" className="text-blue-700 font-semibold hover:underline">
-            Return to Shop
-          </Link>
+        <div className="text-center max-w-md mx-auto px-4">
+          <i className="ri-error-warning-line text-4xl text-amber-500 mb-4 block"></i>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Almost there</h1>
+          <p className="text-gray-600 mb-6">
+            Your payment is being processed. If you completed the payment, your order will be confirmed shortly.
+            Create an account with the same email to see it in your order history, or use Find my order in the footer.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/auth/signup"
+              className="bg-brand-primary hover:bg-[#0d2747] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Create account
+            </Link>
+            <Link href="/shop" className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+              Return to Shop
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -124,10 +145,9 @@ function OrderSuccessContent() {
 
   const orderDate = new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const estimatedDelivery = new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const pointsEarned = Math.floor(order.total / 10); // Example logic: 1 point per 10 currency units
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <main className="min-h-screen bg-brand-light">
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
           {[...Array(50)].map((_, i) => (
@@ -150,13 +170,13 @@ function OrderSuccessContent() {
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center mb-8">
-            <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6 bg-blue-100 rounded-full">
-              <i className="ri-checkbox-circle-fill text-6xl text-blue-600"></i>
+            <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6 bg-brand-light rounded-full">
+              <i className="ri-checkbox-circle-fill text-6xl text-brand-accent"></i>
             </div>
 
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Order Confirmed!</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">You are all set</h1>
             <p className="text-xl text-gray-600 mb-8">
-              Thank you for your purchase. We're processing your order now.
+              Your order is in. We will keep you updated every step of the way.
             </p>
 
             <div className="bg-blue-50 rounded-xl p-6 mb-8">
@@ -171,18 +191,18 @@ function OrderSuccessContent() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Estimated Delivery</p>
-                  <p className="text-lg font-bold text-blue-700">{estimatedDelivery}</p>
+                  <p className="text-lg font-bold text-brand-primary">{estimatedDelivery}</p>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link
-                href={`/account?tab=orders`}
-                className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-lg font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap"
+                href={`/order/${encodeURIComponent(order.order_number)}?email=${encodeURIComponent(order.email || '')}`}
+                className="bg-brand-primary hover:bg-[#0d2747] text-white px-8 py-4 rounded-lg font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap"
               >
-                <i className="ri-file-list-3-line mr-2"></i>
-                View Order
+                <i className="ri-map-pin-line mr-2"></i>
+                Track this order
               </Link>
               <Link
                 href="/shop"
@@ -193,22 +213,19 @@ function OrderSuccessContent() {
               </Link>
             </div>
 
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 flex items-center justify-center bg-amber-500 rounded-full">
-                    <i className="ri-star-fill text-white text-2xl"></i>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-gray-900 text-lg">You Earned {pointsEarned} Points!</p>
-                    <p className="text-sm text-gray-600">Join our loyalty program to redeem.</p>
-                  </div>
+            <div className="bg-gradient-to-r from-slate-50 to-brand-light/60 rounded-xl p-6 border border-slate-200">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-left">
+                  <p className="font-bold text-gray-900 text-lg">Want orders saved in one place?</p>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Create an account with the same email to reopen invoices, tap I’ve paid, and track imports later.
+                  </p>
                 </div>
                 <Link
-                  href="/register"
-                  className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
+                  href="/auth/signup"
+                  className="shrink-0 rounded-lg border-2 border-brand-primary px-6 py-3 font-semibold text-brand-primary transition-colors hover:bg-brand-primary hover:text-white whitespace-nowrap"
                 >
-                  Join Now
+                  Create account
                 </Link>
               </div>
             </div>
@@ -231,7 +248,9 @@ function OrderSuccessContent() {
                       <p className="font-semibold text-gray-900 line-clamp-2">{item.product_name}</p>
                       <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                       {item.variant_name && (
-                        <p className="text-xs text-gray-500">{item.variant_name}</p>
+                        <p className="text-xs font-semibold text-brand-primary">
+                          {cleanVariantDisplayLabel(item.variant_name)}
+                        </p>
                       )}
                       {item.metadata?.preorder_shipping && (
                         <p className="text-xs text-amber-700 bg-amber-50 inline-flex items-center gap-1 px-2 py-0.5 rounded mt-1 border border-amber-200">
@@ -239,23 +258,23 @@ function OrderSuccessContent() {
                         </p>
                       )}
                     </div>
-                    <p className="font-bold text-gray-900">GH₵{item.unit_price.toFixed(2)}</p>
+                    <p className="font-bold text-gray-900">GH¢{item.unit_price.toFixed(2)}</p>
                   </div>
                 ))}
               </div>
               <div className="border-t border-gray-200 mt-4 pt-4">
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
                   <span>Subtotal</span>
-                  <span>GH₵{order.subtotal.toFixed(2)}</span>
+                  <span>GH¢{order.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
                   <span>Shipping</span>
-                  <span>GH₵{order.shipping_total.toFixed(2)}</span>
+                  <span>GH¢{order.shipping_total.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between text-xl font-bold text-gray-900 border-t border-gray-200 pt-2">
                   <span>Total Paid</span>
-                  <span>GH₵{order.total.toFixed(2)}</span>
+                  <span>GH¢{order.total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -293,21 +312,21 @@ function OrderSuccessContent() {
                 <h3 className="font-semibold text-gray-900 mb-3">What's Next?</h3>
                 <div className="space-y-3">
                   <div className="flex items-start space-x-3">
-                    <i className="ri-mail-line text-blue-700 mt-1"></i>
+                    <i className="ri-mail-line text-brand-primary mt-1"></i>
                     <div>
                       <p className="text-sm font-semibold text-gray-900">Email Confirmation</p>
                       <p className="text-sm text-gray-600">Sent to {order.email}</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <i className="ri-box-3-line text-blue-700 mt-1"></i>
+                    <i className="ri-box-3-line text-brand-primary mt-1"></i>
                     <div>
                       <p className="text-sm font-semibold text-gray-900">Processing</p>
                       <p className="text-sm text-gray-600">We'll pack your order today</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <i className="ri-truck-line text-blue-700 mt-1"></i>
+                    <i className="ri-truck-line text-brand-primary mt-1"></i>
                     <div>
                       <p className="text-sm font-semibold text-gray-900">Shipping Updates</p>
                       <p className="text-sm text-gray-600">Track via email & SMS</p>
@@ -321,17 +340,17 @@ function OrderSuccessContent() {
           <div className="mt-8 text-center">
             <p className="text-gray-600 mb-4">Need help with your order?</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/contact" className="text-blue-700 hover:text-blue-900 font-semibold whitespace-nowrap">
+              <Link href="/contact" className="text-brand-primary hover:text-brand-primary font-semibold whitespace-nowrap">
                 <i className="ri-customer-service-line mr-1"></i>
                 Contact Support
               </Link>
-              <Link href="/account/orders" className="text-blue-700 hover:text-blue-900 font-semibold whitespace-nowrap">
+              <Link href="/account/orders" className="text-brand-primary hover:text-brand-primary font-semibold whitespace-nowrap">
                 <i className="ri-question-line mr-1"></i>
                 Order Help
               </Link>
-              <Link href="/returns" className="text-blue-700 hover:text-blue-900 font-semibold whitespace-nowrap">
-                <i className="ri-arrow-left-right-line mr-1"></i>
-                Returns Policy
+              <Link href="/contact" className="whitespace-nowrap font-semibold text-brand-primary hover:text-brand-primary">
+                <i className="ri-customer-service-2-line mr-1"></i>
+                Need help?
               </Link>
             </div>
           </div>
@@ -357,7 +376,7 @@ export default function OrderSuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-blue-700 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     }>
       <OrderSuccessContent />

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { SITE_LOGO_DARK_BG_PATH, SITE_LOGO_SIZE } from '@/lib/brand';
 
 export default function PWASplash() {
   const [showSplash, setShowSplash] = useState(false);
@@ -28,14 +30,17 @@ export default function PWASplash() {
   return (
     <div className="pwa-splash" aria-hidden="true">
       <div className="pwa-splash-logo mb-6">
-        <img
-          src="/gizmoz-logo.png"
+        <Image
+          src={SITE_LOGO_DARK_BG_PATH}
           alt="Gizmoz Trades"
-          className="w-24 h-24 object-contain brightness-0 invert"
+          width={SITE_LOGO_SIZE.width}
+          height={SITE_LOGO_SIZE.height}
+          priority
+          unoptimized
+          className="h-28 w-auto object-contain sm:h-32"
         />
       </div>
-      <h1 className="text-white text-xl font-bold font-serif mb-2">Gizmoz Trades</h1>
-      <p className="text-blue-200 text-sm font-medium mb-8">Everyday essentials, home picks, and more</p>
+      <p className="text-white/75 text-sm font-medium mb-8">Importing is no longer stressful</p>
       <div className="pwa-splash-dots flex gap-1.5">
         <span className="w-2 h-2 bg-white rounded-full" />
         <span className="w-2 h-2 bg-white rounded-full" />

@@ -1,24 +1,54 @@
 import { NextResponse } from 'next/server';
-import { hasStorefrontSupabaseEnv, storefrontSupabase } from '@/lib/storefront-supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || '';
 
 // Simple in-memory cache
 let cache: { data: any; timestamp: number } | null = null;
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes — products don't change frequently
 
 export async function GET(request: Request) {
-    if (!hasStorefrontSupabaseEnv()) {
-        return NextResponse.json([], {
-            headers: {
-                'Cache-Control': 'public, s-maxage=60',
-                'X-Storefront-Config': 'missing-env',
-            },
-        });
+    if (!supabaseUrl || !supabaseKey) {
+        console.warn('[Storefront API] Supabase credentials missing');
+        return NextResponse.json([], { status: 200 });
     }
 
+    const supabase = createClient(supabaseUrl, supabaseKey);
     const { searchParams } = new URL(request.url);
     const featured = searchParams.get('featured') === 'true';
     const limit = parseInt(searchParams.get('limit') || '50');
     const category = searchParams.get('category');
+    const idsParam = searchParams.get('ids')?.trim() || '';
+    const fields = searchParams.get('fields')?.trim() || '';
+    const idList = idsParam
+        ? [...new Set(idsParam.split(',').map((id) => id.trim()).filter(Boolean))].slice(0, 40)
+        : [];
+
+    // Lightweight cart validation: only resolve whether these product ids are still active.
+    if (idList.length > 0 && fields === 'id') {
+        try {
+            const { data, error } = await supabase
+                .from('products')
+                .select('id')
+                .eq('status', 'active')
+                .in('id', idList);
+
+            if (error) {
+                console.error('[Storefront API] Product id check error:', error);
+                return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+            }
+
+            return NextResponse.json(data || [], {
+                headers: {
+                    'Cache-Control': 'private, max-age=30',
+                },
+            });
+        } catch (err: any) {
+            console.error('[Storefront API] Error:', err);
+            return NextResponse.json({ error: err.message }, { status: 500 });
+        }
+    }
 
     // Build a cache key from params
     const cacheKey = `${featured}-${limit}-${category || 'all'}`;
@@ -27,14 +57,14 @@ export async function GET(request: Request) {
     if (featured && cache && cache.data?.[cacheKey] && Date.now() - cache.timestamp < CACHE_TTL) {
         return NextResponse.json(cache.data[cacheKey], {
             headers: {
-                'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=1800',
+                'Cache-Control': 'public, max-age=60, s-maxage=900, stale-while-revalidate=1800',
                 'X-Cache': 'HIT'
             }
         });
     }
 
     try {
-        let query = storefrontSupabase
+        let query = supabase
             .from('products')
             .select(`
                 id, name, slug, price, compare_at_price, quantity, description, metadata,
@@ -50,17 +80,35 @@ export async function GET(request: Request) {
         if (featured) {
             query = query.eq('featured', true).limit(limit);
         } else if (category) {
-            // Filter by category slug or name
             query = query.limit(limit);
         } else {
             query = query.limit(limit);
         }
 
-        const { data, error } = await query;
+        let { data, error } = await query;
 
         if (error) {
             console.error('[Storefront API] Products error:', error);
             return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+        }
+
+        // Home featured row: fall back to latest active products when none are flagged featured
+        if (featured && (!data || data.length === 0)) {
+            const { data: fallbackData, error: fallbackError } = await supabase
+                .from('products')
+                .select(`
+                    id, name, slug, price, compare_at_price, quantity, description, metadata,
+                    categories(id, name, slug),
+                    product_images(url, position),
+                    product_variants(id, name, price, quantity)
+                `)
+                .eq('status', 'active')
+                .order('created_at', { ascending: false })
+                .limit(limit);
+
+            if (!fallbackError && fallbackData?.length) {
+                data = fallbackData;
+            }
         }
 
         // Cache the result
@@ -70,7 +118,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(data, {
             headers: {
-                'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=1800',
+                'Cache-Control': 'public, max-age=60, s-maxage=900, stale-while-revalidate=1800',
                 'X-Cache': 'MISS'
             }
         });

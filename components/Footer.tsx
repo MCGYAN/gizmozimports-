@@ -1,106 +1,133 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { useCMS } from '@/context/CMSContext';
+import StoreLogo from '@/components/StoreLogo';
+import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 
-function FooterSection({ title, children }: { title: string, children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+const linkClass =
+  'text-blue-100/65 transition-colors active:text-white max-lg:text-[13px] lg:hover:text-blue-300 lg:hover:translate-x-1 lg:transition-all lg:duration-300';
 
-  return (
-    <div className="border-b border-blue-800/50 lg:border-none last:border-0">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-4 text-left lg:py-0 lg:cursor-default lg:mb-6"
-      >
-        <h4 className="font-bold text-lg text-white">{title}</h4>
-        <i className={`ri-arrow-down-s-line text-blue-400 text-xl transition-transform duration-300 lg:hidden ${isOpen ? 'rotate-180' : ''}`}></i>
-      </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 pb-6' : 'max-h-0 lg:max-h-full lg:overflow-visible'}`}>
-        {children}
-      </div>
-    </div>
-  );
-}
+const mobileHeadingClass =
+  'mb-2 text-[11px] font-semibold uppercase tracking-wider text-brand-accent lg:mb-4 lg:text-base lg:normal-case lg:tracking-normal lg:font-bold lg:text-white';
 
 export default function Footer() {
   const { getSetting } = useCMS();
 
   const siteName = getSetting('site_name') || 'Gizmoz Trades';
-  const contactPhone = getSetting('contact_phone') || '+233209597443';
+  const siteTagline =
+    getSetting('site_tagline') ||
+    'Your China sourcing partner in Ghana. We source, pay, and deliver quality products so you do not have to.';
+  const contactAddress = getSetting('contact_address') || '';
+  const contactPhone = getSetting('contact_phone') || '';
+  const socialFacebook = getSetting('social_facebook') || '';
+  const socialInstagram = getSetting('social_instagram') || '';
+  const socialTikTok = getSetting('social_tiktok') || '';
+  const socialTwitter = getSetting('social_twitter') || '';
+  const socialYoutube = getSetting('social_youtube') || '';
+
+  const socials = [
+    { link: socialInstagram, icon: <Instagram className="h-4 w-4" />, label: 'Instagram' },
+    { link: socialTikTok, icon: <i className="ri-tiktok-fill text-[15px] leading-none" />, label: 'TikTok' },
+    { link: socialYoutube, icon: <Youtube className="h-4 w-4" />, label: 'YouTube' },
+    { link: socialTwitter, icon: <Twitter className="h-4 w-4" />, label: 'X' },
+    { link: socialFacebook, icon: <Facebook className="h-4 w-4" />, label: 'Facebook' },
+  ].filter((s) => s.link);
 
   return (
-    <footer className="relative mt-12 z-0">
-
-      {/* Footer Background Shape */}
-      <div className="absolute inset-0 bg-blue-950 rounded-t-[3rem] -z-10 overflow-hidden">
-        {/* Decorative elements inside footer bg */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-800 to-transparent opacity-30"></div>
-        <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-brand/20 blur-3xl" />
+    <footer className="relative z-0 mt-8 text-white lg:mt-16">
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-blue-950 lg:rounded-t-[3rem]" aria-hidden>
+        <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-blue-800 to-transparent opacity-30" />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand/20 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-brand-accent/20 blur-3xl" />
       </div>
 
-      <div className="text-white pt-16 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-
-            {/* Brand Column */}
-            <div className="lg:col-span-1 space-y-6">
-              <Link href="/" className="inline-flex items-center gap-3">
-                <img src="/gizmoz-logo.png" alt={siteName} className="h-12 w-auto object-contain" />
-              </Link>
-              <p className="text-blue-200/60 leading-relaxed text-sm">
-                A simple online store experience for everyday shopping.
+      <div className="store-container pb-[calc(4.75rem+env(safe-area-inset-bottom))] pt-8 lg:pb-10 lg:pt-16">
+        <div className="lg:grid lg:grid-cols-4 lg:gap-12">
+          {/* Brand block */}
+          <div className="flex items-start justify-between gap-4 border-b border-blue-800/50 pb-5 lg:col-span-1 lg:block lg:border-0 lg:pb-0">
+            <div className="min-w-0 flex-1 space-y-3 lg:space-y-5">
+              <StoreLogo size="sm" tone="dark" />
+              <p className="max-w-sm text-xs leading-snug text-blue-200/60 lg:text-sm lg:leading-relaxed">
+                {siteTagline}
               </p>
-
-              <div className="pt-2 text-sm text-blue-200/70">
-                <p>Contact: {contactPhone}</p>
-              </div>
+              {(contactPhone || contactAddress) && (
+                <div className="space-y-1 text-xs text-blue-200/70 lg:text-sm">
+                  {contactPhone ? <p>Call / WhatsApp: {contactPhone}</p> : null}
+                  {contactAddress ? <p className="line-clamp-2">{contactAddress}</p> : null}
+                </div>
+              )}
             </div>
 
-            {/* Links Sections */}
-            <div className="lg:col-span-3 grid md:grid-cols-3 gap-8 lg:gap-12 pl-0 lg:pl-12 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6">
-
-              <div className="space-y-6">
-                <h4 className="font-serif text-xl font-bold text-white">Shop</h4>
-                <ul className="space-y-3 text-blue-100/60 text-sm">
-                  <li><Link href="/shop" className="hover:text-blue-300 transition-colors">All Products</Link></li>
-                  <li><Link href="/categories" className="hover:text-blue-300 transition-colors">Collections</Link></li>
-                  <li><Link href="/shop?sort=newest" className="hover:text-blue-300 transition-colors">New Arrivals</Link></li>
-                  <li><Link href="/shop?sort=bestsellers" className="hover:text-blue-300 transition-colors">Best Sellers</Link></li>
-                </ul>
+            {socials.length > 0 ? (
+              <div className="flex shrink-0 gap-2 lg:mt-5">
+                {socials.map((social, i) => (
+                  <a
+                    key={i}
+                    href={social.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-white/85 active:border-brand-accent active:text-brand-accent lg:h-9 lg:w-9 lg:hover:border-brand-accent lg:hover:bg-brand-accent lg:hover:text-white"
+                  >
+                    {social.icon}
+                  </a>
+                ))}
               </div>
-
-              <div className="space-y-6">
-                <h4 className="font-serif text-xl font-bold text-white">Support</h4>
-                <ul className="space-y-3 text-blue-100/60 text-sm">
-                  <li><Link href="/contact" className="hover:text-blue-300 transition-colors">Contact Us</Link></li>
-                  <li><Link href="/shipping" className="hover:text-blue-300 transition-colors">Shipping & Delivery</Link></li>
-                  <li><Link href="/terms" className="hover:text-blue-300 transition-colors">Terms of Service</Link></li>
-                </ul>
-              </div>
-
-              <div className="space-y-6">
-                <h4 className="font-serif text-xl font-bold text-white">Company</h4>
-                <ul className="space-y-3 text-blue-100/60 text-sm">
-                  <li><Link href="/about" className="hover:text-blue-300 transition-colors">Our Story</Link></li>
-                  <li><Link href="/privacy" className="hover:text-blue-300 transition-colors">Privacy Policy</Link></li>
-                  <li><Link href="/terms" className="hover:text-blue-300 transition-colors">Terms of Service</Link></li>
-                  <li><Link href="/admin" className="hover:text-blue-300 transition-colors">Admin Access</Link></li>
-                </ul>
-              </div>
-
-            </div>
+            ) : null}
           </div>
 
-          <div className="border-t border-blue-900/50 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-blue-500/40">
-            <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
-            <div className="flex gap-4 opacity-40">
-              <i className="ri-visa-line text-2xl"></i>
-              <i className="ri-mastercard-line text-2xl"></i>
-              <i className="ri-paypal-line text-2xl"></i>
+          {/* Links */}
+          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 sm:gap-x-8 lg:col-span-3 lg:mt-0 lg:gap-12 lg:rounded-2xl lg:border lg:border-white/10 lg:bg-white/[0.03] lg:p-8 lg:backdrop-blur-sm">
+            <div>
+              <h4 className={mobileHeadingClass}>Shop</h4>
+              <ul className="space-y-1.5 text-sm lg:space-y-3">
+                <li><Link href="/shop" className={linkClass}>All products</Link></li>
+                <li><Link href="/categories" className={linkClass}>Categories</Link></li>
+                <li><Link href="/what-we-source" className={linkClass}>What we source</Link></li>
+                <li><Link href="/pricing-guide" className={linkClass}>Pricing guide</Link></li>
+                <li><Link href="/exchange" className={linkClass}>Buy RMB</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className={mobileHeadingClass}>Support</h4>
+              <ul className="space-y-1.5 text-sm lg:space-y-3">
+                <li><Link href="/contact" className={linkClass}>Contact us</Link></li>
+                <li><Link href="/order-tracking" className={linkClass}>Track my order</Link></li>
+                <li><Link href="/exchange/lookup" className={linkClass}>Find RMB invoice</Link></li>
+                <li><Link href="/shipping" className={linkClass}>Shipping &amp; delivery</Link></li>
+                <li><Link href="/returns" className={linkClass}>Returns</Link></li>
+                <li><Link href="/faqs" className={linkClass}>FAQs</Link></li>
+              </ul>
+            </div>
+
+            <div className="col-span-2 sm:col-span-1">
+              <h4 className={mobileHeadingClass}>Company</h4>
+              <ul className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-sm sm:block sm:space-y-3">
+                <li><Link href="/about" className={linkClass}>Our story</Link></li>
+                <li><Link href="/how-it-works" className={linkClass}>How it works</Link></li>
+                <li><Link href="/blog" className={linkClass}>Blog</Link></li>
+                <li><Link href="/privacy" className={linkClass}>Privacy policy</Link></li>
+                <li><Link href="/terms" className={linkClass}>Terms of service</Link></li>
+              </ul>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-1 border-t border-blue-900/50 pt-4 text-[11px] text-blue-300/50 lg:mt-12 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:pt-8 lg:text-xs">
+          <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
+          <a
+            href="https://wa.me/233554229375"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit items-center gap-1.5 text-blue-200/60 transition-colors hover:text-[#25D366]"
+            aria-label="Contact McGyan Technologies on WhatsApp"
+          >
+            <i className="ri-whatsapp-line text-sm" aria-hidden />
+            Made by McGyan Technologies
+          </a>
+          <p className="text-blue-200/50">Secure payment at checkout</p>
         </div>
       </div>
     </footer>

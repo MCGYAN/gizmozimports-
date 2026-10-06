@@ -2,8 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { SITE_LOGO_LIGHT_BG_PATH, SITE_LOGO_SIZE } from '@/lib/brand';
+import AdminNotificationBell from '@/components/admin/AdminNotificationBell';
+import {
+  ANALYTICS_PATHS,
+  canAccessAdminDashboard,
+  canAccessAdminPath,
+  isOwnerRole,
+  menuItemModule,
+  normalizeAdminPermissions,
+  type AdminPermissions,
+} from '@/lib/admin-permissions';
 
 export default function AdminLayout({
   children,
@@ -12,15 +24,13 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-
-  // Module Filtering State
-  const [enabledModules, setEnabledModules] = useState<string[]>([]);
+  const [permissions, setPermissions] = useState<AdminPermissions>({});
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     async function checkAuth() {
@@ -39,10 +49,9 @@ export default function AdminLayout({
       // Ensure auth cookie is set (in case user already had a session from before)
       document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax; Secure`;
 
-      // Check user role from profiles table
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, admin_permissions')
         .eq('id', session.user.id)
         .single();
 
@@ -52,18 +61,19 @@ export default function AdminLayout({
         return;
       }
 
-      // Only allow admin and staff roles
-      if (profile.role !== 'admin' && profile.role !== 'staff') {
-        console.warn('User does not have admin/staff role');
+      if (!canAccessAdminDashboard(profile.role)) {
+        console.warn('User does not have admin or staff role');
         document.cookie = 'sb-access-token=; path=/; max-age=0; SameSite=Lax; Secure';
         await supabase.auth.signOut();
         router.push('/admin/login?error=unauthorized');
         return;
       }
 
+      const perms = normalizeAdminPermissions(profile.admin_permissions);
       setUser(session.user);
       setUserRole(profile.role);
-      setIsAuthenticated(true);
+      setPermissions(perms);
+      setAccessDenied(!canAccessAdminPath(profile.role, perms, pathname));
       setIsLoading(false);
     }
 
@@ -95,42 +105,24 @@ export default function AdminLayout({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showUserMenu]);
 
-  // Fetch Modules Effect — only when authenticated and not on login page (avoids 404 if store_modules table missing)
   useEffect(() => {
-    if (pathname === '/admin/login' || !isAuthenticated) return;
-    async function fetchModules() {
-      try {
-        const { data, error } = await supabase.from('store_modules').select('id, enabled');
-        if (error) {
-          if (error.code !== 'PGRST116') console.warn('Error fetching modules:', error);
-          return;
-        }
-        if (data) {
-          setEnabledModules(data.filter((m: any) => m.enabled).map((m: any) => m.id));
-        }
-      } catch (_err) {
-        // Table may not exist yet; ignore so login still works
-      }
+    if (window.innerWidth >= 1024) {
+      setIsSidebarOpen(true);
     }
-    fetchModules();
-  }, [pathname, isAuthenticated]);
-
-  // Screen size check for initial state
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        // Only set to false if it's currently true? 
-        // Actually, let's just default to open on desktop, closed on mobile on mount only
-      }
-    };
-
-    // Set initial state based on width
-    if (window.innerWidth < 1024) {
-      setIsSidebarOpen(false);
-    }
-
-    // Optional: Auto-close on resize to mobile? For now, leave as is.
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isMobile = window.innerWidth < 1024;
+    if (isSidebarOpen && isMobile) {
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+    return undefined;
+  }, [isSidebarOpen]);
 
   const handleLogout = async () => {
     // Clear auth cookies set during login
@@ -141,7 +133,7 @@ export default function AdminLayout({
   };
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Loading Admin...</div>;
+    return <div className="flex min-h-screen items-center justify-center store-site-bg text-brand-primary/60">Loading Admin...</div>;
   }
 
   const menuItems = [
@@ -156,6 +148,32 @@ export default function AdminLayout({
       icon: 'ri-shopping-bag-line',
       path: '/admin/orders',
       badge: ''
+    },
+    {
+      title: 'Packages',
+      icon: 'ri-archive-drawer-line',
+      path: '/admin/packages',
+      exact: false
+    },
+    {
+      title: 'Shipping',
+      icon: 'ri-ship-2-line',
+      path: '/admin/shipping'
+    },
+    {
+      title: 'Invoices',
+      icon: 'ri-file-list-3-line',
+      path: '/admin/invoices'
+    },
+    {
+      title: 'Delivery Requests',
+      icon: 'ri-calendar-check-line',
+      path: '/admin/deliveries'
+    },
+    {
+      title: 'Buy RMB',
+      icon: 'ri-exchange-dollar-line',
+      path: '/admin/exchange'
     },
     {
       title: 'POS System',
@@ -190,49 +208,33 @@ export default function AdminLayout({
     {
       title: 'Analytics',
       icon: 'ri-bar-chart-line',
-      path: '/admin/analytics'
-    },
-    {
-      title: 'Coupons',
-      icon: 'ri-coupon-2-line',
-      path: '/admin/coupons'
+      path:
+        ANALYTICS_PATHS.find((path) => canAccessAdminPath(userRole, permissions, path)) ||
+        '/admin/analytics',
+      activePrefix: '/admin/analytics'
     },
     {
       title: 'Customer Insights',
       icon: 'ri-user-search-line',
-      path: '/admin/customer-insights',
-      moduleId: 'customer-insights'
+      path: '/admin/customer-insights'
     },
     {
-      title: 'Notifications',
-      icon: 'ri-notification-3-line',
-      path: '/admin/notifications',
-      moduleId: 'notifications'
+      title: 'Email Campaigns',
+      icon: 'ri-mail-send-line',
+      path: '/admin/notifications'
     },
     {
-      title: 'SMS Debugger',
-      icon: 'ri-message-2-line',
-      path: '/admin/test-sms'
-    },
-
-    {
-      title: 'Blog',
-      icon: 'ri-article-line',
-      path: '/admin/blog',
-      moduleId: 'blog'
-    },
-    {
-      title: 'Modules',
-      icon: 'ri-puzzle-line',
-      path: '/admin/modules'
+      title: 'Team',
+      icon: 'ri-user-settings-line',
+      path: '/admin/team'
     },
   ];
 
-  const visibleMenuItems = menuItems.filter(item => {
-    // @ts-ignore
-    if (!item.moduleId) return true;
-    // @ts-ignore
-    return enabledModules.includes(item.moduleId);
+  const visibleMenuItems = menuItems.filter((item) => {
+    const gate = menuItemModule(item.path);
+    if (gate === null) return true;
+    if (gate === 'owner') return isOwnerRole(userRole);
+    return canAccessAdminPath(userRole, permissions, item.path);
   });
 
   // Special layout for Login Page
@@ -241,46 +243,68 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen store-site-bg">
 
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden glass-overlay"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden glass-overlay"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar - Mobile: Transform / Desktop: Width transition */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen bg-white border-r border-gray-200 transition-all duration-300
-          w-64
+        className={`fixed top-0 left-0 z-50 h-screen liquid-glass border-r border-white/50 transition-all duration-300
+          w-[min(18rem,88vw)]
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
           ${isSidebarOpen ? 'lg:w-64' : 'lg:w-0 lg:overflow-hidden'}
           lg:translate-x-0
         `}
       >
-        <div className="h-full px-4 py-6 overflow-y-auto">
-          <Link href="/admin" className="flex items-center mb-8 px-2 cursor-pointer">
-            <span className="text-xl font-['Pacifico'] text-blue-700">DemoStore</span>
-            <span className="ml-3 text-sm font-semibold text-gray-500">ADMIN</span>
-          </Link>
+        <div className="flex h-full flex-col overflow-y-auto px-4 py-6">
+          <div className="mb-6 flex items-start justify-between gap-2 px-2 lg:mb-8">
+            <Link href="/admin" className="min-w-0 block shrink">
+              <Image
+                src={SITE_LOGO_LIGHT_BG_PATH}
+                alt="Gizmoz Trades"
+                width={SITE_LOGO_SIZE.width}
+                height={SITE_LOGO_SIZE.height}
+                priority
+                unoptimized
+                className="h-auto w-full max-w-[168px] object-contain object-left"
+              />
+              <span className="mt-2 block text-[11px] font-semibold uppercase tracking-widest text-brand-accent">
+                {isOwnerRole(userRole) ? 'Admin Dashboard' : 'Staff Dashboard'}
+              </span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(false)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-brand-primary hover:bg-brand-primary/5 lg:hidden"
+              aria-label="Close menu"
+            >
+              <i className="ri-close-line text-2xl" />
+            </button>
+          </div>
 
           <nav className="space-y-1">
             {visibleMenuItems.map((item) => {
-              const isActive = item.exact ? pathname === item.path : pathname.startsWith(item.path);
+              const isActive = item.exact
+                ? pathname === item.path
+                : pathname.startsWith(item.activePrefix || item.path);
               return (
                 <Link
                   key={item.path}
                   href={item.path}
-                  onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)} // Close on mobile click
-                  className={`flex items-center justify-between px-4 py-3 rounded-lg transition-colors cursor-pointer ${isActive
-                    ? 'bg-blue-50 text-blue-700 font-semibold'
-                    : 'text-gray-700 hover:bg-gray-50'
+                  onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}
+                  className={`group flex min-h-11 cursor-pointer items-center justify-between rounded-xl px-4 py-3 transition-all duration-300 ${isActive
+                    ? 'border-l-4 border-brand-accent bg-brand-primary/5 font-semibold text-brand-accent'
+                    : 'text-brand-primary/70 hover:-translate-y-[1px] hover:bg-brand-primary/5 hover:text-brand-primary hover:shadow-sm'
                     }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <i className={`${item.icon} text-xl w-5 h-5 flex items-center justify-center`}></i>
+                    <i className={`${item.icon} flex h-5 w-5 items-center justify-center text-xl ${isActive ? 'admin-nav-icon-active' : 'admin-nav-icon-idle group-hover:text-brand-primary'}`} />
                     <span>{item.title}</span>
                   </div>
                   {item.badge && (
@@ -293,14 +317,14 @@ export default function AdminLayout({
             })}
           </nav>
 
-          <div className="mt-8 pt-8 border-t border-gray-200">
+          <div className="mt-8 border-t border-white/50 pt-8">
             <Link
               href="/"
               target="_blank"
               onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}
-              className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+              className="flex min-h-11 cursor-pointer items-center space-x-3 rounded-lg px-4 py-3 text-brand-primary/80 transition-colors hover:bg-brand-primary/5 hover:text-brand-accent"
             >
-              <i className="ri-external-link-line text-xl w-5 h-5 flex items-center justify-center"></i>
+              <i className="ri-external-link-line flex h-5 w-5 items-center justify-center text-xl text-brand-accent" />
               <span>View Store</span>
             </Link>
           </div>
@@ -309,41 +333,47 @@ export default function AdminLayout({
 
       {/* Main Content */}
       <div className={`transition-all duration-300 ml-0 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-          <div className="px-4 py-4 lg:px-6 flex items-center justify-between">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
-            >
-              <i className={`${isSidebarOpen ? 'ri-menu-fold-line' : 'ri-menu-unfold-line'} text-xl`}></i>
-            </button>
-
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button className="relative w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
-                <i className="ri-notification-3-line text-xl"></i>
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        <header className="sticky top-0 z-30 border-b border-white/50 liquid-glass pt-[env(safe-area-inset-top,0px)]">
+          <div className="flex items-center justify-between gap-3 px-3 py-3 md:px-4 md:py-4 lg:px-6">
+            <div className="flex min-w-0 items-center gap-2 md:gap-3">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="flex h-11 w-11 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg text-brand-primary transition-colors hover:bg-brand-primary/5 hover:text-brand-accent"
+                aria-label="Toggle menu"
+              >
+                <i className={`${isSidebarOpen ? 'ri-menu-fold-line' : 'ri-menu-unfold-line'} text-xl`}></i>
               </button>
+              <Link href="/admin" className="min-w-0 truncate font-heading text-sm font-bold text-brand-primary md:text-lg">
+                <span className="md:hidden">Dashboard</span>
+                <span className="hidden md:inline">Dashboard Overview</span>
+              </Link>
+            </div>
+
+            <div className="flex shrink-0 items-center space-x-1 md:space-x-2 lg:space-x-4">
+              {user?.id ? <AdminNotificationBell userId={user.id} /> : null}
 
               <div className="relative user-menu-container">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 lg:space-x-3 px-2 lg:px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                  className="flex cursor-pointer items-center space-x-2 rounded-lg px-2 py-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-primary/5 lg:space-x-3 lg:px-3"
                 >
-                  <div className="w-8 h-8 lg:w-9 lg:h-9 flex items-center justify-center bg-blue-100 text-blue-700 rounded-full font-semibold">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary font-semibold text-white shadow-sm lg:h-9 lg:w-9">
                     {user?.email?.charAt(0).toUpperCase() || 'A'}
                   </div>
-                  <div className="text-left hidden md:block">
-                    <p className="text-sm font-semibold text-gray-900 capitalize">{userRole || 'Admin'}</p>
-                    <p className="text-xs text-gray-500 max-w-[100px] truncate">{user?.email}</p>
+                  <div className="hidden text-left md:block">
+                    <p className="text-sm font-semibold capitalize text-brand-primary">
+                      {isOwnerRole(userRole) ? 'Owner' : 'Staff'}
+                    </p>
+                    <p className="max-w-[100px] truncate text-xs text-slate-500">{user?.email}</p>
                   </div>
-                  <i className="ri-arrow-down-s-line text-gray-600"></i>
+                  <i className="ri-arrow-down-s-line hidden text-brand-primary/60 sm:block" />
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20">
+                  <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-white/50 liquid-glass-card shadow-lg">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors border-t border-gray-200 text-left cursor-pointer"
+                      className="flex w-full cursor-pointer items-center space-x-3 border-t border-white/40 px-4 py-3 text-left transition-colors hover:bg-brand-primary/5"
                     >
                       <i className="ri-logout-box-line text-red-600 w-5 h-5 flex items-center justify-center"></i>
                       <span className="text-red-600">Logout</span>
@@ -355,8 +385,23 @@ export default function AdminLayout({
           </div>
         </header>
 
-        <main className="p-4 lg:p-6">
-          {children}
+        <main className="p-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-4 lg:p-6">
+          {accessDenied ? (
+            <div className="mx-auto max-w-lg rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+              <h2 className="text-lg font-bold text-brand-primary">You do not have access</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Ask the owner to turn on this feature for your staff account.
+              </p>
+              <Link
+                href="/admin"
+                className="mt-4 inline-block rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-bold text-white"
+              >
+                Back to dashboard
+              </Link>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>

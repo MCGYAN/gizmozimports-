@@ -23,45 +23,45 @@ export default function AdvancedSearch() {
   const allProducts: SearchSuggestion[] = [
     {
       id: '1',
-      name: 'Wireless Noise-Cancelling Headphones',
+      name: 'Premium Wireless Headphones',
       category: 'Electronics',
       price: 450,
-      image: 'https://picsum.photos/seed/search1/200/200'
+      image: 'https://picsum.photos/seed/ph-AdvancedSearch-1/200/200'
     },
     {
       id: '2',
       name: 'Smart Fitness Watch',
       category: 'Wearables',
       price: 320,
-      image: 'https://picsum.photos/seed/search2/200/200'
+      image: 'https://picsum.photos/seed/ph-AdvancedSearch-2/200/200'
     },
     {
       id: '3',
       name: 'Leather Crossbody Bag',
       category: 'Fashion',
       price: 289,
-      image: 'https://picsum.photos/seed/search3/200/200'
+      image: 'https://picsum.photos/seed/ph-AdvancedSearch-3/200/200'
     },
     {
       id: '4',
       name: 'Minimalist Ceramic Vase Set',
       category: 'Home Decor',
       price: 159,
-      image: 'https://picsum.photos/seed/search4/200/200'
+      image: 'https://picsum.photos/seed/ph-AdvancedSearch-4/200/200'
     },
     {
       id: '5',
       name: 'Organic Cotton T-Shirt',
       category: 'Clothing',
       price: 45,
-      image: 'https://picsum.photos/seed/search5/200/200'
+      image: 'https://picsum.photos/seed/ph-AdvancedSearch-5/200/200'
     },
     {
       id: '6',
       name: 'Bamboo Desk Organizer',
       category: 'Office',
       price: 68,
-      image: 'https://picsum.photos/seed/search6/200/200'
+      image: 'https://picsum.photos/seed/ph-AdvancedSearch-6/200/200'
     }
   ];
 
@@ -93,6 +93,7 @@ export default function AdvancedSearch() {
     } else {
       setSuggestions([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- filter by query only; allProducts is large and would trigger too often
   }, [query]);
 
   const handleSearch = (searchQuery: string) => {
@@ -203,7 +204,7 @@ export default function AdvancedSearch() {
                     <p className="font-semibold text-gray-900 text-sm">{product.name}</p>
                     <p className="text-xs text-gray-500">{product.category}</p>
                   </div>
-                  <p className="font-bold text-gray-900">GH₵{product.price}</p>
+                  <p className="font-bold text-gray-900">GH¢{product.price}</p>
                 </Link>
               ))}
             </div>

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
+import { ShieldCheck, AlertTriangle, Home, Clock, Lock } from 'lucide-react';
+
 export default function PaymentPage() {
   usePageTitle('Complete Payment');
   const params = useParams();
@@ -20,29 +22,29 @@ export default function PaymentPage() {
   useEffect(() => {
     async function fetchOrder() {
       try {
-        // Fetch order by ID (UUID) or order_number
-        let query = supabase
-          .from('orders')
-          .select('*')
-          .or(`id.eq.${orderId},order_number.eq.${orderId}`)
-          .single();
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(
+          `/api/orders/pay-context?order=${encodeURIComponent(orderId)}`,
+          {
+            headers: session?.access_token
+              ? { Authorization: `Bearer ${session.access_token}` }
+              : undefined,
+          },
+        );
+        const payload = await res.json();
 
-        const { data, error: fetchError } = await query;
-
-        if (fetchError || !data) {
+        if (!res.ok || !payload?.order) {
           setError('Order not found. Please check your link and try again.');
           setLoading(false);
           return;
         }
 
-        setOrder(data);
+        setOrder(payload.order);
 
-        // If already paid, redirect to success page
-        if (data.payment_status === 'paid') {
-          router.push(`/order-success?order=${data.order_number}`);
+        if (payload.order.payment_status === 'paid') {
+          router.push(`/order-success?order=${payload.order.order_number}`);
           return;
         }
-
       } catch (err) {
         console.error('Error fetching order:', err);
         setError('Failed to load order details.');
@@ -105,15 +107,15 @@ export default function PaymentPage() {
       <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-full flex items-center justify-center">
-            <i className="ri-error-warning-line text-4xl text-red-500"></i>
+            <AlertTriangle className="w-10 h-10 text-red-500" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-3">Order Not Found</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <Link
             href="/"
-            className="inline-flex items-center px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-brand-primary hover:bg-[#0d2747] text-white rounded-lg font-semibold transition-colors"
           >
-            <i className="ri-home-line mr-2"></i>
+            <Home className="w-5 h-5 mr-2" />
             Go to Homepage
           </Link>
         </div>
@@ -130,7 +132,7 @@ export default function PaymentPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
-            <span className="text-2xl font-['Pacifico'] text-blue-700">DemoStore</span>
+            <span className="font-heading text-2xl font-semibold text-brand-primary">Store</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Complete Your Payment</h1>
           <p className="text-gray-600 mt-2">Hi {customerName}, your order is waiting for payment.</p>
@@ -146,23 +148,23 @@ export default function PaymentPage() {
           <div className="space-y-3 mb-6">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="text-gray-900">GH₵ {order?.subtotal?.toFixed(2)}</span>
+              <span className="text-gray-900">GH¢{order?.subtotal?.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Shipping</span>
-              <span className="text-gray-900">GH₵ {order?.shipping_total?.toFixed(2)}</span>
+              <span className="text-gray-900">GH¢{order?.shipping_total?.toFixed(2)}</span>
             </div>
             {order?.discount_total > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Discount</span>
-                <span className="text-green-600">-GH₵ {order?.discount_total?.toFixed(2)}</span>
+                <span className="text-green-600">-GH¢{order?.discount_total?.toFixed(2)}</span>
               </div>
             )}
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t border-gray-200">
             <span className="text-lg font-semibold text-gray-900">Total</span>
-            <span className="text-2xl font-bold text-blue-700">GH₵ {order?.total?.toFixed(2)}</span>
+            <span className="text-2xl font-bold text-brand-primary">GH¢{order?.total?.toFixed(2)}</span>
           </div>
         </div>
 
@@ -170,7 +172,7 @@ export default function PaymentPage() {
         {order?.payment_status === 'pending' && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
             <div className="flex items-start space-x-3">
-              <i className="ri-time-line text-xl text-yellow-600 mt-0.5"></i>
+              <Clock className="w-5 h-5 text-yellow-600 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-yellow-800">Payment Pending</p>
                 <p className="text-sm text-yellow-700 mt-1">
@@ -184,7 +186,7 @@ export default function PaymentPage() {
         {order?.payment_status === 'failed' && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <div className="flex items-start space-x-3">
-              <i className="ri-error-warning-line text-xl text-red-600 mt-0.5"></i>
+              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-red-800">Payment Failed</p>
                 <p className="text-sm text-red-700 mt-1">
@@ -205,7 +207,7 @@ export default function PaymentPage() {
         <button
           onClick={handlePayNow}
           disabled={processing}
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-70 flex items-center justify-center cursor-pointer"
+          className="w-full bg-brand-primary hover:bg-[#0d2747] text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-70 flex items-center justify-center cursor-pointer"
         >
           {processing ? (
             <>
@@ -217,8 +219,8 @@ export default function PaymentPage() {
             </>
           ) : (
             <>
-              <i className="ri-secure-payment-line mr-2"></i>
-              Pay GH₵ {order?.total?.toFixed(2)} with Mobile Money
+              <ShieldCheck className="w-5 h-5 mr-2" />
+              Pay GH¢{order?.total?.toFixed(2)} with Mobile Money
             </>
           )}
         </button>
@@ -226,7 +228,7 @@ export default function PaymentPage() {
         {/* Security Note */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500 flex items-center justify-center">
-            <i className="ri-lock-line mr-1"></i>
+            <Lock className="w-3.5 h-3.5 mr-1" />
             Secure payment powered by Moolre
           </p>
         </div>
@@ -234,7 +236,7 @@ export default function PaymentPage() {
         {/* Help Link */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
-            Having issues? <Link href="/contact" className="text-blue-700 hover:underline">Contact Support</Link>
+            Having issues? <Link href="/contact" className="text-brand-primary hover:underline">Contact Support</Link>
           </p>
         </div>
       </div>

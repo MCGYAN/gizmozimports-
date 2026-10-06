@@ -1,0 +1,155 @@
+/**
+ * Admin dashboard module permissions.
+ * Owner (role=admin) has every module. Staff only get toggled modules.
+ */
+
+export const ADMIN_MODULES = {
+  orders: {
+    label: 'Orders',
+    description: 'Orders, packages, Ghana shipping, payments, and POS',
+  },
+  invoices: {
+    label: 'Invoices',
+    description: 'Create and download manual customer invoices. History cannot be deleted',
+  },
+  warehouse: {
+    label: 'China Warehouse',
+    description: 'Warehouse address, incoming packages, shipping marks, and workbook imports',
+  },
+  exchange: {
+    label: 'Buy RMB',
+    description: 'RMB exchange desk',
+  },
+  products: {
+    label: 'Products',
+    description: 'Products, categories, and inventory',
+  },
+  customers: {
+    label: 'Customers',
+    description: 'Customers and reviews',
+  },
+} as const;
+
+export type AdminModule = keyof typeof ADMIN_MODULES;
+
+export type AdminPermissions = Partial<Record<AdminModule, boolean>>;
+
+export const ADMIN_MODULE_KEYS = Object.keys(ADMIN_MODULES) as AdminModule[];
+
+export const EMPTY_STAFF_PERMISSIONS: AdminPermissions = {
+  orders: false,
+  invoices: false,
+  warehouse: false,
+  exchange: false,
+  products: false,
+  customers: false,
+};
+
+/** Analytics tabs in display order. The sidebar opens the first one the user can access. */
+export const ANALYTICS_PATHS = [
+  '/admin/analytics',
+  '/admin/analytics/rmb',
+  '/admin/analytics/shipping',
+] as const;
+
+const PATH_MODULE_RULES: { prefix: string; module: AdminModule | 'owner' | null }[] = [
+  { prefix: '/admin/team', module: 'owner' },
+  { prefix: '/admin/notifications', module: 'owner' },
+  // More specific than /admin/analytics (owner). Orders + warehouse staff can open it.
+  { prefix: '/admin/analytics/shipping', module: 'orders' },
+  { prefix: '/admin/analytics/rmb', module: 'exchange' },
+  { prefix: '/admin/analytics', module: 'owner' },
+  { prefix: '/admin/packages/warehouse', module: 'warehouse' },
+  { prefix: '/admin/invoices', module: 'invoices' },
+  { prefix: '/admin/deliveries', module: 'orders' },
+  { prefix: '/admin/packages', module: 'orders' },
+  { prefix: '/admin/shipping', module: 'orders' },
+  { prefix: '/admin/orders', module: 'orders' },
+  { prefix: '/admin/pos', module: 'orders' },
+  { prefix: '/admin/exchange', module: 'exchange' },
+  { prefix: '/admin/products', module: 'products' },
+  { prefix: '/admin/categories', module: 'products' },
+  { prefix: '/admin/inventory', module: 'products' },
+  { prefix: '/admin/customers', module: 'customers' },
+  { prefix: '/admin/customer-insights', module: 'customers' },
+  { prefix: '/admin/reviews', module: 'customers' },
+];
+
+/** Paths staff can open if they have any of these modules. */
+const PATH_ANY_MODULE_RULES: { prefix: string; modules: AdminModule[] }[] = [
+  { prefix: '/admin/packages', modules: ['orders', 'warehouse'] },
+  { prefix: '/admin/analytics/shipping', modules: ['orders', 'warehouse'] },
+];
+
+export function normalizeAdminPermissions(raw: unknown): AdminPermissions {
+  const src = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const out: AdminPermissions = { ...EMPTY_STAFF_PERMISSIONS };
+  for (const key of ADMIN_MODULE_KEYS) {
+    out[key] = Boolean(src[key]);
+  }
+  return out;
+}
+
+export function isOwnerRole(role: string | null | undefined): boolean {
+  return role === 'admin';
+}
+
+export function isStaffRole(role: string | null | undefined): boolean {
+  return role === 'staff';
+}
+
+export function canAccessAdminDashboard(role: string | null | undefined): boolean {
+  return isOwnerRole(role) || isStaffRole(role);
+}
+
+export function hasAdminModule(
+  role: string | null | undefined,
+  permissions: unknown,
+  module: AdminModule,
+): boolean {
+  if (isOwnerRole(role)) return true;
+  if (!isStaffRole(role)) return false;
+  return Boolean(normalizeAdminPermissions(permissions)[module]);
+}
+
+export function requiredModuleForPath(pathname: string): AdminModule | 'owner' | null {
+  const path = pathname.split('?')[0].replace(/\/$/, '') || '/admin';
+  if (path === '/admin' || path === '/admin/login') return null;
+
+  for (const rule of PATH_MODULE_RULES) {
+    if (path === rule.prefix || path.startsWith(`${rule.prefix}/`)) {
+      return rule.module;
+    }
+  }
+  if (path.startsWith('/admin')) return 'owner';
+  return null;
+}
+
+export function canAccessAdminPath(
+  role: string | null | undefined,
+  permissions: unknown,
+  pathname: string,
+): boolean {
+  if (!canAccessAdminDashboard(role)) return false;
+  if (isOwnerRole(role)) return true;
+
+  const path = pathname.split('?')[0].replace(/\/$/, '') || '/admin';
+  for (const rule of PATH_ANY_MODULE_RULES) {
+    if (path === rule.prefix || path.startsWith(`${rule.prefix}/`)) {
+      // Warehouse-only staff still use /admin/packages/warehouse via warehouse module.
+      if (path.startsWith('/admin/packages/warehouse')) {
+        return hasAdminModule(role, permissions, 'warehouse');
+      }
+      return rule.modules.some((module) => hasAdminModule(role, permissions, module));
+    }
+  }
+
+  const required = requiredModuleForPath(pathname);
+  if (required === null) return true;
+  if (required === 'owner') return false;
+  return hasAdminModule(role, permissions, required);
+}
+
+export function menuItemModule(path: string): AdminModule | 'owner' | null {
+  return requiredModuleForPath(path);
+}

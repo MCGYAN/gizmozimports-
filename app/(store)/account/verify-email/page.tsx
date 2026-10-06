@@ -7,7 +7,7 @@ export default function VerifyEmailPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [email] = useState('john.doe@email.com');
+  const [email] = useState('john@example.com');
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -138,7 +138,7 @@ export default function VerifyEmailPage() {
           <div className="mt-8 pt-6 border-t">
             <div className="bg-blue-50 rounded-lg p-4">
               <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                <i className="ri-information-line text-blue-600"></i>
+                <i className="ri-information-line text-brand-accent"></i>
                 Didn't receive the code?
               </h3>
               <ul className="text-xs text-gray-600 space-y-1">

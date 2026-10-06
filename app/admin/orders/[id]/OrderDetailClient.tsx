@@ -1,9 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import FraudDetectionAlert from '@/components/FraudDetectionAlert';
+import OrderShippingDesk from '@/components/admin/OrderShippingDesk';
+import {
+  deriveAccountOrderStatus,
+  type AccountOrderPackageSummary,
+} from '@/lib/account-order-status';
+import {
+  deriveFulfillmentStage,
+  FULFILLMENT_STAGES,
+  fulfillmentIndex,
+  storedFulfillmentStage,
+} from '@/lib/order-journey';
+import { STORE_INVOICE_ISSUER } from '@/lib/bank-details';
 
 interface OrderDetailClientProps {
   orderId: string;
@@ -18,9 +30,11 @@ interface FraudAnalysis {
 
 export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
   const [order, setOrder] = useState<any>(null);
+  const [packages, setPackages] = useState<AccountOrderPackageSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState('');
   const [trackingNumber, setTrackingNumber] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [statusUpdating, setStatusUpdating] = useState(false);
@@ -44,11 +58,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
     };
   }, []);
 
-  useEffect(() => {
-    fetchOrderDetails();
-  }, [orderId]);
-
-  const fetchOrderDetails = async () => {
+  const fetchOrderDetails = useCallback(async () => {
     try {
       setLoading(true);
       // Try to fetch by ID or order_number
@@ -59,6 +69,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
           order_items (
             id,
             product_id,
+            variant_id,
             product_name,
             variant_name,
             sku,
@@ -67,6 +78,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
             total_price,
             metadata,
             products (
+              metadata,
               product_images (url)
             )
           )
@@ -84,6 +96,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
             order_items (
               id,
               product_id,
+              variant_id,
               product_name,
               variant_name,
               sku,
@@ -92,6 +105,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
               total_price,
               metadata,
               products (
+              metadata,
                 product_images (url)
               )
             )
@@ -112,13 +126,47 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
       setTrackingNumber(data.metadata?.tracking_number || '');
       setAdminNotes(data.notes || '');
 
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const shippingRes = await fetch(`/api/shipping/packages?orderId=${encodeURIComponent(data.id)}`, {
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+        });
+        const shippingData = await shippingRes.json();
+        if (shippingRes.ok) {
+          setPackages(
+            (shippingData.packages || []).map((pkg: any) => ({
+              id: pkg.id,
+              package_name: pkg.package_name,
+              tracking_id: pkg.tracking_id,
+              status: pkg.status,
+              freight_included: Boolean(pkg.freight_included),
+              final_usd_to_ghs: pkg.final_usd_to_ghs ?? null,
+              shipping_payment_status: pkg.shipping_payment_status ?? null,
+              final_shipping_ghs: pkg.final_shipping_ghs ?? null,
+              estimated_shipping_usd: pkg.estimated_shipping_usd ?? null,
+            })),
+          );
+          if (shippingData.order) setOrder(shippingData.order);
+        } else {
+          setPackages([]);
+        }
+      } catch {
+        setPackages([]);
+      }
+
     } catch (err: any) {
       console.error('Error fetching order:', err);
       setError('Failed to load order details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    fetchOrderDetails();
+  }, [fetchOrderDetails]);
 
   const handleUpdateStatus = async (newStatus?: string) => {
     try {
@@ -146,37 +194,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
         notes: adminNotes,
         metadata: { ...order.metadata, tracking_number: trackingNumber }
       });
-
-      // Send Notification (Email + SMS)
-      // Only send if status changed OR tracking number was added/changed
-      const statusChanged = statusToUpdate !== order.status;
-      const trackingChanged = trackingNumber !== order.metadata?.tracking_number;
-
-      if (statusChanged || (trackingChanged && trackingNumber)) {
-        // Get auth token for notification API
-        const { data: { session } } = await supabase.auth.getSession();
-        const authToken = session?.access_token;
-
-        fetch('/api/notifications', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-          },
-          body: JSON.stringify({
-            type: 'order_status',
-            payload: {
-              email: order.email,
-              name: customerName,
-              orderId: orderId,
-              orderNumber: order.order_number || orderId,
-              status: statusToUpdate,
-              trackingNumber: trackingNumber,
-              phone: shippingAddress.phone || order.phone // Ensure phone is passed for SMS
-            }
-          })
-        }).catch(err => console.error('Notification error:', err));
-      }
+      setPendingStatus('');
 
       alert('Order updated successfully');
       setShowStatusMenu(false);
@@ -189,6 +207,218 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
   };
 
   const [resendingNotification, setResendingNotification] = useState(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [paymentUndoUntil, setPaymentUndoUntil] = useState<string | null>(null);
+  const [updatingJourney, setUpdatingJourney] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelConfirm, setCancelConfirm] = useState('');
+  const [cancelling, setCancelling] = useState(false);
+
+  const [amendItem, setAmendItem] = useState<any>(null);
+  const [amendVariants, setAmendVariants] = useState<any[]>([]);
+  const [amendVariantId, setAmendVariantId] = useState('');
+  const [amendReason, setAmendReason] = useState('');
+  const [amending, setAmending] = useState(false);
+  const [loadingVariants, setLoadingVariants] = useState(false);
+
+  const authHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      'Content-Type': 'application/json',
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    };
+  };
+
+  const openAmend = async (item: any) => {
+    if (!item?.product_id) {
+      alert('This line has no linked product, so variants cannot be loaded. Re-add the product or contact support.');
+      return;
+    }
+    setAmendItem(item);
+    setAmendVariantId(item.variant_id || item.metadata?.variant_id || '');
+    setAmendReason('');
+    setLoadingVariants(true);
+    try {
+      const { data, error } = await supabase
+        .from('product_variants')
+        .select('id, name, option1, option2, option3, price, quantity, sku')
+        .eq('product_id', item.product_id)
+        .order('name');
+      if (error) throw error;
+      setAmendVariants(data || []);
+    } catch (err: any) {
+      alert(err?.message || 'Could not load variants');
+      setAmendItem(null);
+    } finally {
+      setLoadingVariants(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    setCancelling(true);
+    try {
+      const headers = await authHeaders();
+      const res = await fetch('/api/orders/cancel', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          orderId: order.id,
+          reason: cancelReason,
+          confirmText: cancelConfirm,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Cancel failed');
+        return;
+      }
+      setShowCancelModal(false);
+      setCancelReason('');
+      setCancelConfirm('');
+      await fetchOrderDetails();
+      alert('Order cancelled. The record was kept for history.');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const handleAmendItem = async () => {
+    if (!amendItem || !amendVariantId) return;
+    setAmending(true);
+    try {
+      const headers = await authHeaders();
+      const res = await fetch('/api/orders/amend-item', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          orderId: order.id,
+          orderItemId: amendItem.id,
+          variantId: amendVariantId,
+          reason: amendReason,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Amend failed');
+        return;
+      }
+      const pc = data.priceChange;
+      let msg = 'Variant updated.';
+      if (pc?.samePrice) msg = 'Variant updated. Same price.';
+      else if (pc?.balanceDue > 0) msg = `Variant updated. Customer still owes GH¢${pc.balanceDue.toFixed(2)}.`;
+      else if (pc?.creditDue > 0) msg = `Variant updated. Credit due GH¢${pc.creditDue.toFixed(2)}.`;
+      setAmendItem(null);
+      await fetchOrderDetails();
+      alert(msg);
+    } finally {
+      setAmending(false);
+    }
+  };
+
+  const handleVerifyPayment = async () => {
+    if (!order?.order_number) return;
+    try {
+      setVerifyingPayment(true);
+      setVerifyMessage(null);
+      const res = await fetch('/api/payment/moolre/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderNumber: order.order_number })
+      });
+      const data = await res.json();
+      if (data.success && data.payment_status === 'paid') {
+        setVerifyMessage('Payment verified. Order updated.');
+        await fetchOrderDetails();
+      } else {
+        setVerifyMessage(data.message || 'Could not verify payment. Customer may not have completed payment yet.');
+      }
+    } catch (err: any) {
+      setVerifyMessage(err?.message || 'Verification request failed.');
+    } finally {
+      setVerifyingPayment(false);
+    }
+  };
+
+  const handleConfirmManualPayment = async () => {
+    if (!order?.id) return;
+    if (!confirm(
+      `Confirm GH¢${Number(order.total || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })} received for ${order.order_number}? Check your bank or MoMo first.`,
+    )) return;
+    try {
+      setConfirmingPayment(true);
+      setVerifyMessage(null);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/orders/confirm-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ orderId: order.id, note: adminNotes || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Confirm failed');
+      setVerifyMessage('Payment confirmed. The receipt email waits 2 minutes.');
+      setPaymentUndoUntil(data.undoUntil || null);
+      window.setTimeout(async () => {
+        const headers = await authHeaders();
+        void fetch('/api/cron/receipt-outbox', { method: 'POST', headers });
+        setPaymentUndoUntil(null);
+      }, 125_000);
+      await fetchOrderDetails();
+    } catch (err: any) {
+      setVerifyMessage(err?.message || 'Could not confirm payment.');
+    } finally {
+      setConfirmingPayment(false);
+    }
+  };
+
+  const handleUndoPayment = async () => {
+    if (!paymentUndoUntil || new Date(paymentUndoUntil).getTime() <= Date.now()) return;
+    setConfirmingPayment(true);
+    const response = await fetch('/api/orders/undo-payment', {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({ orderNumber: order.order_number }),
+    });
+    const result = await response.json();
+    setConfirmingPayment(false);
+    if (!response.ok) {
+      setVerifyMessage(result.error || 'Could not undo payment.');
+      return;
+    }
+    setPaymentUndoUntil(null);
+    setVerifyMessage('Payment confirmation undone. No receipt email was sent.');
+    await fetchOrderDetails();
+  };
+
+  const handleStartSourcing = async () => {
+    if (!order?.id) return;
+    try {
+      setUpdatingJourney(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/orders/fulfillment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ orderId: order.id, stage: 'sourcing', note: adminNotes || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Update failed');
+      await fetchOrderDetails();
+      alert('Order marked as sourcing in China.');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to update journey');
+    } finally {
+      setUpdatingJourney(false);
+    }
+  };
 
   const handleResendNotification = async () => {
     if (!order) return;
@@ -239,13 +469,18 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
     }
   };
 
-  const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-  const statusLabel = (s: string) => s === 'shipped' ? 'Packaged' : s.charAt(0).toUpperCase() + s.slice(1);
+  const statusOptions = ['pending', 'awaiting_payment', 'processing', 'shipped', 'delivered'];
+  const statusLabel = (s: string) => {
+    if (s === 'shipped') return 'Packaged';
+    if (s === 'awaiting_payment') return 'Awaiting payment';
+    if (s === 'cancelled') return 'Cancelled';
+    return s ? s.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase()) : 'Unknown';
+  };
   const statusColors: any = {
     'pending': 'bg-amber-100 text-amber-700 border-amber-200',
-    'processing': 'bg-blue-100 text-blue-700 border-blue-200',
-    'shipped': 'bg-purple-100 text-purple-700 border-purple-200',
-    'delivered': 'bg-blue-100 text-blue-700 border-blue-200',
+    'processing': 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
+    'shipped': 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
+    'delivered': 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
     'cancelled': 'bg-red-100 text-red-700 border-red-200',
     'awaiting_payment': 'bg-gray-100 text-gray-700 border-gray-200'
   };
@@ -259,14 +494,21 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
     ? `${shippingAddress.firstName.trim()} ${shippingAddress.lastName.trim()}`
     : shippingAddress.full_name || shippingAddress.firstName || order.email?.split('@')[0] || 'Customer';
 
-  // Derive timeline from status (simplified logic as we don't have full history table joined here yet)
-  const timeline = [
-    { status: 'Order Placed', date: new Date(order.created_at).toLocaleString(), completed: true },
-    { status: 'Payment', date: order.payment_status, completed: order.payment_status === 'paid' },
-    { status: 'Processing', date: '', completed: ['processing', 'shipped', 'delivered'].includes(order.status) },
-    { status: 'Packaged', date: '', completed: ['shipped', 'delivered'].includes(order.status) },
-    { status: 'Delivered', date: '', completed: order.status === 'delivered' }
-  ];
+  const packageStatuses = packages.map((pkg) => pkg.status).filter(Boolean);
+  const storedJourney = storedFulfillmentStage(order);
+  const currentJourney = deriveFulfillmentStage(order, packageStatuses);
+  const openShippingInvoiceId =
+    packages.find(
+      (pkg) =>
+        !pkg.freight_included &&
+        Boolean(pkg.final_usd_to_ghs) &&
+        pkg.shipping_payment_status !== 'paid',
+    )?.id || null;
+  const customerStatus = deriveAccountOrderStatus(order, packages, openShippingInvoiceId);
+  const journeyOutOfSync =
+    packages.length > 0 &&
+    order.payment_status === 'paid' &&
+    fulfillmentIndex(currentJourney) > fulfillmentIndex(storedJourney);
 
   // Mock fraud analysis for now (or implement real logic later)
   const fraudAnalysis: FraudAnalysis = {
@@ -284,7 +526,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
           {/* Header */}
           <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4 mb-4">
             <div>
-              <h1 className="text-2xl font-bold">Demo Storefront</h1>
+              <h1 className="text-2xl font-bold">{STORE_INVOICE_ISSUER.brand}</h1>
               <p className="text-sm text-gray-600">Order Packing Slip</p>
             </div>
             <div className="text-right">
@@ -320,9 +562,17 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                 {order?.order_items?.map((item: any) => (
                   <tr key={item.id} className="border-b border-gray-200">
                     <td className="py-2 px-2 font-medium">{item.product_name}</td>
-                    <td className="py-2 px-2 text-sm">{item.variant_name || '-'}</td>
+                    <td className="py-2 px-2 text-sm">
+                      {item.variant_name
+                        ? item.variant_name.includes('/') &&
+                          item.variant_name.split('/')[0].trim().toLowerCase() ===
+                            item.variant_name.split('/')[1]?.trim().toLowerCase()
+                          ? `Color: ${item.variant_name.split('/')[0].trim()}`
+                          : item.variant_name
+                        : '—'}
+                    </td>
                     <td className="py-2 px-2 text-center font-bold">{item.quantity}</td>
-                    <td className="py-2 px-2 text-right">GH₵ {item.unit_price?.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right">GH¢{item.unit_price?.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -332,34 +582,39 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
           {/* Order Summary */}
           <div className="flex justify-between mb-6">
             <div>
-              <p><span className="font-semibold">Shipping Method:</span> {order?.shipping_method || 'Standard'}</p>
+              <p>
+                <span className="font-semibold">Customer handoff:</span>{' '}
+                {order?.shipping_method === 'schedule_later'
+                  ? 'Chosen after package is ready'
+                  : (order?.shipping_method || 'Not chosen').replace(/_/g, ' ')}
+              </p>
               <p><span className="font-semibold">Payment:</span> {order?.payment_method} ({order?.payment_status})</p>
               {trackingNumber && <p><span className="font-semibold">Tracking #:</span> {trackingNumber}</p>}
             </div>
             <div className="text-right">
-              <p>Subtotal: GH₵ {order?.subtotal?.toFixed(2)}</p>
-              <p>Shipping: GH₵ {order?.shipping_total?.toFixed(2)}</p>
-              <p className="font-bold text-lg border-t border-gray-400 pt-1 mt-1">Total: GH₵ {order?.total?.toFixed(2)}</p>
+              <p>Subtotal: GH¢{order?.subtotal?.toFixed(2)}</p>
+              <p>Shipping: GH¢{order?.shipping_total?.toFixed(2)}</p>
+              <p className="font-bold text-lg border-t border-gray-400 pt-1 mt-1">Total: GH¢{order?.total?.toFixed(2)}</p>
             </div>
           </div>
 
           {/* Footer */}
           <div className="border-t-2 border-gray-800 pt-4 text-center text-sm text-gray-600">
-            <p>Thank you for shopping with Demo Storefront!</p>
-            <p>Questions? Contact us at support@example.com</p>
+            <p>Thank you for shopping with {STORE_INVOICE_ISSUER.brand}.</p>
+            <p>Questions? Call or WhatsApp {STORE_INVOICE_ISSUER.phones[0]}.</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 no-print">
+      <div className="mx-auto max-w-7xl p-3 no-print sm:p-4 md:p-6">
         {/* Page Header with Print Button */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="flex items-center space-x-4 min-w-0">
             <Link href="/admin/orders" className="text-gray-600 hover:text-gray-900">
               <i className="ri-arrow-left-line text-2xl"></i>
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{order?.order_number}</h1>
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-bold text-gray-900 sm:text-2xl">{order?.order_number}</h1>
               <p className="text-sm text-gray-600">Order placed on {order ? new Date(order.created_at).toLocaleDateString() : ''}</p>
             </div>
           </div>
@@ -368,9 +623,51 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
             className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           >
             <i className="ri-printer-line text-lg"></i>
-            <span>Print Order</span>
+            <span className="hidden sm:inline">Print Order</span>
+            <span className="sm:hidden">Print</span>
           </button>
         </div>
+
+        {/* Mobile: the one action that matters, before anything else */}
+        {order.payment_status === 'awaiting_confirmation' && (
+          <div className="lg:hidden mb-6 rounded-2xl border border-amber-300 bg-amber-50 p-4">
+            <p className="text-sm font-bold text-amber-900">
+              Customer says they paid GH¢{order.total?.toFixed(2)}.
+            </p>
+            <p className="mt-1 text-sm text-amber-700">
+              Check your bank or MoMo, then confirm below.
+            </p>
+            {order.metadata?.payment_sent_note ? (
+              <p className="mt-2 rounded-lg bg-white/70 px-3 py-2 text-xs text-amber-900">
+                Customer note: {order.metadata.payment_sent_note}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleConfirmManualPayment}
+              disabled={confirmingPayment}
+              className="mt-3 w-full rounded-xl bg-brand-primary py-3.5 font-bold text-white disabled:opacity-50"
+            >
+              {confirmingPayment ? 'Confirming…' : 'Confirm payment received'}
+            </button>
+          </div>
+        )}
+
+        {paymentUndoUntil ? (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-sm font-semibold text-emerald-900">
+              Payment confirmed. The receipt email waits 2 minutes.
+            </p>
+            <button
+              type="button"
+              onClick={() => void handleUndoPayment()}
+              disabled={confirmingPayment}
+              className="rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-bold text-emerald-800"
+            >
+              Undo confirmation
+            </button>
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -404,11 +701,31 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900 mb-1">{item.product_name}</h3>
-                      <p className="text-sm text-gray-600 mb-1">{item.variant_name}</p>
-                      <p className="text-xs text-gray-500">SKU: {item.sku}</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {item.variant_name
+                          ? item.variant_name.includes('/') &&
+                            item.variant_name.split('/')[0].trim().toLowerCase() ===
+                              item.variant_name.split('/')[1]?.trim().toLowerCase()
+                            ? `Color: ${item.variant_name.split('/')[0].trim()}`
+                            : item.variant_name
+                          : null}
+                      </p>
+                      <p className="text-xs text-gray-500">SKU: {item.sku || '—'}</p>
+                      {order.status !== 'cancelled' &&
+                        order.status !== 'shipped' &&
+                        order.status !== 'delivered' && (
+                          <button
+                            type="button"
+                            onClick={() => openAmend(item)}
+                            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border-2 border-brand-primary/20 bg-white px-3 py-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/5"
+                          >
+                            <i className="ri-edit-line"></i>
+                            Amend variant / color
+                          </button>
+                        )}
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-900 mb-1">GH₵ {item.unit_price?.toFixed(2)}</p>
+                      <p className="font-semibold text-gray-900 mb-1">GH¢{item.unit_price?.toFixed(2)}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     </div>
                   </div>
@@ -418,110 +735,137 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
               <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal</span>
-                  <span>GH₵ {order.subtotal?.toFixed(2)}</span>
+                  <span>GH¢{order.subtotal?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Shipping</span>
-                  <span>GH₵ {order.shipping_total?.toFixed(2)}</span>
+                  <span>GH¢{order.shipping_total?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Tax</span>
-                  <span>GH₵ {order.tax_total?.toFixed(2)}</span>
+                  <span>GH¢{order.tax_total?.toFixed(2)}</span>
                 </div>
                 {order.discount_total > 0 && (
-                  <div className="flex justify-between text-blue-700 font-semibold">
+                  <div className="flex justify-between text-brand-primary font-semibold">
                     <span>Discount</span>
-                    <span>-GH₵ {order.discount_total?.toFixed(2)}</span>
+                    <span>-GH¢{order.discount_total?.toFixed(2)}</span>
+                  </div>
+                )}
+                {(order.metadata?.balance_due > 0 || order.metadata?.credit_due > 0) && (
+                  <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                    {order.metadata?.balance_due > 0 ? (
+                      <p>Balance due after amendment: <strong>GH¢{Number(order.metadata.balance_due).toFixed(2)}</strong></p>
+                    ) : null}
+                    {order.metadata?.credit_due > 0 ? (
+                      <p>Credit due after amendment: <strong>GH¢{Number(order.metadata.credit_due).toFixed(2)}</strong></p>
+                    ) : null}
                   </div>
                 )}
                 <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-200">
                   <span>Total</span>
-                  <span>GH₵ {order.total?.toFixed(2)}</span>
+                  <span>GH¢{order.total?.toFixed(2)}</span>
                 </div>
               </div>
+
+              {Array.isArray(order.metadata?.amendments) && order.metadata.amendments.length > 0 && (
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                  <h3 className="text-sm font-bold text-gray-900 mb-2">Amendment history</h3>
+                  <div className="space-y-2">
+                    {[...order.metadata.amendments].reverse().map((a: any, idx: number) => (
+                      <div key={`${a.at}-${idx}`} className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                        <p className="font-semibold">
+                          {a.from?.variant_name || '—'} → {a.to?.variant_name || '—'}
+                        </p>
+                        <p>{a.reason}</p>
+                        <p className="text-slate-400">{a.at ? new Date(a.at).toLocaleString('en-GB') : ''}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Order Timeline</h2>
-              <div className="space-y-4">
-                {timeline.map((event, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div className={`w-10 h-10 flex items-center justify-center rounded-full border-2 ${event.completed ? 'bg-blue-700 border-blue-700' : 'bg-white border-gray-300'
-                      }`}>
-                      {event.completed ? (
-                        <i className="ri-check-line text-white text-xl"></i>
-                      ) : (
-                        <span className="w-3 h-3 bg-gray-300 rounded-full"></span>
-                      )}
-                    </div>
-                    <div className="flex-1 pb-6 border-b border-gray-200 last:border-0">
-                      <p className={`font-semibold ${event.completed ? 'text-gray-900' : 'text-gray-500'}`}>
-                        {event.status}
-                      </p>
-                      {event.date && (
-                        <p className="text-sm text-gray-600 mt-1">{event.date}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <OrderShippingDesk order={order} />
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Order Status</h2>
-              <div className="relative">
-                <button
-                  onClick={() => setShowStatusMenu(!showStatusMenu)}
-                  className={`w-full px-4 py-3 rounded-lg border-2 font-semibold text-left flex items-center justify-between ${statusColors[currentStatus] || 'bg-gray-100'}`}
-                >
-                  <span>{statusLabel(currentStatus)}</span>
-                  <i className="ri-arrow-down-s-line text-xl"></i>
-                </button>
-                {showStatusMenu && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg overflow-hidden z-10">
-                    {statusOptions.map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => {
-                          handleUpdateStatus(status);
-                        }}
-                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${status === currentStatus ? 'bg-blue-50 font-semibold' : ''
-                          }`}
-                      >
-                        {statusLabel(status)}
-                      </button>
-                    ))}
+            <div className="overflow-hidden rounded-2xl border border-brand-primary/15 bg-gradient-to-b from-brand-light/80 to-white shadow-sm">
+              <div className="px-5 py-4">
+                <h2 className="text-lg font-bold text-gray-900">Order progress</h2>
+                <p className="mt-1 text-xs leading-relaxed text-gray-500">
+                  Orders stop here after sourcing. Build boxes in Packages, then manage travel in
+                  Shipping.
+                </p>
+                <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2.5 ring-1 ring-brand-primary/10">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-white">
+                    <i className="ri-map-pin-line text-sm" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-brand-accent">
+                      Customer sees
+                    </p>
+                    <p className="truncate text-sm font-semibold text-brand-primary">
+                      {customerStatus.title}
+                    </p>
+                    {customerStatus.nextHint ? (
+                      <p className="mt-0.5 truncate text-[11px] text-gray-500">
+                        {customerStatus.nextHint}
+                      </p>
+                    ) : null}
                   </div>
+                </div>
+                {journeyOutOfSync ? (
+                  <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
+                    Stored journey was{' '}
+                    {FULFILLMENT_STAGES.find((s) => s.key === storedJourney)?.title || storedJourney}.
+                    Customer tracking now shows {customerStatus.title} from package and shipping desk
+                    status.
+                  </p>
+                ) : null}
+                {order.payment_status === 'paid' && customerStatus.key === 'payment_confirmed' ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleStartSourcing()}
+                    disabled={updatingJourney || order.status === 'cancelled'}
+                    className="mt-3 w-full rounded-xl bg-brand-primary py-3 text-sm font-bold text-white disabled:opacity-40"
+                  >
+                    {updatingJourney ? 'Updating…' : 'Start sourcing in China'}
+                  </button>
+                ) : null}
+
+                <Link
+                  href="/admin/packages"
+                  className="mt-3 flex w-full items-center justify-center rounded-xl border border-brand-primary/20 bg-white py-3 text-sm font-bold text-brand-primary"
+                >
+                  Open Packages workspace
+                </Link>
+
+                {order.status !== 'cancelled' &&
+                  currentJourney !== 'delivered' &&
+                  currentJourney !== 'en_route_ghana' &&
+                  currentJourney !== 'in_ghana' &&
+                  currentJourney !== 'ready' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowCancelModal(true)}
+                      className="mt-3 w-full rounded-xl border border-red-200 bg-red-50/80 py-3 text-sm font-bold text-red-700 transition-colors hover:bg-red-100"
+                    >
+                      Cancel this order…
+                    </button>
+                  )}
+                {order.status === 'cancelled' && (
+                  <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+                    Cancelled
+                    {order.metadata?.cancel_reason ? `: ${order.metadata.cancel_reason}` : ''}
+                  </p>
                 )}
               </div>
-
-              <div className="mt-4">
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Tracking Number
-                </label>
-                <input
-                  type="text"
-                  value={trackingNumber}
-                  onChange={(e) => setTrackingNumber(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <button
-                onClick={() => handleUpdateStatus()}
-                disabled={statusUpdating}
-                className="w-full mt-4 bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap disabled:opacity-50"
-              >
-                {statusUpdating ? 'Updating...' : 'Update Status'}
-              </button>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Customer</h2>
               <div className="flex items-start space-x-3 mb-4">
-                <div className="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-700 rounded-full font-semibold uppercase">
+                <div className="w-12 h-12 flex items-center justify-center bg-brand-primary/10 text-brand-primary rounded-full font-semibold uppercase">
                   {customerName.substring(0, 2)}
                 </div>
                 <div>
@@ -556,8 +900,10 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status</span>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold whitespace-nowrap capitalize">
-                    {order.payment_status}
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap capitalize ${
+                    order.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {(order.payment_status || 'unknown').replace(/_/g, ' ')}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -567,6 +913,60 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                     {order.metadata?.moolre_reference || order.payment_transaction_id || 'N/A'}
                   </span>
                 </div>
+                {order.payment_status !== 'paid' && (
+                  <div className="pt-3 border-t border-gray-200 space-y-2">
+                    {(order.payment_method === 'invoice' ||
+                      order.payment_status === 'awaiting_confirmation' ||
+                      order.metadata?.payment_channel === 'invoice') && (
+                      <>
+                        <p className="text-sm text-gray-600">
+                          {order.payment_status === 'awaiting_confirmation'
+                            ? 'Customer tapped “I’ve paid”. Confirm after you see the transfer.'
+                            : 'Electronic invoice. Confirm when bank/MoMo payment lands.'}
+                        </p>
+                        {order.metadata?.payment_sent_note ? (
+                          <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+                            Customer note: {order.metadata.payment_sent_note}
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={handleConfirmManualPayment}
+                          disabled={confirmingPayment}
+                          className="w-full bg-brand-primary hover:bg-[#0d2747] text-white py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                        >
+                          {confirmingPayment ? 'Confirming…' : 'Confirm payment received'}
+                        </button>
+                      </>
+                    )}
+                    {order.payment_method === 'moolre' && (
+                      <>
+                        <p className="text-sm text-gray-600">
+                          If the customer already paid via MoMo, verify with Moolre.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleVerifyPayment}
+                          disabled={verifyingPayment}
+                          className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                        >
+                          {verifyingPayment ? 'Verifying…' : 'Verify payment with Moolre'}
+                        </button>
+                      </>
+                    )}
+                    {verifyMessage ? (
+                      <p className="text-sm text-gray-700">{verifyMessage}</p>
+                    ) : null}
+                    <Link
+                      href={`/order/${encodeURIComponent(order.order_number)}?email=${encodeURIComponent(order.email || '')}`}
+                      target="_blank"
+                      className="block text-center text-sm font-semibold text-brand-primary hover:underline"
+                    >
+                      Open customer invoice page
+                    </Link>
+                  </div>
+                )}
+
               </div>
             </div>
 
@@ -578,7 +978,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
               <button
                 onClick={handleResendNotification}
                 disabled={resendingNotification}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
+                className="w-full bg-brand-primary hover:bg-brand-accent text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
               >
                 {resendingNotification ? (
                   <>
@@ -605,19 +1005,151 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                 placeholder="Add internal notes about this order..."
                 rows={4}
                 maxLength={500}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-accent/25 focus:border-brand-accent resize-none"
               />
               <button
                 onClick={() => handleUpdateStatus()}
                 disabled={statusUpdating}
                 className="w-full mt-3 bg-gray-700 hover:bg-gray-800 text-white py-2 rounded-lg font-medium transition-colors whitespace-nowrap disabled:opacity-50"
               >
-                Save Note
+                {statusUpdating ? 'Saving...' : 'Save note'}
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900">Cancel order</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              This keeps the order record. It does not delete payment history. Type CANCEL to confirm.
+            </p>
+            {order.payment_status === 'paid' || order.payment_status === 'awaiting_confirmation' ? (
+              <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                Warning: payment status is {order.payment_status}. Only cancel if you have handled money with the customer.
+              </p>
+            ) : null}
+            <label className="mt-4 block text-sm font-semibold text-gray-900">
+              Reason
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={3}
+                className="mt-1 w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-sm"
+                placeholder="Customer never paid / wrong product / deal rejected…"
+              />
+            </label>
+            <label className="mt-3 block text-sm font-semibold text-gray-900">
+              Type CANCEL
+              <input
+                value={cancelConfirm}
+                onChange={(e) => setCancelConfirm(e.target.value)}
+                className="mt-1 w-full rounded-lg border-2 border-gray-300 px-3 py-2 font-mono text-sm uppercase"
+                placeholder="CANCEL"
+              />
+            </label>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(false)}
+                className="flex-1 rounded-lg border-2 border-gray-300 py-2.5 text-sm font-semibold"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                disabled={cancelling || cancelConfirm.trim().toUpperCase() !== 'CANCEL' || cancelReason.trim().length < 5}
+                onClick={handleCancelOrder}
+                className="flex-1 rounded-lg bg-red-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {cancelling ? 'Cancelling…' : 'Confirm cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {amendItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900">Amend variant</h3>
+            <p className="mt-1 text-sm text-gray-600">{amendItem.product_name}</p>
+            <p className="text-xs text-gray-500">
+              Current: {amendItem.variant_name || 'None'} · GH¢{Number(amendItem.unit_price || 0).toFixed(2)}
+            </p>
+
+            {loadingVariants ? (
+              <p className="mt-4 text-sm text-gray-500">Loading options…</p>
+            ) : (
+              <label className="mt-4 block text-sm font-semibold text-gray-900">
+                New option
+                <select
+                  value={amendVariantId}
+                  onChange={(e) => setAmendVariantId(e.target.value)}
+                  className="mt-1 w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Select…</option>
+                  {amendVariants.map((v) => {
+                    const label = [v.option2, v.name || v.option1].filter(Boolean).join(' / ') || v.name || v.id;
+                    return (
+                      <option key={v.id} value={v.id}>
+                        {label} · GH¢{Number(v.price || 0).toFixed(2)}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            )}
+
+            {amendVariantId && (() => {
+              const v = amendVariants.find((x) => x.id === amendVariantId);
+              if (!v) return null;
+              const qty = Math.max(1, Number(amendItem.quantity) || 1);
+              const delta = Number(v.price) * qty - Number(amendItem.total_price || amendItem.unit_price * qty || 0);
+              return (
+                <p className="mt-2 text-sm text-brand-primary font-semibold">
+                  {Math.abs(delta) < 0.009
+                    ? 'Same price'
+                    : delta > 0
+                      ? `Customer would owe +GH¢${delta.toFixed(2)}`
+                      : `Credit GH¢${Math.abs(delta).toFixed(2)}`}
+                </p>
+              );
+            })()}
+
+            <label className="mt-3 block text-sm font-semibold text-gray-900">
+              Reason
+              <textarea
+                value={amendReason}
+                onChange={(e) => setAmendReason(e.target.value)}
+                rows={2}
+                className="mt-1 w-full rounded-lg border-2 border-gray-300 px-3 py-2 text-sm"
+                placeholder="Customer WhatsApp request / stock finished / wrong color…"
+              />
+            </label>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setAmendItem(null)}
+                className="flex-1 rounded-lg border-2 border-gray-300 py-2.5 text-sm font-semibold"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                disabled={amending || !amendVariantId || amendReason.trim().length < 5}
+                onClick={handleAmendItem}
+                className="flex-1 rounded-lg bg-brand-primary py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {amending ? 'Saving…' : 'Save amendment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

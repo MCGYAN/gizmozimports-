@@ -1,157 +1,94 @@
 import Link from 'next/link';
 
 export default function ShippingPage() {
-  const deliveryOptions = [
-    { id: 'pickup', type: 'Pickup', time: 'Within 72hrs (excl. Sunday)', cost: 'As quoted', description: 'After confirmation. Pickup location shown at confirmation stage.', icon: 'ri-store-2-line' },
-    { id: 'free-delivery', type: 'Free Delivery', time: 'Tue/Fri only', cost: 'FREE (min 5% discount)', description: 'Minimum 5% discount on total as Free Delivery Discount. Orders confirmed before noon of preceding delivery day; after noon delivered next available day.', icon: 'ri-truck-line' },
-    { id: 'sole-express', type: 'Sole Express', time: 'Daily', cost: 'As quoted', description: 'Fresh produce/bakery/meat/frozen/seafood/fish/poultry MUST use Express. Delivery within 2hr, 6hr, 12hr, 24hr or 48hr after confirmation.', icon: 'ri-time-line' },
-    { id: 'joint-express', type: 'Joint Express', time: 'Daily', cost: 'Shared fee', description: 'Share delivery fee with neighbor/colleague; items remain private. Same perishable rule. 2hr, 6hr, 12hr, 24hr or 48hr after confirmation.', icon: 'ri-group-line' },
-  ];
-
-  const zones = [
-    {
-      zone: 'Zone 1 - Accra Metro',
-      areas: 'East Legon, Osu, Labone, Airport, Dzorwulu, Cantonments, Adabraka, Tema',
-      standard: '1-2 days',
-      express: 'Next day'
-    },
-    {
-      zone: 'Zone 2 - Greater Accra',
-      areas: 'Madina, Legon, Haatso, Achimota, Dansoman, Spintex, Teshie, Kasoa',
-      standard: '2-3 days',
-      express: 'Next day'
-    },
-    {
-      zone: 'Zone 3 - Major Cities',
-      areas: 'Kumasi, Takoradi, Cape Coast, Tamale, Sunyani, Ho, Koforidua',
-      standard: '3-4 days',
-      express: '1-2 days'
-    },
-    {
-      zone: 'Zone 4 - Other Areas',
-      areas: 'All other locations within Ghana',
-      standard: '4-5 days',
-      express: 'Not available'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-white">
-      <div className="bg-brand-purple-light/20 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-brand-black mb-6">Shipping & Delivery</h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Pickup, free delivery (Tue/Fri), Sole Express, and Joint Express across Ghana.
-            </p>
-          </div>
+      <div className="store-page-header py-16">
+        <div className="store-container relative z-10 text-center">
+          <p className="store-eyebrow mb-3">Delivery</p>
+          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+            Your order gets home safe
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/80">
+            We move your import from China to Ghana. You always know where it is.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Delivery Options</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {deliveryOptions.map((option) => (
-              <div key={option.id} id={option.id} className="scroll-mt-24 bg-white border-2 border-gray-200 p-8 rounded-2xl hover:border-brand-purple hover:shadow-lg transition-all">
-                <div className="w-14 h-14 bg-brand-purple-light/20 rounded-full flex items-center justify-center mb-6">
-                  <i className={`${option.icon} text-2xl text-brand-purple`}></i>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{option.type}</h3>
-                <div className="text-brand-purple font-bold mb-2">{option.cost}</div>
-                <div className="text-gray-600 font-medium mb-4">{option.time}</div>
-                <p className="text-gray-600 leading-relaxed text-sm">{option.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-brand-purple-light/20 border-2 border-brand-purple-light rounded-2xl p-8 mb-16 text-center">
-          <div className="w-16 h-16 bg-brand-purple rounded-full flex items-center justify-center mx-auto mb-4">
-            <i className="ri-gift-line text-3xl text-white"></i>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">Free Standard Shipping</h3>
-          <p className="text-lg text-gray-600">
-            Spend GHS 300 or more and get <span className="font-bold text-brand-purple">FREE standard delivery</span> anywhere in Ghana
-          </p>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Delivery Zones & Timeframes</h2>
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Zone</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Areas Covered</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Standard</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Express</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {zones.map((zone, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900">{zone.zone}</td>
-                      <td className="px-6 py-4 text-gray-600 text-sm">{zone.areas}</td>
-                      <td className="px-6 py-4 text-gray-900">{zone.standard}</td>
-                      <td className="px-6 py-4 text-gray-900">{zone.express}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="store-container store-section">
+        <section className="mb-16 overflow-hidden rounded-3xl border border-brand-primary/10 bg-gradient-to-br from-brand-primary to-[#071529] p-6 text-white sm:p-8">
+          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+                Already buying in China?
+              </p>
+              <h2 className="mt-2 font-heading text-2xl font-bold sm:text-3xl">
+                Send your supplier packages through Gizmoz Trades
+              </h2>
+              <p className="mt-3 max-w-2xl leading-relaxed text-white/75">
+                Create an account to receive your personal shipping mark and our China warehouse
+                address. Register the supplier tracking number, then follow your shipment to Ghana.
+              </p>
             </div>
+            <Link
+              href="/account?tab=warehouse"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-accent px-6 font-bold text-white"
+            >
+              Get my shipping mark
+            </Link>
           </div>
-        </div>
+        </section>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        <div className="mb-16 grid gap-8 md:grid-cols-2">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">How Shipping Works</h2>
+            <h2 className="mb-6 text-3xl font-bold text-gray-900">What happens after you order</h2>
             <div className="space-y-6">
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-brand-purple-light/30 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-brand-purple">1</span>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-light">
+                  <span className="font-bold text-brand-primary">1</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-2">Order Processing</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Orders placed before 2pm are processed same day. We carefully pack your items and prepare them for dispatch.
+                  <h3 className="mb-2 font-bold text-gray-900">You pay and we confirm</h3>
+                  <p className="leading-relaxed text-gray-600">
+                    Pay by Mobile Money for smaller carts, or by invoice transfer for bigger ones.
+                    When payment is confirmed, we start your import.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-brand-purple-light/30 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-brand-purple">2</span>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-light">
+                  <span className="font-bold text-brand-primary">2</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-2">Dispatch</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Your order is handed to our trusted delivery partner. You'll receive a tracking number via email and SMS.
+                  <h3 className="mb-2 font-bold text-gray-900">We source and ship</h3>
+                  <p className="leading-relaxed text-gray-600">
+                    We buy from trusted suppliers in China and move your goods toward Ghana.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-brand-purple-light/30 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-brand-purple">3</span>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-light">
+                  <span className="font-bold text-brand-primary">3</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-2">Track Your Order</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Use your tracking number to monitor your delivery in real-time. You'll get updates at each stage.
+                  <h3 className="mb-2 font-bold text-gray-900">You stay updated</h3>
+                  <p className="leading-relaxed text-gray-600">
+                    Sign in with the same email you used at checkout to see your order journey,
+                    or use Find my order in the footer.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-brand-purple-light/30 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-brand-purple">4</span>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-light">
+                  <span className="font-bold text-brand-primary">4</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-2">Delivery</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Our delivery partner will contact you before arrival. Sign for your package and enjoy your purchase!
+                  <h3 className="mb-2 font-bold text-gray-900">It arrives in Ghana</h3>
+                  <p className="leading-relaxed text-gray-600">
+                    Your import clears and becomes ready for pickup or delivery. We handle the hard part.
                   </p>
                 </div>
               </div>
@@ -159,118 +96,127 @@ export default function ShippingPage() {
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Important Information</h2>
-            <div className="bg-gray-50 rounded-2xl p-6 space-y-6">
+            <h2 className="mb-6 text-3xl font-bold text-gray-900">Good to know</h2>
+            <div className="space-y-6 rounded-2xl bg-gray-50 p-6">
               <div>
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                  <i className="ri-time-line text-brand-purple"></i>
-                  Cut-off Times
+                <h3 className="mb-2 flex items-center gap-2 font-bold text-gray-900">
+                  <i className="ri-time-line text-brand-primary"></i>
+                  Timelines vary
                 </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  Orders placed before 2pm are dispatched same day. Orders after 2pm are dispatched next business day.
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Import timing depends on the product and how it ships. We update your order as
+                  it moves. Ask us if you need a clearer estimate before you pay.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                  <i className="ri-calendar-line text-brand-purple"></i>
-                  Business Days
+                <h3 className="mb-2 flex items-center gap-2 font-bold text-gray-900">
+                  <i className="ri-calendar-line text-brand-primary"></i>
+                  Clearing in Ghana
                 </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  Delivery timeframes exclude weekends and public holidays. We process orders Monday to Friday.
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Goods coming into Ghana are cleared before pickup or delivery. We keep you posted
+                  when that stage starts.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                  <i className="ri-phone-line text-brand-purple"></i>
-                  Delivery Contact
+                <h3 className="mb-2 flex items-center gap-2 font-bold text-gray-900">
+                  <i className="ri-store-2-line text-brand-primary"></i>
+                  Pickup or delivery
                 </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  Our delivery partner will call you before arrival. Please ensure your phone number is correct and reachable.
+                <p className="text-sm leading-relaxed text-gray-600">
+                  When your package is ready in Ghana, open Deliveries in your account and choose
+                  pickup or delivery. We call to confirm the arrangement and any delivery cost.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                  <i className="ri-home-line text-brand-purple"></i>
-                  Failed Deliveries
+                <h3 className="mb-2 flex items-center gap-2 font-bold text-gray-900">
+                  <i className="ri-phone-line text-brand-primary"></i>
+                  We contact you
                 </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  If you're unavailable, we'll attempt delivery twice. After that, the package is held at a collection point for 5 days.
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Before final handoff we reach out. Keep your phone number up to date.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                  <i className="ri-secure-payment-line text-brand-purple"></i>
-                  Package Security
+                <h3 className="mb-2 flex items-center gap-2 font-bold text-gray-900">
+                  <i className="ri-whatsapp-line text-brand-primary"></i>
+                  Need help sooner?
                 </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  All packages are insured during transit. Report any damage or missing items within 48 hours of delivery.
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Message us on WhatsApp or use the contact page. Share your order number if you have it.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Order Tracking</h2>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            Track your order anytime using your order number and email address. You'll see real-time updates including:
+        <div className="mb-16 rounded-2xl border border-gray-200 bg-white p-8">
+          <h2 className="mb-6 text-3xl font-bold text-gray-900">Never wonder where your order is</h2>
+          <p className="mb-6 leading-relaxed text-gray-600">
+            Your account shows the real import journey. Typical steps look like this:
           </p>
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="text-center">
-              <div className="w-12 h-12 bg-brand-purple-light/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i className="ri-checkbox-circle-line text-2xl text-brand-purple"></i>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-light">
+                <i className="ri-checkbox-circle-line text-2xl text-brand-primary"></i>
               </div>
-              <p className="font-medium text-gray-900">Order Confirmed</p>
+              <p className="font-medium text-gray-900">Payment confirmed</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-brand-purple-light/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i className="ri-package-line text-2xl text-brand-purple"></i>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+                <i className="ri-shopping-bag-3-line text-2xl text-amber-700"></i>
               </div>
-              <p className="font-medium text-gray-900">Processing</p>
+              <p className="font-medium text-gray-900">Sourcing in China</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i className="ri-truck-line text-2xl text-purple-700"></i>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sky-100">
+                <i className="ri-ship-line text-2xl text-sky-700"></i>
               </div>
-              <p className="font-medium text-gray-900">Out for Delivery</p>
+              <p className="font-medium text-gray-900">On the way to Ghana</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-brand-purple-light/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i className="ri-gift-line text-2xl text-brand-purple"></i>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                <i className="ri-home-smile-line text-2xl text-emerald-700"></i>
               </div>
-              <p className="font-medium text-gray-900">Delivered</p>
+              <p className="font-medium text-gray-900">Ready or delivered</p>
             </div>
           </div>
-          <div className="mt-8 text-center">
+          <div className="mt-8 flex flex-wrap justify-center gap-3 text-center">
+            <Link
+              href="/account"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-primary px-8 py-4 font-medium text-white transition-colors hover:bg-[#0d2747]"
+            >
+              <i className="ri-user-line"></i>
+              Open my orders
+            </Link>
             <Link
               href="/order-tracking"
-              className="inline-flex items-center gap-2 bg-brand-purple text-white px-8 py-4 rounded-full font-medium hover:bg-brand-purple-dark transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border-2 border-slate-200 bg-white px-8 py-4 font-medium text-brand-primary transition-colors hover:border-brand-accent"
             >
-              <i className="ri-map-pin-line"></i>
-              Track Your Order
+              Find my order
             </Link>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-brand-purple to-brand-purple-dark rounded-2xl p-8 text-white text-center">
-          <h2 className="text-3xl font-bold mb-4">Need Help with Your Delivery?</h2>
-          <p className="text-white/90 mb-6 leading-relaxed">
-            Questions about shipping costs, delivery times, or tracking? Our customer service team is here to help.
+        <div className="rounded-2xl bg-gradient-to-br from-brand-primary to-[#050f1f] p-8 text-center text-white">
+          <h2 className="mb-4 text-3xl font-bold">Questions about delivery?</h2>
+          <p className="mb-6 leading-relaxed text-white/80">
+            Ask about timing, pickup, or where your order stands.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-white text-brand-purple px-6 py-3 rounded-full font-medium hover:bg-brand-purple-light/20 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-blue-50"
             >
               Contact Support
             </Link>
             <Link
               href="/faqs"
-              className="inline-flex items-center gap-2 bg-brand-purple text-white px-6 py-3 rounded-full font-medium hover:bg-brand-purple-dark transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-accent px-6 py-3 font-medium text-white transition-colors hover:bg-[#e85f12]"
             >
               View FAQs
             </Link>

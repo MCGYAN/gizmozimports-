@@ -27,9 +27,9 @@ export default function MobileSearchOverlay({ isOpen, onClose }: MobileSearchOve
   ];
 
   const searchSuggestions = [
-    { name: 'Summer Floral Dress', category: 'Women\'s Clothing', price: 'GH₵289', image: 'https://picsum.photos/seed/mob1/80/80' },
-    { name: 'Classic Leather Handbag', category: 'Bags', price: 'GH₵459', image: 'https://picsum.photos/seed/mob2/80/80' },
-    { name: 'Designer Sunglasses', category: 'Accessories', price: 'GH₵199', image: 'https://picsum.photos/seed/mob3/80/80' }
+    { name: 'Summer Floral Dress', category: 'Women\'s Clothing', price: 'GH¢289', image: 'https://picsum.photos/seed/ph-MobileSearchOverlay-1/80/80' },
+    { name: 'Classic Leather Handbag', category: 'Bags', price: 'GH¢459', image: 'https://picsum.photos/seed/ph-MobileSearchOverlay-2/80/80' },
+    { name: 'Designer Sunglasses', category: 'Accessories', price: 'GH¢199', image: 'https://picsum.photos/seed/ph-MobileSearchOverlay-3/80/80' }
   ];
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function MobileSearchOverlay({ isOpen, onClose }: MobileSearchOve
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white z-50 lg:hidden overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-white md:hidden">
       <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
         <div className="flex items-center space-x-3">
           <button

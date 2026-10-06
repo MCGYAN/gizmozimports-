@@ -1,0 +1,589 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useParams, useSearchParams } from 'next/navigation';
+import InvoiceDocument from '@/components/InvoiceDocument';
+import ScaledDocumentPreview from '@/components/ScaledDocumentPreview';
+import { downloadElementAsPdf } from '@/lib/download-pdf';
+import {
+  accountOrderStatusIndex,
+  accountOrderStatusTone,
+  deriveAccountOrderStatus,
+  visibleAccountOrderStatusSteps,
+  type AccountOrderPackageSummary,
+} from '@/lib/account-order-status';
+import { formatMoney, isInvoiceExpired } from '@/lib/payment-routing';
+import { resolvePaymentReference } from '@/lib/payment-reference';
+import { buildWhatsAppHref, resolveContactWhatsApp } from '@/lib/store-config';
+import {
+  CheckCircle2,
+  Clock,
+  Download,
+  MessageCircle,
+  Package,
+  Printer,
+  RefreshCcw,
+  ShieldCheck,
+  Truck,
+} from 'lucide-react';
+
+export default function OrderHubPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const orderNumber = decodeURIComponent(String(params.orderNumber || ''));
+  const emailFromUrl = searchParams.get('email') || '';
+
+  const [email, setEmail] = useState(emailFromUrl);
+  const [order, setOrder] = useState<any>(null);
+  const [packages, setPackages] = useState<AccountOrderPackageSummary[]>([]);
+  const [loading, setLoading] = useState(Boolean(emailFromUrl));
+  const [error, setError] = useState('');
+  const [note, setNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [autoDownloadHint, setAutoDownloadHint] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  const loadOrder = useCallback(async (orderNum: string, mail: string) => {
+    setLoading(true);
+    setError('');
+    try {
+      const [res, shippingRes] = await Promise.all([
+        fetch(
+          `/api/orders/lookup?order=${encodeURIComponent(orderNum)}&email=${encodeURIComponent(mail.trim())}`,
+        ),
+        fetch(
+          `/api/shipping/packages?order=${encodeURIComponent(orderNum)}&email=${encodeURIComponent(
+            mail.trim(),
+          )}`,
+        ),
+      ]);
+      const data = await res.json();
+      const shippingData = await shippingRes.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || 'Could not load order');
+        setOrder(null);
+        return;
+      }
+      setOrder(data.order);
+      const pkgs = shippingRes.ok ? shippingData.packages || [] : [];
+      setPackages(
+        pkgs.map((pkg: any) => ({
+          id: pkg.id,
+          package_name: pkg.package_name,
+          tracking_id: pkg.tracking_id,
+          status: pkg.status,
+          freight_included: Boolean(pkg.freight_included),
+          final_usd_to_ghs: pkg.final_usd_to_ghs ?? null,
+          shipping_payment_status: pkg.shipping_payment_status ?? null,
+          final_shipping_ghs: pkg.final_shipping_ghs ?? null,
+          estimated_shipping_usd: pkg.estimated_shipping_usd ?? null,
+        })),
+      );
+    } catch {
+      setError('Something went wrong. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (orderNumber && emailFromUrl) loadOrder(orderNumber, emailFromUrl);
+  }, [orderNumber, emailFromUrl, loadOrder]);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  const orderStatus = useMemo(() => {
+    if (!order) return null;
+    const openShippingInvoiceId =
+      packages.find(
+        (pkg) =>
+          !pkg.freight_included &&
+          Boolean(pkg.final_usd_to_ghs) &&
+          pkg.shipping_payment_status !== 'paid',
+      )?.id || null;
+    return deriveAccountOrderStatus(order, packages, openShippingInvoiceId);
+  }, [order, packages]);
+
+  const statusSteps = useMemo(() => {
+    if (!orderStatus) return [];
+    const needsShippingBill = packages.some(
+      (pkg) => !pkg.freight_included && Boolean(pkg.final_usd_to_ghs || pkg.estimated_shipping_usd),
+    );
+    return visibleAccountOrderStatusSteps(
+      orderStatus.key,
+      packages.length > 0 || orderStatus.key === 'needs_packing',
+      needsShippingBill,
+    );
+  }, [orderStatus, packages]);
+
+  const packageCount = packages.length;
+  const statusTone = accountOrderStatusTone(orderStatus?.key || 'awaiting_payment');
+  const dueAt = order?.metadata?.invoice_due_at as string | undefined;
+  const expired = isInvoiceExpired(dueAt);
+  const msLeft = dueAt ? new Date(dueAt).getTime() - now : 0;
+  const hoursLeft = Math.max(0, Math.floor(msLeft / 3600000));
+  const minsLeft = Math.max(0, Math.floor((msLeft % 3600000) / 60000));
+
+  const waHref = useMemo(() => {
+    const base = buildWhatsAppHref(resolveContactWhatsApp(null));
+    if (!base || !orderNumber) return base;
+    const text = encodeURIComponent(`Hi Gizmoz Trades, I need help with order ${orderNumber}.`);
+    return `${base}${base.includes('?') ? '&' : '?'}text=${text}`;
+  }, [orderNumber]);
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setError('Enter the email used at checkout.');
+      return;
+    }
+    loadOrder(orderNumber, email);
+  };
+
+  const handlePaymentSent = async () => {
+    if (!order) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/orders/payment-sent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber: order.order_number,
+          email: order.email,
+          note,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Could not submit');
+        return;
+      }
+      setOrder(data.order);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handlePrint = () => window.print();
+
+  const handleDownloadPdf = useCallback(async () => {
+    const root = document.getElementById('invoice-print');
+    const official = root?.querySelector<HTMLElement>('.invoice-official');
+    if (!official) return false;
+    setDownloading(true);
+    try {
+      await downloadElementAsPdf(official, `${orderNumber || 'invoice'}.pdf`);
+      return true;
+    } catch (err) {
+      console.error('[order pdf]', err);
+      alert('Could not download PDF. Try Print instead.');
+      return false;
+    } finally {
+      setDownloading(false);
+    }
+  }, [orderNumber]);
+
+  // Get invoice on checkout → land here, show invoice, and save the PDF.
+  // Intent is carried by ?download=1 and/or sessionStorage (more reliable).
+  // Skip on phones: Safari/WebViews often hang on html2canvas.
+  const autoDownloadStarted = useRef(false);
+  useEffect(() => {
+    if (!order || !orderNumber) return;
+
+    const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
+    const mobileLike =
+      /iPhone|iPad|iPod|Android/i.test(ua) ||
+      (typeof navigator !== 'undefined' &&
+        navigator.maxTouchPoints > 1 &&
+        /Mac/i.test(ua));
+    if (mobileLike) {
+      try {
+        sessionStorage.removeItem('gizmoz-auto-download-invoice');
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
+    let fromQuery = false;
+    try {
+      fromQuery = searchParams.get('download') === '1';
+    } catch {
+      fromQuery = false;
+    }
+
+    let fromStorage = false;
+    try {
+      fromStorage = sessionStorage.getItem('gizmoz-auto-download-invoice') === orderNumber;
+    } catch {
+      fromStorage = false;
+    }
+
+    if (!fromQuery && !fromStorage) return;
+    if (autoDownloadStarted.current) return;
+
+    setAutoDownloadHint(true);
+    let cancelled = false;
+    let tries = 0;
+
+    const clearIntent = () => {
+      try {
+        sessionStorage.removeItem('gizmoz-auto-download-invoice');
+      } catch {
+        /* ignore */
+      }
+      if (typeof window !== 'undefined' && window.location.search.includes('download=')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('download');
+        window.history.replaceState({}, '', url.toString());
+      }
+    };
+
+    const attempt = async () => {
+      if (cancelled || autoDownloadStarted.current) return;
+
+      const official = document
+        .getElementById('invoice-print')
+        ?.querySelector<HTMLElement>('.invoice-official');
+
+      if (!official) {
+        if (tries++ < 40) {
+          window.setTimeout(() => {
+            void attempt();
+          }, 150);
+        }
+        return;
+      }
+
+      // Only lock once the node exists so React Strict Mode remounts can retry.
+      autoDownloadStarted.current = true;
+      clearIntent();
+      const ok = await handleDownloadPdf();
+      if (!ok) setAutoDownloadHint(true);
+      else setAutoDownloadHint(false);
+    };
+
+    // First paint after order state lands in the tree
+    const start = window.setTimeout(() => {
+      void attempt();
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(start);
+    };
+  }, [order, orderNumber, searchParams, handleDownloadPdf]);
+
+  if (!orderNumber) {
+    return (
+      <main className="store-page py-16 text-center">
+        <p>Missing order number.</p>
+        <Link href="/order-tracking" className="text-brand-primary underline">
+          Track an order
+        </Link>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-white to-[#eef2f7]">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 print:max-w-none print:px-0 print:py-0">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">Your order</p>
+            <h1 className="font-heading text-2xl font-bold text-brand-primary sm:text-3xl">
+              {orderNumber}
+            </h1>
+          </div>
+          {waHref ? (
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-sm font-bold text-white"
+            >
+              <MessageCircle className="h-4 w-4" /> WhatsApp help
+            </a>
+          ) : null}
+        </div>
+
+        {!order && (
+          <form onSubmit={handleUnlock} className="store-card mx-auto max-w-md space-y-4 p-6 print:hidden">
+            <p className="text-sm text-slate-600">
+              Enter the email you used at checkout to open your invoice, payment status, and tracking.
+            </p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-base focus:border-brand-accent focus:outline-none"
+              required
+            />
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-brand-primary py-3 font-bold text-white disabled:opacity-60"
+            >
+              {loading ? 'Opening…' : 'Open order'}
+            </button>
+          </form>
+        )}
+
+        {loading && !order ? (
+          <div className="flex justify-center py-16 print:hidden">
+            <RefreshCcw className="h-8 w-8 animate-spin text-brand-primary" />
+          </div>
+        ) : null}
+
+        {order ? (
+          <div className="space-y-6">
+            <section className="store-card grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:p-5 print:hidden">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="mt-0.5 h-5 w-5 text-brand-accent" />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Payment</p>
+                  <p className="font-bold capitalize text-brand-primary">
+                    {order.payment_status?.replace(/_/g, ' ')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Package className="mt-0.5 h-5 w-5 text-brand-accent" />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Order status</p>
+                  <span
+                    className={`mt-1 inline-flex rounded-full px-2.5 py-0.5 text-sm font-bold ${statusTone.badge}`}
+                  >
+                    {orderStatus?.title || 'Awaiting payment'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Clock className="mt-0.5 h-5 w-5 text-brand-accent" />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Invoice deadline</p>
+                  <p className="font-bold text-brand-primary">
+                    {order.payment_status === 'paid'
+                      ? 'Paid. Closed'
+                      : expired
+                        ? 'Expired'
+                        : dueAt
+                          ? `${hoursLeft}h ${minsLeft}m left`
+                          : '—'}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="store-card p-4 sm:p-8">
+              <div className="mb-6 flex flex-col gap-3 print:hidden sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-brand-primary">Invoice</h2>
+                  {autoDownloadHint ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      Saving your PDF… If nothing downloads, tap Download PDF below.
+                    </p>
+                  ) : null}
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:flex">
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-primary"
+                  >
+                    <Printer className="h-4 w-4" /> Print
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleDownloadPdf();
+                    }}
+                    disabled={downloading}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-accent px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                  >
+                    <Download className="h-4 w-4" />
+                    {downloading ? 'Preparing PDF…' : 'Download PDF'}
+                  </button>
+                </div>
+              </div>
+              <ScaledDocumentPreview>
+                <InvoiceDocument order={order} />
+              </ScaledDocumentPreview>
+            </section>
+
+            {order.payment_status !== 'paid' && (
+              <section className="store-card space-y-4 p-5 sm:p-8 print:hidden">
+                <h2 className="text-xl font-bold text-brand-primary">Pay this invoice</h2>
+                <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-700">
+                  <li>Transfer the total using one of the bank or MoMo accounts on the invoice.</li>
+                  <li>
+                    Optional: add code{' '}
+                    <span className="font-mono font-bold">
+                      {resolvePaymentReference(order.metadata?.payment_ref, order.order_number)}
+                    </span>{' '}
+                    on the transfer if you can. It helps us match your payment faster.
+                  </li>
+                  <li>Tap “I’ve paid” so we can confirm and start your import.</li>
+                </ol>
+
+                {order.payment_status === 'awaiting_confirmation' ? (
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                    <p className="text-sm font-medium">
+                      Payment marked as sent. Waiting for Gizmoz Trades to confirm on the dashboard.
+                    </p>
+                  </div>
+                ) : expired ? (
+                  <p className="text-sm text-red-600">
+                    This invoice expired. Message us on WhatsApp to renew the order.
+                  </p>
+                ) : (
+                  <>
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Optional: MoMo/bank reference or screenshot note"
+                      className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-base"
+                      rows={2}
+                    />
+                    <button
+                      type="button"
+                      disabled={submitting}
+                      onClick={handlePaymentSent}
+                      className="w-full rounded-xl bg-brand-primary py-4 text-lg font-bold text-white disabled:opacity-60 sm:w-auto sm:px-10"
+                    >
+                      {submitting ? 'Sending…' : 'I’ve paid'}
+                    </button>
+                  </>
+                )}
+              </section>
+            )}
+
+            {order.payment_status === 'paid' ? (
+              <section className="store-card flex items-start gap-3 border border-green-200 bg-green-50 p-5 print:hidden">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <div>
+                  <p className="font-bold text-green-900">Payment confirmed</p>
+                  <p className="text-sm text-green-800">
+                    Total {formatMoney(order.total || 0, order.currency)}. Your import journey is active.
+                  </p>
+                </div>
+              </section>
+            ) : null}
+
+            <section className="store-card p-5 sm:p-8 print:hidden">
+              <div className="mb-2 flex items-center gap-2">
+                <Truck className="h-5 w-5 text-brand-accent" />
+                <h2 className="text-xl font-bold text-brand-primary">Order status</h2>
+              </div>
+              <p className="mb-2 text-sm text-slate-500">
+                Live tracking linked to what Gizmoz Trades sets on the dashboard. Package CBM and freight
+                details stay under shipping packages.
+              </p>
+              {orderStatus?.nextHint ? (
+                <p className={`mb-6 rounded-xl px-4 py-3 text-sm font-semibold ${statusTone.panel} ${statusTone.title}`}>
+                  Now at {orderStatus.title}. {orderStatus.nextHint}
+                </p>
+              ) : (
+                <div className="mb-6" />
+              )}
+              <ol className="space-y-4">
+                {statusSteps.map((s) => {
+                  const idx = accountOrderStatusIndex(s.key);
+                  const current = orderStatus ? accountOrderStatusIndex(orderStatus.key) : 0;
+                  const done = idx >= 0 && current >= 0 && idx < current;
+                  const active = orderStatus?.key === s.key;
+                  const stepTone = accountOrderStatusTone(s.key);
+                  return (
+                    <li key={s.key} className="flex gap-3">
+                      <div
+                        className={`mt-1 h-3 w-3 shrink-0 rounded-full ${
+                          active
+                            ? stepTone.dot
+                            : done
+                              ? 'bg-slate-500'
+                              : 'bg-slate-200'
+                        }`}
+                      />
+                      <div>
+                        <p className={`font-semibold ${active ? stepTone.title : 'text-slate-800'}`}>
+                          {s.title}
+                        </p>
+                        <p className="text-sm text-slate-500">{s.description}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              {order.metadata?.tracking_number ? (
+                <p className="mt-4 text-sm text-slate-600">
+                  Tracking ID:{' '}
+                  <span className="font-mono font-bold">{order.metadata.tracking_number}</span>
+                </p>
+              ) : null}
+              {order.payment_status === 'paid' ? (
+                <Link
+                  href={`/order/${encodeURIComponent(order.order_number)}/shipping?email=${encodeURIComponent(
+                    order.email,
+                  )}`}
+                  className="mt-5 flex items-center justify-between rounded-xl border border-brand-primary/15 bg-brand-light/50 px-4 py-3 text-brand-primary transition hover:border-brand-accent/40"
+                >
+                  <span className="flex items-center gap-3">
+                    <Package className="h-5 w-5 text-brand-accent" />
+                    <span>
+                      <span className="block text-sm font-bold">
+                        {packageCount > 0
+                          ? `View ${packageCount} shipping package${packageCount === 1 ? '' : 's'}`
+                          : 'View shipping packages'}
+                      </span>
+                      <span className="block text-xs text-slate-500">
+                        {packageCount > 0
+                          ? 'See what is inside each box, CBM, freight and arrival'
+                          : 'Package details appear after the warehouse packs your goods'}
+                      </span>
+                    </span>
+                  </span>
+                  <span aria-hidden>›</span>
+                </Link>
+              ) : null}
+              <Link
+                href="/account?tab=status"
+                className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-primary/30"
+              >
+                <span>Open Order status in your account</span>
+                <span aria-hidden>›</span>
+              </Link>
+            </section>
+
+          </div>
+        ) : null}
+      </div>
+
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #invoice-print,
+          #invoice-print * {
+            visibility: visible;
+          }
+          #invoice-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 24px;
+          }
+        }
+      `}</style>
+    </main>
+  );
+}

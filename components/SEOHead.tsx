@@ -1,4 +1,6 @@
 import { Metadata } from 'next';
+import { SEO } from '@/lib/seo';
+import { pageMetadata } from '@/lib/page-metadata';
 
 interface SEOProps {
   title?: string;
@@ -6,6 +8,7 @@ interface SEOProps {
   keywords?: string[];
   ogImage?: string;
   ogType?: 'website' | 'product' | 'article';
+  path?: string;
   price?: number;
   currency?: string;
   availability?: string;
@@ -15,81 +18,40 @@ interface SEOProps {
   noindex?: boolean;
 }
 
+/** Prefer `pageMetadata` from `@/lib/page-metadata` for route layouts. */
 export function generateMetadata({
-  title = 'Affordable Online Shopping in Ghana',
-  description = 'Shop affordable, trusted products with Gizmoz Trades.',
+  title,
+  description,
   keywords = [],
-  ogImage = '/og-image.png',
-  ogType = 'website',
-  price,
-  currency = 'GHS',
-  availability,
-  category,
+  ogImage,
+  path = '/',
   publishedTime,
   author,
-  noindex = false
+  noindex = false,
+  ogType = 'website',
 }: SEOProps): Metadata {
-  const siteName = 'Gizmoz Trades';
-  const siteUrl = 'https://gizmoztrades.com';
-  const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
+  const base = pageMetadata(undefined, {
+    title: title || SEO.defaultTitle,
+    description: description || SEO.defaultDescription,
+    keywords,
+    ogImage,
+    path,
+    noindex,
+  });
 
-  const defaultKeywords = [
-    'online shopping ghana',
-    'affordable products ghana',
-    'buy online ghana',
-    'ecommerce ghana',
-    'fast delivery ghana',
-    'secure shopping'
-  ];
+  if (author) {
+    base.authors = [{ name: author }];
+  }
 
-  const allKeywords = [...new Set([...keywords, ...defaultKeywords])];
-
-  const metadata: Metadata = {
-    title: fullTitle,
-    description,
-    keywords: allKeywords.join(', '),
-    authors: author ? [{ name: author }] : undefined,
-    openGraph: {
-      title: fullTitle,
-      description,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
-      type: ogType as any,
-      siteName,
-      locale: 'en_GH'
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: fullTitle,
-      description,
-      images: [ogImage]
-    },
-    robots: noindex ? {
-      index: false,
-      follow: false
-    } : {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-image-preview': 'large',
-        'max-snippet': -1
-      }
-    },
-    alternates: {
-      canonical: siteUrl
-    }
-  };
-
-  if (ogType === 'article' && publishedTime) {
-    metadata.openGraph = {
-      ...metadata.openGraph,
+  if (ogType === 'article' && publishedTime && base.openGraph) {
+    base.openGraph = {
+      ...base.openGraph,
       type: 'article',
-      publishedTime
+      publishedTime,
     };
   }
 
-  return metadata;
+  return base;
 }
 
 export function generateProductSchema(product: {
@@ -114,7 +76,7 @@ export function generateProductSchema(product: {
     sku: product.sku,
     brand: {
       '@type': 'Brand',
-      name: product.brand || 'Gizmoz Trades'
+      name: product.brand || SEO.siteName
     },
     offers: {
       '@type': 'Offer',
@@ -159,22 +121,23 @@ export function generateBreadcrumbSchema(items: { name: string; url: string }[])
 }
 
 export function generateOrganizationSchema() {
+  const withLogo =
+    SEO.logoUrl && SEO.logoUrl.length > 0
+      ? { logo: SEO.logoUrl, image: SEO.logoUrl }
+      : {};
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Gizmoz Trades',
-    url: 'https://gizmoztrades.com',
-    logo: 'https://gizmoztrades.com/logo.svg',
+    name: SEO.siteName,
+    url: SEO.siteUrl,
+    ...withLogo,
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+233-XX-XXX-XXXX',
+      telephone: SEO.contact.phone,
       contactType: 'Customer Service',
       areaServed: 'GH',
       availableLanguage: ['English']
-    },
-    sameAs: [
-      'https://gizmoztrades.com'
-    ]
+    }
   };
 }
 
@@ -182,13 +145,13 @@ export function generateWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Gizmoz Trades',
-    url: 'https://gizmoztrades.com',
+    name: SEO.siteName,
+    url: SEO.siteUrl,
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://gizmoztrades.com/shop?search={search_term_string}'
+        urlTemplate: `${SEO.siteUrl}/shop?search={search_term_string}`
       },
       'query-input': 'required name=search_term_string'
     }

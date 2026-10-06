@@ -9,6 +9,8 @@ export type CartItem = {
     image: string;
     quantity: number;
     variant?: string;
+    /** Selected product_variants.id when the SKU has colors/sizes */
+    variantId?: string;
     slug: string;
     maxStock: number;
     moq?: number; // Minimum Order Quantity
@@ -16,7 +18,7 @@ export type CartItem = {
 
 type CartContextType = {
     cart: CartItem[];
-    addToCart: (item: CartItem) => void;
+    addToCart: (item: CartItem, options?: { openCart?: boolean }) => void;
     removeFromCart: (itemId: string, variant?: string) => void;
     updateQuantity: (itemId: string, quantity: number, variant?: string) => void;
     clearCart: () => void;
@@ -33,40 +35,80 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
 
-    // Load cart from localStorage on mount, with migration for legacy items
+    // Load cart from localStorage on mount, then drop items no longer in the catalog
     useEffect(() => {
         const savedCart = localStorage.getItem('cart');
+        let initialCart: CartItem[] = [];
+
         if (savedCart) {
             try {
                 const parsed: CartItem[] = JSON.parse(savedCart);
-                // Migrate legacy cart items: if `id` is not a UUID, it's likely a slug
                 const isValidUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-                const migratedCart = parsed.filter(item => {
-                    if (!item.id || !item.name || !item.price) return false; // Remove corrupted items
+                initialCart = parsed.filter((item) => {
+                    if (!item.id || !item.name || !item.price) return false;
                     if (!isValidUUID(item.id)) {
-                        // Legacy item with slug as id - ensure slug is set, then clear
-                        // These items will be resolved at checkout via the slug fallback
-                        // But best to remove them so users re-add with correct UUIDs
                         console.warn(`Removing legacy cart item with non-UUID id: ${item.id}`);
                         return false;
                     }
-                    // Ensure slug field exists
-                    if (!item.slug) {
-                        item.slug = item.id;
-                    }
+                    if (!item.slug) item.slug = item.id;
                     return true;
                 });
-                setCart(migratedCart);
-                // If items were removed, update localStorage immediately
-                if (migratedCart.length !== parsed.length) {
-                    localStorage.setItem('cart', JSON.stringify(migratedCart));
-                }
             } catch (e) {
                 console.error('Failed to parse cart:', e);
                 localStorage.removeItem('cart');
             }
         }
-        setIsInitialized(true);
+
+        const validateAgainstCatalog = async () => {
+            if (initialCart.length === 0) {
+                setIsInitialized(true);
+                return;
+            }
+
+            // Defer so homepage images/JS win the first network race on mobile.
+            await new Promise<void>((resolve) => {
+                const win = window as Window & {
+                    requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+                };
+                if (typeof win.requestIdleCallback === 'function') {
+                    win.requestIdleCallback(() => resolve(), { timeout: 2500 });
+                } else {
+                    window.setTimeout(() => resolve(), 1200);
+                }
+            });
+
+            try {
+                const ids = [...new Set(initialCart.map((item) => item.id))].slice(0, 40);
+                const res = await fetch(
+                    `/api/storefront/products?ids=${encodeURIComponent(ids.join(','))}&fields=id`,
+                );
+                if (!res.ok) {
+                    setCart(initialCart);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                const products: { id: string }[] = await res.json();
+                const activeIds = new Set(products.map((p) => p.id));
+                const validCart = initialCart.filter((item) => activeIds.has(item.id));
+
+                if (validCart.length !== initialCart.length) {
+                    const removed = initialCart.filter((item) => !activeIds.has(item.id));
+                    console.warn(
+                        'Removed stale cart items (no longer in store):',
+                        removed.map((i) => i.name)
+                    );
+                }
+
+                setCart(validCart);
+            } catch {
+                setCart(initialCart);
+            } finally {
+                setIsInitialized(true);
+            }
+        };
+
+        validateAgainstCatalog();
     }, []);
 
     // Save cart to localStorage whenever it changes
@@ -77,10 +119,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
     }, [cart, isInitialized]);
 
-    const addToCart = (newItem: CartItem) => {
+    const addToCart = (newItem: CartItem, options?: { openCart?: boolean }) => {
         setCart((prevCart) => {
             const existingItemIndex = prevCart.findIndex(
-                (item) => item.id === newItem.id && item.variant === newItem.variant
+                (item) =>
+                    item.id === newItem.id &&
+                    item.variant === newItem.variant &&
+                    (item.variantId || '') === (newItem.variantId || '')
             );
 
             if (existingItemIndex > -1) {
@@ -98,7 +143,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
             }
         });
 
-        setIsCartOpen(true); // Open cart when item is added
+        if (options?.openCart !== false) {
+            setIsCartOpen(true); // Open cart when item is added
+        }
     };
 
     const removeFromCart = (itemId: string, variant?: string) => {

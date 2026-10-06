@@ -1,20 +1,44 @@
 import { createClient } from '@supabase/supabase-js';
+import { createAuthStorage } from '@/lib/auth-remember';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+/**
+ * Public anon client (browser + server). Never uses the service role key.
+ *
+ * If NEXT_PUBLIC_SUPABASE_* are unset, we still create a client with placeholders so
+ * `next dev` / first paint does not crash. Network calls will fail until you add
+ * real values to `.env.local` (copy from `.env.example`).
+ */
+const PLACEHOLDER_URL = 'https://__set-env__.supabase.co';
+/** Minimal JWT-shaped string so @supabase/supabase-js accepts the client (requests will 401 until real key is set). */
+const PLACEHOLDER_ANON =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Il9fZW52X18iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMH0.placeholder';
 
-export const hasSupabaseEnv = Boolean(supabaseUrl && supabaseKey);
+const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-if (!hasSupabaseEnv) {
-    console.warn(
-        '[supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
-            'Running in frontend preview mode until env vars are added.'
-    );
+export const isSupabaseConfigured = Boolean(rawUrl && rawKey);
+
+const supabaseUrl = rawUrl || PLACEHOLDER_URL;
+const supabaseKey = rawKey || PLACEHOLDER_ANON;
+
+if (!isSupabaseConfigured) {
+    const msg =
+        'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — add them to .env.local (see .env.example). Using placeholder; auth and data requests will fail until configured.';
+    if (process.env.NODE_ENV === 'development') {
+        console.warn(`[supabase] ${msg}`);
+    } else {
+        console.error(`[supabase] ${msg}`);
+    }
 }
 
-// Use placeholders so local dev can boot before Supabase is configured.
-// Note: env vars may exist as empty strings in .env.local, so we use `||`.
-export const supabase = createClient(
-    supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseKey || 'placeholder-anon-key'
-);
+const browserAuthStorage =
+    typeof window !== 'undefined' ? createAuthStorage() : undefined;
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        ...(browserAuthStorage ? { storage: browserAuthStorage } : {}),
+    },
+});

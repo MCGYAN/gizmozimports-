@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { canAccessAdminPath } from '@/lib/admin-permissions';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function middleware(request: NextRequest) {
@@ -72,7 +73,7 @@ export async function middleware(request: NextRequest) {
         }
 
         // Verify the token is valid and user has admin/staff role
-        if (supabaseServiceKey) {
+        if (supabaseUrl && supabaseServiceKey) {
             try {
                 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
                     auth: { autoRefreshToken: false, persistSession: false }
@@ -87,17 +88,24 @@ export async function middleware(request: NextRequest) {
                     return NextResponse.redirect(loginUrl);
                 }
 
-                // Check role
+                // Check role + staff module permissions
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('role')
+                    .select('role, admin_permissions')
                     .eq('id', user.id)
                     .single();
 
-                if (!profile || (profile.role !== 'admin' && profile.role !== 'staff')) {
+                const role = profile?.role;
+                if (!profile || (role !== 'admin' && role !== 'staff')) {
                     const loginUrl = new URL('/admin/login', request.url);
                     loginUrl.searchParams.set('error', 'unauthorized');
                     return NextResponse.redirect(loginUrl);
+                }
+
+                if (!canAccessAdminPath(role, profile.admin_permissions, pathname)) {
+                    const homeUrl = new URL('/admin', request.url);
+                    homeUrl.searchParams.set('error', 'forbidden');
+                    return NextResponse.redirect(homeUrl);
                 }
 
                 // Auth passed — set user info in headers for downstream use
@@ -106,8 +114,10 @@ export async function middleware(request: NextRequest) {
 
             } catch (err) {
                 console.error('[Middleware] Auth check error:', err);
-                // On error, still allow through (client-side check is backup)
-                // But log it for monitoring
+                const loginUrl = new URL('/admin/login', request.url);
+                loginUrl.searchParams.set('redirect', pathname);
+                loginUrl.searchParams.set('error', 'session_error');
+                return NextResponse.redirect(loginUrl);
             }
         }
     }
@@ -117,7 +127,10 @@ export async function middleware(request: NextRequest) {
     // ============================================================
     if (pathname.startsWith('/api/')) {
         response.headers.set('X-Content-Type-Options', 'nosniff');
-        response.headers.set('Cache-Control', 'no-store');
+        // Public catalog APIs must stay cacheable. Private APIs stay uncached.
+        if (!pathname.startsWith('/api/storefront')) {
+            response.headers.set('Cache-Control', 'no-store');
+        }
     }
 
     return response;
