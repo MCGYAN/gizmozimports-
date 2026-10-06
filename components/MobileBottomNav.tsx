@@ -2,14 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
-import { useWishlist } from '@/context/WishlistContext';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { leadConfig } from '@/lib/leadConfig';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { cartCount } = useCart();
-  const { wishlistCount } = useWishlist();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -50,24 +47,25 @@ export default function MobileBottomNav() {
       iconInactive: 'ri-home-5-line',
     },
     {
-      href: '/shop',
-      label: 'Shop',
-      iconActive: 'ri-store-3-fill',
-      iconInactive: 'ri-store-3-line',
+      href: '/what-we-source',
+      label: 'Categories',
+      iconActive: 'ri-layout-grid-fill',
+      iconInactive: 'ri-layout-grid-line',
     },
     {
-      href: '/cart',
-      label: 'Cart',
-      iconActive: 'ri-shopping-cart-fill',
-      iconInactive: 'ri-shopping-cart-line',
-      badge: cartCount,
+      href: leadConfig.whatsappUrl(),
+      label: 'WhatsApp',
+      iconActive: 'ri-whatsapp-fill',
+      iconInactive: 'ri-whatsapp-line',
+      highlighted: true,
+      external: true,
     },
     {
-      href: '/wishlist',
-      label: 'Wishlist',
-      iconActive: 'ri-heart-3-fill',
-      iconInactive: 'ri-heart-3-line',
-      badge: wishlistCount,
+      href: leadConfig.telUrl(leadConfig.ghanaPhone),
+      label: 'Call',
+      iconActive: 'ri-phone-fill',
+      iconInactive: 'ri-phone-line',
+      external: true,
     },
     {
       href: '/account',
@@ -92,13 +90,19 @@ export default function MobileBottomNav() {
         <div className="bg-white/90 backdrop-blur-xl border-t border-gray-200/60 shadow-[0_-4px_30px_rgba(0,0,0,0.08)]">
           <div className={`grid grid-cols-5 ${isStandalone ? 'pb-6' : 'pb-1'} pt-1`}>
             {navItems.map((item) => {
-              const active = isActive(item.href);
+              const active = item.external ? false : isActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
                   className={`flex flex-col items-center justify-center py-2 transition-all duration-200 relative group active:scale-90 ${
-                    active ? 'text-blue-700' : 'text-gray-400'
+                    item.highlighted
+                      ? 'text-white'
+                      : active
+                        ? 'text-blue-700'
+                        : 'text-gray-400'
                   }`}
                   aria-label={item.label}
                   aria-current={active ? 'page' : undefined}
@@ -108,23 +112,20 @@ export default function MobileBottomNav() {
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-full transition-all duration-300" />
                   )}
                   
-                  <div className="relative w-7 h-7 flex items-center justify-center">
+                  <div
+                    className={`relative w-8 h-8 flex items-center justify-center rounded-full ${
+                      item.highlighted ? 'bg-brand-accent shadow-md' : ''
+                    }`}
+                  >
                     <i
                       className={`${active ? item.iconActive : item.iconInactive} text-[22px] transition-all duration-200 ${
                         active ? 'scale-110' : 'group-hover:scale-105'
                       }`}
                     />
-                    
-                    {/* Badge */}
-                    {item.badge !== undefined && item.badge > 0 && (
-                      <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm animate-scale-in">
-                        {item.badge > 99 ? '99+' : item.badge}
-                      </span>
-                    )}
                   </div>
                   
                   <span className={`text-[10px] font-semibold mt-0.5 transition-all duration-200 ${
-                    active ? 'opacity-100' : 'opacity-70'
+                    item.highlighted ? 'opacity-100 text-brand-accent' : active ? 'opacity-100' : 'opacity-70'
                   }`}>
                     {item.label}
                   </span>

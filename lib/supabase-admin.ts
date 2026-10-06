@@ -6,18 +6,20 @@ import { createClient } from '@supabase/supabase-js';
  * This bypasses RLS, so always verify the caller is authorized first.
  */
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Use fallbacks so `next build` can evaluate modules without env (CI / frontend-only preview).
+// Real admin routes still need SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL at runtime.
+const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://placeholder.supabase.co';
+const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || 'placeholder-service-role-key';
 
-if (!supabaseUrl) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL');
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    console.warn(
+        '[supabase-admin] SUPABASE_SERVICE_ROLE_KEY is not set — server admin DB calls will fail until configured.'
+    );
 }
 
-if (!supabaseServiceKey) {
-    console.error('CRITICAL: Missing SUPABASE_SERVICE_ROLE_KEY — admin operations will fail');
-}
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey || '', {
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
         autoRefreshToken: false,
         persistSession: false,

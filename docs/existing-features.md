@@ -1,8 +1,8 @@
 # Existing Features Inventory
 
-**Project:** E-commerce platform (MultiMey Supplies → rebranding to GSG Convenience Goods)  
+**Project:** E-commerce platform (legacy branding removed for anonymized template)  
 **Stack:** Next.js 15 App Router, TypeScript, TailwindCSS, Supabase, Remix Icons.  
-**Last inventory:** Before GSG storefront redesign.
+**Last inventory:** Before storefront redesign.
 
 ---
 
@@ -45,7 +45,7 @@
 | `/offline` | Offline page |
 | `/pwa-settings` | PWA settings |
 
-**Added for GSG:** `/referral-rewards`, `/gift-card` (placeholder pages). `/basket` redirects to `/cart`.
+**Added in redesign:** `/referral-rewards`, `/gift-card` (placeholder pages). `/basket` redirects to `/cart`.
 **Note:** No `/browse/[broad]`, `/categories/[main]`, `/categories/[main]/[sub]` hierarchy routes.
 
 ---
@@ -106,7 +106,7 @@
 
 ---
 
-## Theming (before GSG)
+## Theming (before redesign)
 
 - **Tailwind:** `brand` (blue), `fontFamily`: Outfit (sans), Playfair Display (serif), Pacifico (handwriting)
 - **globals.css:** Remix Icon CDN, animations (fadeInUp, shimmer, etc.), PWA and safe-area styles
@@ -121,4 +121,4 @@
 
 ---
 
-This inventory is the source of truth for what exists; the GSG redesign only changes storefront UI/layout/copy and adds new storefront components/routes where specified, without removing or breaking existing backend or admin behavior.
+This inventory is the source of truth for what exists; the redesign only changes storefront UI/layout/copy and adds new storefront components/routes where specified, without removing or breaking existing backend or admin behavior.

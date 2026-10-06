@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'gsg_promo_dismissed';
+const STORAGE_KEY = 'store_promo_dismissed';
 
-export default function GSGPromoBanner() {
+export default function PromoBanner() {
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function GSGPromoBanner() {
   if (dismissed) return null;
 
   return (
-    <div className="bg-gsg-purple text-white py-2.5 px-4 text-center text-sm relative">
+    <div className="bg-brand-purple text-white py-2.5 px-4 text-center text-sm relative">
       <p className="font-medium">
         🎁 Free gift for every purchase
       </p>

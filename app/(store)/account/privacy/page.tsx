@@ -16,7 +16,7 @@ export default function PrivacySettingsPage() {
       const userData = {
         personalInfo: {
           name: 'John Doe',
-          email: 'john@example.com',
+          email: 'john.doe@email.com',
           phone: '+1234567890',
           createdAt: '2024-01-15'
         },

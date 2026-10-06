@@ -25,10 +25,10 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
   const allProducts: Product[] = [
     {
       id: '1',
-      name: 'Premium Wireless Headphones',
+      name: 'Wireless Noise-Cancelling Headphones',
       price: 450,
       originalPrice: 599,
-      image: 'https://readdy.ai/api/search-image?query=premium%20wireless%20headphones%20with%20sleek%20black%20design%20and%20cushioned%20ear%20cups%20on%20clean%20white%20background%20professional%20product%20photography%20minimalist%20style%20high%20quality&width=300&height=300&seq=rec1&orientation=squarish',
+      image: 'https://picsum.photos/seed/rec1/300/300',
       rating: 4.8,
       reviews: 234
     },
@@ -36,7 +36,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
       id: '2',
       name: 'Smart Fitness Watch',
       price: 320,
-      image: 'https://readdy.ai/api/search-image?query=modern%20smart%20fitness%20watch%20with%20black%20band%20and%20digital%20display%20showing%20health%20metrics%20on%20clean%20white%20background%20professional%20product%20photography%20minimalist%20style&width=300&height=300&seq=rec2&orientation=squarish',
+      image: 'https://picsum.photos/seed/rec2/300/300',
       rating: 4.6,
       reviews: 189
     },
@@ -45,7 +45,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
       name: 'Leather Crossbody Bag',
       price: 289,
       originalPrice: 399,
-      image: 'https://readdy.ai/api/search-image?query=elegant%20premium%20leather%20crossbody%20bag%20in%20forest%20green%20color%20on%20clean%20white%20background%20professional%20product%20photography%20luxury%20style%20high%20quality&width=300&height=300&seq=rec3&orientation=squarish',
+      image: 'https://picsum.photos/seed/rec3/300/300',
       rating: 4.9,
       reviews: 312
     },
@@ -53,7 +53,7 @@ export default function SmartRecommendations({ productId, type, title }: SmartRe
       id: '4',
       name: 'Minimalist Ceramic Vase Set',
       price: 159,
-      image: 'https://readdy.ai/api/search-image?query=modern%20minimalist%20ceramic%20vase%20set%20in%20cream%20and%20charcoal%20colors%20on%20white%20background%20elegant%20home%20decor%20professional%20photography%20clean%20lines&width=300&height=300&seq=rec4&orientation=squarish',
+      image: 'https://picsum.photos/seed/rec4/300/300',
       rating: 4.7,
       reviews: 156
     }

@@ -108,8 +108,8 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           colorHexMap,
           variants: rawVariants,
           sizes: rawVariants.map((v: any) => v.name) || [],
-          features: ['Premium Quality', 'Authentic Design'],
-          featured: ['Premium Quality', 'Authentic Design'],
+          features: ['Great Value', 'Authentic Design'],
+          featured: ['Great Value', 'Authentic Design'],
           care: 'Handle with care.',
           preorderShipping: productData.metadata?.preorder_shipping || null
         };

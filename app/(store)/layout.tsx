@@ -1,14 +1,15 @@
 'use client';
 
 import { Suspense } from 'react';
-import GSGHeader from '@/components/GSGHeader';
-import GSGFooter from '@/components/GSGFooter';
-import GSGPromoBanner from '@/components/GSGPromoBanner';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ScrollToTop from '@/components/ScrollToTop';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NavigationProgress from '@/components/NavigationProgress';
 import CookieConsent from '@/components/CookieConsent';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import CallButton from '@/components/CallButton';
 import { CMSProvider } from '@/context/CMSContext';
 
 // Lazy-load non-critical components
@@ -37,15 +38,16 @@ export default function StoreLayout({
       <div className="min-h-screen bg-gray-50">
         <PWASplash />
         <PWAInstaller />
-        <GSGPromoBanner />
-        <GSGHeader />
+        <Header />
         <ErrorBoundary>
           <div className="pwa-page-enter">
             {children}
           </div>
         </ErrorBoundary>
-        <GSGFooter />
+        <Footer />
         <MobileBottomNav />
+        <WhatsAppButton />
+        <CallButton />
         <SessionTimeoutWarning />
         <PWAPrompt />
         <PushNotificationManager />

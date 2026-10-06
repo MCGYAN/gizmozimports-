@@ -26,16 +26,8 @@ function FooterSection({ title, children }: { title: string, children: React.Rea
 export default function Footer() {
   const { getSetting } = useCMS();
 
-  const siteName = getSetting('site_name') || 'MultiMey Supplies';
-  const siteTagline = getSetting('site_tagline') || 'Dresses, Electronics, Bags, Shoes & More.';
-  const contactEmail = getSetting('contact_email') || '';
+  const siteName = getSetting('site_name') || 'Gizmoz Trades';
   const contactPhone = getSetting('contact_phone') || '+233209597443';
-  const socialFacebook = getSetting('social_facebook') || '';
-  const socialInstagram = getSetting('social_instagram') || 'https://www.instagram.com/mey_phua';
-  const socialTwitter = getSetting('social_twitter') || 'https://x.com/mey_phua';
-  const socialTiktok = getSetting('social_tiktok') || 'https://www.tiktok.com/@mey_phua';
-  const socialSnapchat = getSetting('social_snapchat') || 'https://snapchat.com/t/eL9wfuQa';
-  const socialYoutube = getSetting('social_youtube') || 'https://youtube.com/@mey_phua';
 
   return (
     <footer className="relative mt-12 z-0">
@@ -44,6 +36,8 @@ export default function Footer() {
       <div className="absolute inset-0 bg-blue-950 rounded-t-[3rem] -z-10 overflow-hidden">
         {/* Decorative elements inside footer bg */}
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-800 to-transparent opacity-30"></div>
+        <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-brand/20 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-brand-accent/20 blur-3xl" />
       </div>
 
       <div className="text-white pt-16 pb-12">
@@ -52,37 +46,20 @@ export default function Footer() {
 
             {/* Brand Column */}
             <div className="lg:col-span-1 space-y-6">
-              <Link href="/" className="inline-block group">
-                <img src="/logo.png" alt={siteName} className="h-16 w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300" />
+              <Link href="/" className="inline-flex items-center gap-3">
+                <img src="/gizmoz-logo.png" alt={siteName} className="h-12 w-auto object-contain" />
               </Link>
               <p className="text-blue-200/60 leading-relaxed text-sm">
-                Your one-stop shop for dresses, electronics, bags, shoes and more. Locally sourced and imported quality products from Accra, Ghana.
+                A simple online store experience for everyday shopping.
               </p>
 
-              <div className="flex gap-3 pt-2">
-                {[
-                  { link: socialInstagram, icon: 'ri-instagram-line' },
-                  { link: socialTiktok, icon: 'ri-tiktok-fill' },
-                  { link: socialSnapchat, icon: 'ri-snapchat-fill' },
-                  { link: socialYoutube, icon: 'ri-youtube-fill' },
-                  { link: socialTwitter, icon: 'ri-twitter-x-fill' },
-                  { link: socialFacebook, icon: 'ri-facebook-fill' }
-                ].map((social, i) => social.link && (
-                  <a
-                    key={i}
-                    href={social.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-blue-900/40 border border-blue-800 rounded-full flex items-center justify-center text-blue-300 hover:bg-blue-500 hover:text-blue-950 hover:border-blue-500 transition-all hover:-translate-y-1"
-                  >
-                    <i className={social.icon}></i>
-                  </a>
-                ))}
+              <div className="pt-2 text-sm text-blue-200/70">
+                <p>Contact: {contactPhone}</p>
               </div>
             </div>
 
             {/* Links Sections */}
-            <div className="lg:col-span-3 grid md:grid-cols-3 gap-8 lg:gap-12 pl-0 lg:pl-12">
+            <div className="lg:col-span-3 grid md:grid-cols-3 gap-8 lg:gap-12 pl-0 lg:pl-12 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6">
 
               <div className="space-y-6">
                 <h4 className="font-serif text-xl font-bold text-white">Shop</h4>
@@ -98,9 +75,8 @@ export default function Footer() {
                 <h4 className="font-serif text-xl font-bold text-white">Support</h4>
                 <ul className="space-y-3 text-blue-100/60 text-sm">
                   <li><Link href="/contact" className="hover:text-blue-300 transition-colors">Contact Us</Link></li>
-                  <li><Link href="/order-tracking" className="hover:text-blue-300 transition-colors">Track Order</Link></li>
                   <li><Link href="/shipping" className="hover:text-blue-300 transition-colors">Shipping & Delivery</Link></li>
-                  <li><Link href="/returns" className="hover:text-blue-300 transition-colors">Returns & Exchange</Link></li>
+                  <li><Link href="/terms" className="hover:text-blue-300 transition-colors">Terms of Service</Link></li>
                 </ul>
               </div>
 

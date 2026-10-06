@@ -95,24 +95,25 @@ export default function AdminLayout({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showUserMenu]);
 
-  // Fetch Modules Effect
+  // Fetch Modules Effect — only when authenticated and not on login page (avoids 404 if store_modules table missing)
   useEffect(() => {
+    if (pathname === '/admin/login' || !isAuthenticated) return;
     async function fetchModules() {
       try {
         const { data, error } = await supabase.from('store_modules').select('id, enabled');
         if (error) {
-          console.warn('Error fetching modules:', error);
+          if (error.code !== 'PGRST116') console.warn('Error fetching modules:', error);
           return;
         }
         if (data) {
           setEnabledModules(data.filter((m: any) => m.enabled).map((m: any) => m.id));
         }
-      } catch (err) {
-        console.warn('Fetch modules failed:', err);
+      } catch (_err) {
+        // Table may not exist yet; ignore so login still works
       }
     }
     fetchModules();
-  }, []);
+  }, [pathname, isAuthenticated]);
 
   // Screen size check for initial state
   useEffect(() => {
@@ -261,7 +262,7 @@ export default function AdminLayout({
       >
         <div className="h-full px-4 py-6 overflow-y-auto">
           <Link href="/admin" className="flex items-center mb-8 px-2 cursor-pointer">
-            <span className="text-xl font-['Pacifico'] text-blue-700">MultiMey</span>
+            <span className="text-xl font-['Pacifico'] text-blue-700">DemoStore</span>
             <span className="ml-3 text-sm font-semibold text-gray-500">ADMIN</span>
           </Link>
 

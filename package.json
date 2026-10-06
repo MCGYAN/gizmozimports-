@@ -22,7 +22,8 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   },
-  "name": "classy-debbie-collection",
+  "name": "neutral-storefront",
+  "description": "A generic Next.js storefront application.",
   "private": true,
   "scripts": {
     "build": "next build",

@@ -163,7 +163,7 @@ export default function ProductCard({
             <div className="absolute bottom-3 left-3 z-20">
               <button
                 onClick={handleAddToCart}
-                className="bg-white text-gray-900 hover:bg-gsg-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors flex items-center gap-1 text-sm"
+                className="bg-white text-gray-900 hover:bg-brand-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors flex items-center gap-1 text-sm"
               >
                 <i className="ri-add-line"></i>
                 <span>+ Add</span>
@@ -172,7 +172,7 @@ export default function ProductCard({
             <div className="absolute bottom-3 right-3 z-20">
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setItemDetailsOpen(true); }}
-                className="bg-white text-gray-900 hover:bg-gsg-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors text-sm"
+                className="bg-white text-gray-900 hover:bg-brand-purple hover:text-white py-2 px-4 rounded-lg font-medium shadow-lg transition-colors text-sm"
               >
                 Item details
               </button>
@@ -187,7 +187,7 @@ export default function ProductCard({
                   onChange={(e) => setAddQty(Math.max(moq, Math.min(maxStock, parseInt(e.target.value, 10) || moq)))}
                   className="w-14 py-1 px-2 border border-gray-300 rounded text-center text-sm"
                 />
-                <button onClick={confirmAdd} className="bg-gsg-purple text-white py-1.5 px-3 rounded text-sm font-medium">
+                <button onClick={confirmAdd} className="bg-brand-purple text-white py-1.5 px-3 rounded text-sm font-medium">
                   Add
                 </button>
               </div>
@@ -207,7 +207,7 @@ export default function ProductCard({
               <div><dt className="text-gray-500">Net Volume</dt><dd className="font-medium">{netVolume || '—'}</dd></div>
               <div><dt className="text-gray-500">Unit</dt><dd className="font-medium">{unit || '—'}</dd></div>
             </dl>
-            <Link href={`/product/${slug}`} className="mt-4 inline-block text-gsg-purple font-medium hover:underline">View full product</Link>
+            <Link href={`/product/${slug}`} className="mt-4 inline-block text-brand-purple font-medium hover:underline">View full product</Link>
             <button type="button" onClick={() => setQuickSpecsOpen(false)} className="mt-4 w-full border border-gray-300 py-2 rounded-lg">Close</button>
           </div>
         </div>
@@ -229,7 +229,7 @@ export default function ProductCard({
               {(!description && !ingredients && !nutrition && !specification) && <p className="text-gray-500">See product page for full details.</p>}
             </div>
             <div className="p-6 border-t">
-              <Link href={`/product/${slug}`} className="block w-full text-center bg-gsg-purple text-white py-3 rounded-lg font-medium">View product</Link>
+              <Link href={`/product/${slug}`} className="block w-full text-center bg-brand-purple text-white py-3 rounded-lg font-medium">View product</Link>
             </div>
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function ProductCard({
           )}
         </div>
         <Link href={`/product/${slug}`}>
-          <h3 className="font-medium text-gray-900 mb-1 group-hover:text-gsg-purple transition-colors line-clamp-2">
+          <h3 className="font-medium text-gray-900 mb-1 group-hover:text-brand-purple transition-colors line-clamp-2">
             {name}{size ? ` · ${size}` : ''}
           </h3>
         </Link>
@@ -260,7 +260,7 @@ export default function ProductCard({
                 key={color.name}
                 title={color.name}
                 onClick={(e) => { e.preventDefault(); setActiveColor(activeColor === color.name ? null : color.name); }}
-                className={`w-4 h-4 rounded-full border flex-shrink-0 ${activeColor === color.name ? 'ring-2 ring-offset-1 ring-gsg-purple scale-110' : ''} ${color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}`}
+                className={`w-4 h-4 rounded-full border flex-shrink-0 ${activeColor === color.name ? 'ring-2 ring-offset-1 ring-brand-purple scale-110' : ''} ${color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}`}
                 style={{ backgroundColor: color.hex }}
               />
             ))}

@@ -8,20 +8,20 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#2563eb',
+  themeColor: '#1D4ED8',
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.multimeysupplies.com';
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gizmoztrades.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "MultiMey Supplies | Quality Products & Supplies",
-    template: "%s | MultiMey Supplies"
+    default: "Gizmoz Trades | Affordable Online Store",
+    template: "%s | Gizmoz Trades"
   },
-  description: "Shop dresses, electronics, bags, shoes & more at MultiMey Supplies. Locally sourced and imported quality products delivered across Ghana from Accra.",
+  description: "Shop affordable and trusted products with Gizmoz Trades.",
   keywords: [
-    "MultiMey Supplies",
+    "Gizmoz Trades",
     "Online Store Ghana",
     "Buy Dresses Online Ghana",
     "Electronics Ghana",
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
     "Ghana E-commerce",
     "Quality Products Accra"
   ],
-  authors: [{ name: "MultiMey Supplies" }],
-  creator: "MultiMey Supplies",
-  publisher: "MultiMey Supplies",
+  authors: [{ name: "Gizmoz Trades" }],
+  creator: "Gizmoz Trades",
+  publisher: "Gizmoz Trades",
   robots: {
     index: true,
     follow: true,
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MultiMey Supplies',
+    title: 'Gizmoz Trades',
   },
   formatDetection: {
     telephone: true,
@@ -81,24 +81,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_GH",
     url: siteUrl,
-    title: "MultiMey Supplies | Quality Products & Supplies",
-    description: "Shop dresses, electronics, bags, shoes and more. Locally sourced and China-imported quality products delivered across Ghana.",
-    siteName: "MultiMey Supplies",
+    title: "Gizmoz Trades | Affordable Online Store",
+    description: "Shop affordable and trusted products with Gizmoz Trades.",
+    siteName: "Gizmoz Trades",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "MultiMey Supplies",
+        alt: "Gizmoz Trades",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MultiMey Supplies | Quality Products & Supplies",
-    description: "Dresses, electronics, bags, shoes and more. Quality products delivered across Ghana from Accra.",
+    title: "Gizmoz Trades | Affordable Online Store",
+    description: "Affordable products and reliable delivery from Gizmoz Trades.",
     images: ["/og-image.png"],
-    creator: "@mey_phua",
+    creator: "@gizmoztrades",
   },
   alternates: {
     canonical: siteUrl,
@@ -119,12 +119,12 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* PWA Meta Tags */}
-        <meta name="theme-color" content="#2563eb" />
+        <meta name="theme-color" content="#1D4ED8" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="MultiMey Supplies" />
+        <meta name="apple-mobile-web-app-title" content="Gizmoz Trades" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#2563eb" />
+        <meta name="msapplication-TileColor" content="#1D4ED8" />
         <meta name="msapplication-tap-highlight" content="no" />
 
         {/* Apple Touch Icons */}
@@ -151,10 +151,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "MultiMey Supplies",
-              "url": "https://www.multimeysupplies.com",
-              "logo": "https://www.multimeysupplies.com/logo.png",
-              "description": "Shop dresses, electronics, bags, shoes and more at MultiMey Supplies. Locally sourced and China-imported quality products delivered across Ghana from Accra.",
+              "name": "Gizmoz Trades",
+              "url": "https://gizmoztrades.com",
+              "logo": "https://gizmoztrades.com/gizmoz-logo.png",
+              "description": "Affordable and trusted online shopping in Ghana.",
               "address": {
                 "@type": "PostalAddress",
                 "addressCountry": "GH",

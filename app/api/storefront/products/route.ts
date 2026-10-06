@@ -1,16 +1,20 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Server-side Supabase client (no auth needed for public data)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { hasStorefrontSupabaseEnv, storefrontSupabase } from '@/lib/storefront-supabase';
 
 // Simple in-memory cache
 let cache: { data: any; timestamp: number } | null = null;
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes — products don't change frequently
 
 export async function GET(request: Request) {
+    if (!hasStorefrontSupabaseEnv()) {
+        return NextResponse.json([], {
+            headers: {
+                'Cache-Control': 'public, s-maxage=60',
+                'X-Storefront-Config': 'missing-env',
+            },
+        });
+    }
+
     const { searchParams } = new URL(request.url);
     const featured = searchParams.get('featured') === 'true';
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -30,7 +34,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        let query = supabase
+        let query = storefrontSupabase
             .from('products')
             .select(`
                 id, name, slug, price, compare_at_price, quantity, description, metadata,

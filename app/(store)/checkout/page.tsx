@@ -60,7 +60,7 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<any>({});
 
   const deliveryOptionsList = [
-    { value: 'personal-shopper', label: 'Add To My Personal Shopper', desc: 'Send your list to your personal shopper.', href: 'https://shopper.gsgbrands.com.gh' },
+    { value: 'personal-shopper', label: 'Add To Personal Shopper', desc: 'Send your list to your personal shopper.', href: 'https://gizmoztrades.com' },
     { value: 'free-delivery', label: 'Free Delivery (Tue/Fri)', desc: 'Tue/Fri only. Min 5% discount as Free Delivery Discount. Confirmed before noon of preceding day.', href: null },
     { value: 'sole-express', label: 'Sole Express Delivery (Daily)', desc: 'Fresh/perishable must use Express. 2hr, 6hr, 12hr, 24hr or 48hr after confirmation.', href: null },
     { value: 'joint-express', label: 'Joint Express – Myself & Neighbor (Daily)', desc: 'Share delivery fee with neighbor; items stay private. Same perishable rule. 2hr–48hr slots.', href: null },
@@ -444,7 +444,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingData({ ...shippingData, email: e.target.value })}
                         className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
                           } ${user ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                        placeholder="you@example.com"
+                        placeholder="name@email.com"
                       />
                       {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
                     </div>
@@ -546,7 +546,7 @@ export default function CheckoutPage() {
                     {deliveryOptionsList.map((opt) => (
                       <label
                         key={opt.value}
-                        className={`flex items-start justify-between p-4 border-2 rounded-card cursor-pointer transition-colors ${deliveryMethod === opt.value ? 'border-gsg-purple bg-gsg-purple-light/10' : 'border-gray-300 hover:border-gray-400'}`}
+                        className={`flex items-start justify-between p-4 border-2 rounded-card cursor-pointer transition-colors ${deliveryMethod === opt.value ? 'border-brand-purple bg-brand-purple-light/10' : 'border-gray-300 hover:border-gray-400'}`}
                       >
                         <div className="flex items-start space-x-4">
                           <input
@@ -555,7 +555,7 @@ export default function CheckoutPage() {
                             value={opt.value}
                             checked={deliveryMethod === opt.value}
                             onChange={(e) => setDeliveryMethod(e.target.value)}
-                            className="w-5 h-5 mt-0.5 text-gsg-purple"
+                            className="w-5 h-5 mt-0.5 text-brand-purple"
                           />
                           <div>
                             <p className="font-semibold text-gray-900">{opt.label}</p>
@@ -588,7 +588,7 @@ export default function CheckoutPage() {
                   )}
                   {deliveryMethod === 'personal-shopper' && (
                     <p className="mt-4 text-sm text-gray-600">
-                      <a href="https://shopper.gsgbrands.com.gh" target="_blank" rel="noopener noreferrer" className="text-gsg-purple font-medium hover:underline">Go to My Personal Shopper</a> to add items to your list.
+                      <a href="https://gizmoztrades.com" target="_blank" rel="noopener noreferrer" className="text-brand-purple font-medium hover:underline">Go to Personal Shopper</a> to add items to your list.
                     </p>
                   )}
 

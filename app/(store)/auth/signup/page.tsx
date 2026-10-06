@@ -226,7 +226,7 @@ export default function SignupPage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
-                placeholder="you@example.com"
+                placeholder="name@email.com"
               />
               {errors.email && (
                 <p className="text-sm text-red-600 mt-2">{errors.email}</p>

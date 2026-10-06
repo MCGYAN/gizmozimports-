@@ -3,11 +3,11 @@ import Link from 'next/link';
 export default function GiftCardPage() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="bg-gsg-purple-light/20 py-12">
+      <div className="bg-brand-purple-light/20 py-12">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gsg-black mb-4">Gift Card</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-brand-black mb-4">Gift Card</h1>
           <p className="text-gray-600">
-            Give the gift of convenience. GSG Convenience Goods gift cards coming soon.
+            Give the gift of convenience. Gizmoz Trades gift cards coming soon.
           </p>
         </div>
       </div>
@@ -18,7 +18,7 @@ export default function GiftCardPage() {
           </p>
           <Link
             href="/shop"
-            className="inline-block bg-gsg-purple hover:bg-gsg-purple-dark text-white px-6 py-3 rounded-pill font-medium"
+            className="inline-block bg-brand-purple hover:bg-brand-purple-dark text-white px-6 py-3 rounded-pill font-medium"
           >
             Continue Shopping
           </Link>

@@ -16,10 +16,10 @@ interface SEOProps {
 }
 
 export function generateMetadata({
-  title = 'Premium Online Shopping in Ghana',
-  description = 'Shop dresses, electronics, bags, shoes and more at MultiMey Supplies. Locally sourced and imported quality products delivered across Ghana.',
+  title = 'Affordable Online Shopping in Ghana',
+  description = 'Shop affordable, trusted products with Gizmoz Trades.',
   keywords = [],
-  ogImage = 'https://readdy.ai/api/search-image?query=modern%20premium%20ecommerce%20online%20shopping%20platform%20elegant%20design&width=1200&height=630&seq=ogimage&orientation=landscape',
+  ogImage = '/og-image.png',
   ogType = 'website',
   price,
   currency = 'GHS',
@@ -29,13 +29,13 @@ export function generateMetadata({
   author,
   noindex = false
 }: SEOProps): Metadata {
-  const siteName = 'PremiumShop Ghana';
-  const siteUrl = 'https://premiumshop.com';
+  const siteName = 'Gizmoz Trades';
+  const siteUrl = 'https://gizmoztrades.com';
   const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
 
   const defaultKeywords = [
     'online shopping ghana',
-    'premium products ghana',
+    'affordable products ghana',
     'buy online ghana',
     'ecommerce ghana',
     'fast delivery ghana',
@@ -114,7 +114,7 @@ export function generateProductSchema(product: {
     sku: product.sku,
     brand: {
       '@type': 'Brand',
-      name: product.brand || 'PremiumShop'
+      name: product.brand || 'Gizmoz Trades'
     },
     offers: {
       '@type': 'Offer',
@@ -162,9 +162,9 @@ export function generateOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'PremiumShop Ghana',
-    url: 'https://premiumshop.com',
-    logo: 'https://readdy.ai/api/search-image?query=premium%20shop%20logo%20elegant%20modern&width=200&height=200&seq=logo&orientation=squarish',
+    name: 'Gizmoz Trades',
+    url: 'https://gizmoztrades.com',
+    logo: 'https://gizmoztrades.com/logo.svg',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+233-XX-XXX-XXXX',
@@ -173,9 +173,7 @@ export function generateOrganizationSchema() {
       availableLanguage: ['English']
     },
     sameAs: [
-      'https://facebook.com/premiumshop',
-      'https://instagram.com/premiumshop',
-      'https://twitter.com/premiumshop'
+      'https://gizmoztrades.com'
     ]
   };
 }
@@ -184,13 +182,13 @@ export function generateWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'PremiumShop Ghana',
-    url: 'https://premiumshop.com',
+    name: 'Gizmoz Trades',
+    url: 'https://gizmoztrades.com',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://premiumshop.com/shop?search={search_term_string}'
+        urlTemplate: 'https://gizmoztrades.com/shop?search={search_term_string}'
       },
       'query-input': 'required name=search_term_string'
     }

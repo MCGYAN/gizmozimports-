@@ -7,7 +7,7 @@ export default function VerifyEmailPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [email] = useState('john@example.com');
+  const [email] = useState('john.doe@email.com');
 
   useEffect(() => {
     if (resendCooldown > 0) {
