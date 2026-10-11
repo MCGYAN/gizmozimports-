@@ -16,6 +16,10 @@ CREATE TABLE IF NOT EXISTS public.exchange_corridor_rates (
 COMMENT ON TABLE public.exchange_corridor_rates IS
   'Per-country Buy RMB rate board, live switch, and local pay-in accounts';
 
+-- Read and written only through server routes using the service role.
+ALTER TABLE public.exchange_corridor_rates ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.exchange_corridor_rates FROM anon, authenticated;
+
 INSERT INTO public.exchange_corridor_rates (
   country_code, currency_code, buy_rmb_rate, sell_rmb_rate,
   min_amount, max_amount, notes, valid_until, is_live, pay_accounts, updated_at
@@ -29,12 +33,8 @@ SELECT
   b.max_amount_ghs,
   b.notes,
   b.valid_until,
-  true,
-  '[
-    {"holder":"Snappy Sampson Enterprise","bank":"Prudential Bank","accountNumber":"0304003190019","channel":"bank"},
-    {"holder":"Snappy Sampson Enterprise","bank":"Stanbic Bank","accountNumber":"9040014178591","branch":"Graphic Road","channel":"bank"},
-    {"holder":"Snappy Sampson Enterprise","bank":"MTN AGENT","accountNumber":"0550016939","registeredName":"Sampson Dziwornu Amadah","channel":"momo"}
-  ]'::jsonb,
+  false,
+  '[]'::jsonb,
   COALESCE(b.updated_at, now())
 FROM (SELECT 1) AS _
 LEFT JOIN public.exchange_rate_board b ON b.id = 1

@@ -7,21 +7,6 @@ ALTER TABLE public.china_warehouse_settings
 
 UPDATE public.china_warehouse_settings
 SET
-  warehouse_name = CASE
-    WHEN warehouse_name IS NULL OR warehouse_name = 'Snappy China Warehouse'
-      THEN 'Snappy China Warehouse, Lide Warehouse'
-    ELSE warehouse_name
-  END,
-  address_english = COALESCE(
-    NULLIF(address_english, ''),
-    'Warehouse No. 1, Lide Warehouse, No. 2, Wuyi Village Avenue, Lishui Town, Foshan City.'
-  ),
-  address_chinese = COALESCE(
-    NULLIF(address_chinese, ''),
-    '佛山市里水镇五一村大道2号里德仓1号仓'
-  ),
-  entry_numbers = COALESCE(NULLIF(entry_numbers, ''), '18620853884; 18620788554'),
-  tracking_whatsapp = COALESCE(NULLIF(tracking_whatsapp, ''), '+8618620853884'),
   instructions = COALESCE(
     NULLIF(instructions, ''),
     'Put the customer shipping mark and telephone number clearly on every carton.'
@@ -69,7 +54,7 @@ BEGIN
     4,
     '0'
   );
-  RETURN 'SNAPPY ' || surname || ' ' || suffix;
+  RETURN 'GIZMOZ ' || surname || ' ' || suffix;
 END;
 $$;
 

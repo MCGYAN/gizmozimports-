@@ -1,5 +1,5 @@
 /**
- * Update Supabase Site URL + Snappy auth emails.
+ * Update Supabase Site URL + Gizmoz Trades auth emails.
  * Free tier requires custom SMTP before templates can change.
  * Uses RESEND_API_KEY from .env.local when present.
  *
@@ -9,8 +9,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
-const PROJECT_REF = 'zqckwcsyxlcxpioaqhwb';
-const SITE_URL = 'https://snappyimports.vercel.app';
+const PROJECT_REF = 'mnzbrazmcbwcnfjqhtsd';
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return;
@@ -35,6 +34,7 @@ function loadEnvFile(filePath) {
 loadEnvFile(resolve(process.cwd(), '.env.local'));
 loadEnvFile(resolve(process.cwd(), '.env'));
 
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.gizmoztrades.com').replace(/\/+$/, '');
 const token = process.env.SUPABASE_ACCESS_TOKEN || '';
 const resendKey = process.env.RESEND_API_KEY || '';
 const emailFrom = process.env.EMAIL_FROM || process.env.ADMIN_EMAIL || '';
@@ -54,7 +54,7 @@ function extractEmail(from) {
 function extractSenderName(from) {
   const m = String(from).match(/^"?([^"<]+)"?\s*</);
   if (m && m[1].trim()) return m[1].trim();
-  return 'Snappy Imports Global';
+  return 'Gizmoz Trades';
 }
 
 async function patchAuth(body, label) {
@@ -82,36 +82,36 @@ async function patchAuth(body, label) {
   return true;
 }
 
-const confirmation = `<h2 style="color:#0f2744;font-family:Arial,sans-serif;">Hi from Snappy Imports</h2>
+const confirmation = `<h2 style="color:#1E3A8A;font-family:Arial,sans-serif;">Hi from Gizmoz Trades</h2>
 <p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Thanks for signing up. One quick step left.</p>
 <p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Tap the button below to confirm your email and open your account.</p>
-<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#0f2744;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Confirm my email</a></p>
+<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#1E3A8A;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Confirm my email</a></p>
 <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#64748b;">If you did not create an account, you can ignore this message.</p>
-<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Snappy Imports Global</p>`;
+<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Gizmoz Trades</p>`;
 
-const recovery = `<h2 style="color:#0f2744;font-family:Arial,sans-serif;">Reset your password</h2>
+const recovery = `<h2 style="color:#1E3A8A;font-family:Arial,sans-serif;">Reset your password</h2>
 <p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">We got a request to change your password.</p>
 <p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Tap below to pick a new one.</p>
-<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#0f2744;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Choose a new password</a></p>
+<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#1E3A8A;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Choose a new password</a></p>
 <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#64748b;">If you did not ask for this, ignore this email. Your password stays the same.</p>
-<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Snappy Imports Global</p>`;
+<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Gizmoz Trades</p>`;
 
-const magicLink = `<h2 style="color:#0f2744;font-family:Arial,sans-serif;">Sign in to Snappy</h2>
+const magicLink = `<h2 style="color:#1E3A8A;font-family:Arial,sans-serif;">Sign in to Gizmoz Trades</h2>
 <p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Tap the button below to sign in. This link works one time and expires soon.</p>
-<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#0f2744;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Sign me in</a></p>
+<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#1E3A8A;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Sign me in</a></p>
 <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#64748b;">If you did not ask for this, you can ignore it.</p>
-<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Snappy Imports Global</p>`;
+<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Gizmoz Trades</p>`;
 
-const emailChange = `<h2 style="color:#0f2744;font-family:Arial,sans-serif;">Confirm your new email</h2>
-<p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Please confirm <strong>{{ .NewEmail }}</strong> as your new email for Snappy Imports.</p>
-<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#0f2744;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Confirm new email</a></p>
+const emailChange = `<h2 style="color:#1E3A8A;font-family:Arial,sans-serif;">Confirm your new email</h2>
+<p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Please confirm <strong>{{ .NewEmail }}</strong> as your new email for Gizmoz Trades.</p>
+<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#1E3A8A;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Confirm new email</a></p>
 <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#64748b;">If you did not ask for this, ignore this email.</p>
-<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Snappy Imports Global</p>`;
+<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Gizmoz Trades</p>`;
 
-const invite = `<h2 style="color:#0f2744;font-family:Arial,sans-serif;">You are invited</h2>
-<p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Someone invited you to create a Snappy Imports account.</p>
-<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#0f2744;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Accept invite</a></p>
-<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Snappy Imports Global</p>`;
+const invite = `<h2 style="color:#1E3A8A;font-family:Arial,sans-serif;">You are invited</h2>
+<p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#334155;">Someone invited you to create a Gizmoz Trades account.</p>
+<p style="margin:28px 0;"><a href="{{ .ConfirmationURL }}" style="background:#1E3A8A;color:#ffffff;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">Accept invite</a></p>
+<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">Gizmoz Trades</p>`;
 
 const smtpEmail = extractEmail(emailFrom);
 const smtpName = extractSenderName(emailFrom);
@@ -150,22 +150,22 @@ const smtpOk = await patchAuth(
 
 if (!smtpOk) process.exit(1);
 
-console.log('Updating Snappy email templates…');
+console.log('Updating Gizmoz Trades email templates…');
 const templatesOk = await patchAuth(
   {
-    mailer_subjects_confirmation: 'Confirm your Snappy Imports account',
+    mailer_subjects_confirmation: 'Confirm your Gizmoz Trades account',
     mailer_templates_confirmation_content: confirmation,
-    mailer_subjects_recovery: 'Reset your Snappy Imports password',
+    mailer_subjects_recovery: 'Reset your Gizmoz Trades password',
     mailer_templates_recovery_content: recovery,
-    mailer_subjects_magic_link: 'Your Snappy Imports sign-in link',
+    mailer_subjects_magic_link: 'Your Gizmoz Trades sign-in link',
     mailer_templates_magic_link_content: magicLink,
-    mailer_subjects_email_change: 'Confirm your new Snappy email',
+    mailer_subjects_email_change: 'Confirm your new Gizmoz Trades email',
     mailer_templates_email_change_content: emailChange,
-    mailer_subjects_invite: 'You are invited to Snappy Imports',
+    mailer_subjects_invite: 'You are invited to Gizmoz Trades',
     mailer_templates_invite_content: invite,
   },
   'Auth email templates',
 );
 
 if (!templatesOk) process.exit(1);
-console.log('Done. Auth emails should now say Snappy and open the live site.');
+console.log('Done. Auth emails should now say Gizmoz Trades and open the live site.');

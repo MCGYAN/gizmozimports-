@@ -356,7 +356,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
 
-        <div className="mt-16 bg-gradient-to-br from-brand-primary to-[#050f1f] rounded-2xl p-12 text-center text-white">
+        <div className="mt-16 bg-gradient-to-br from-brand-primary to-[#0f1a3d] rounded-2xl p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Enjoyed This Article?</h2>
           <p className="text-white/80 mb-8 text-lg">
             Subscribe to our newsletter for more shopping tips and exclusive offers

@@ -933,7 +933,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                           type="button"
                           onClick={handleConfirmManualPayment}
                           disabled={confirmingPayment}
-                          className="w-full bg-brand-primary hover:bg-[#0d2747] text-white py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                          className="w-full bg-brand-primary hover:bg-[#172554] text-white py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
                         >
                           {confirmingPayment ? 'Confirming…' : 'Confirm payment received'}
                         </button>

@@ -130,7 +130,7 @@ function OrderSuccessContent() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/auth/signup"
-              className="bg-brand-primary hover:bg-[#0d2747] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-brand-primary hover:bg-[#172554] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               Create account
             </Link>
@@ -199,7 +199,7 @@ function OrderSuccessContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link
                 href={`/order/${encodeURIComponent(order.order_number)}?email=${encodeURIComponent(order.email || '')}`}
-                className="bg-brand-primary hover:bg-[#0d2747] text-white px-8 py-4 rounded-lg font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap"
+                className="bg-brand-primary hover:bg-[#172554] text-white px-8 py-4 rounded-lg font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap"
               >
                 <i className="ri-map-pin-line mr-2"></i>
                 Track this order

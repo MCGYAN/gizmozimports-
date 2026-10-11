@@ -188,7 +188,7 @@ export default function ShippingPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3 text-center">
             <Link
               href="/account"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-primary px-8 py-4 font-medium text-white transition-colors hover:bg-[#0d2747]"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-primary px-8 py-4 font-medium text-white transition-colors hover:bg-[#172554]"
             >
               <i className="ri-user-line"></i>
               Open my orders
@@ -202,7 +202,7 @@ export default function ShippingPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-gradient-to-br from-brand-primary to-[#050f1f] p-8 text-center text-white">
+        <div className="rounded-2xl bg-gradient-to-br from-brand-primary to-[#0f1a3d] p-8 text-center text-white">
           <h2 className="mb-4 text-3xl font-bold">Questions about delivery?</h2>
           <p className="mb-6 leading-relaxed text-white/80">
             Ask about timing, pickup, or where your order stands.

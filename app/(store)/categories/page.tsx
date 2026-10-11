@@ -11,9 +11,9 @@ export const revalidate = 300;
 export const metadata: Metadata = pageMetadata('categories', { path: '/categories' });
 
 const PLACEHOLDER_BGS = [
-  'bg-gradient-to-br from-brand-primary via-[#0d2747] to-[#050f1f]',
-  'bg-gradient-to-br from-[#0d2747] via-brand-primary to-[#050f1f]',
-  'bg-gradient-to-br from-[#1a0f08] via-brand-primary to-[#050f1f]',
+  'bg-gradient-to-br from-brand-primary via-[#172554] to-[#0f1a3d]',
+  'bg-gradient-to-br from-[#172554] via-brand-primary to-[#0f1a3d]',
+  'bg-gradient-to-br from-[#1a0f08] via-brand-primary to-[#0f1a3d]',
   'bg-gradient-to-br from-brand-primary via-slate-900 to-slate-950',
 ];
 

@@ -5,7 +5,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
-const PROJECT_REF = 'zqckwcsyxlcxpioaqhwb';
+const PROJECT_REF = 'mnzbrazmcbwcnfjqhtsd';
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return;

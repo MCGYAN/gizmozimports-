@@ -816,7 +816,7 @@ img {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1E3A8A 0%, #0d2747 50%, #050f1f 100%);
+  background: linear-gradient(135deg, #1E3A8A 0%, #172554 50%, #0f1a3d 100%);
   animation: splashFadeOut 0.5s ease-out 1.5s forwards;
 }
 
@@ -951,7 +951,7 @@ img {
   }
 
   .store-page-header {
-    @apply relative overflow-hidden bg-gradient-to-br from-brand-primary via-[#0d2747] to-[#050f1f] py-14 md:py-16;
+    @apply relative overflow-hidden bg-gradient-to-br from-brand-primary via-[#172554] to-[#0f1a3d] py-14 md:py-16;
   }
 
   .store-page-header::before {

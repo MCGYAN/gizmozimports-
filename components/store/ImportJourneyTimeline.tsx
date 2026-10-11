@@ -23,7 +23,7 @@ const MOBILE_MILESTONES = [
 
 export default function ImportJourneyTimeline() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#1E3A8A] via-[#0d2747] to-[#061224] py-8 md:py-20">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#1E3A8A] via-[#172554] to-[#0f1a3d] py-8 md:py-20">
       <div className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-brand-accent/10 blur-3xl" aria-hidden />
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(249,115,22,0.12),transparent)]"

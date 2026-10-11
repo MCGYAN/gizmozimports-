@@ -92,7 +92,7 @@ export default function FAQsPage() {
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-brand-primary to-[#050f1f] py-16">
+      <div className="bg-gradient-to-br from-brand-primary to-[#0f1a3d] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <i className="ri-customer-service-2-line text-3xl text-white"></i>

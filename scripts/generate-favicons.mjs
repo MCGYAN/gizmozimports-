@@ -4,13 +4,8 @@ import { join } from 'path';
 
 const ROOT = process.cwd();
 const SOURCE_CANDIDATES = [
-  join(ROOT, 'public', 'images', 'snappy-favicon-source.png'),
-  join(
-    ROOT,
-    'public',
-    'images',
-    'snappy-imports-global-logo.png',
-  ),
+  join(ROOT, 'public', 'images', 'gizmoz-trades-icon.png'),
+  join(ROOT, 'public', 'images', 'gizmoz-trades-logo.png'),
 ];
 
 function resolveSource() {
@@ -18,11 +13,11 @@ function resolveSource() {
     if (existsSync(path)) return path;
   }
   throw new Error(
-    'No favicon source found. Add public/images/snappy-favicon-source.png',
+    'No favicon source found. Add public/images/gizmoz-trades-icon.png',
   );
 }
 
-const BRAND_NAVY = { r: 11, g: 31, b: 58, alpha: 1 };
+const BRAND_NAVY = { r: 30, g: 58, b: 138, alpha: 1 };
 
 async function extractEmblem(sourcePath) {
   const meta = await sharp(sourcePath).metadata();
@@ -116,7 +111,7 @@ async function generateFavicons() {
   }
   console.log('  Generated favicon.ico');
 
-  console.log('\nDone! Favicons generated from Snappy Imports emblem.');
+  console.log('\nDone! Favicons generated from the Gizmoz Trades emblem.');
 }
 
 generateFavicons().catch((err) => {

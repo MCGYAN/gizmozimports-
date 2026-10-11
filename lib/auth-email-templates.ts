@@ -6,7 +6,7 @@
  *   node scripts/update-auth-email-templates.mjs
  *
  * Or paste into Supabase Dashboard → Authentication → Email Templates:
- *   https://supabase.com/dashboard/project/zqckwcsyxlcxpioaqhwb/auth/templates
+ *   https://supabase.com/dashboard/project/mnzbrazmcbwcnfjqhtsd/auth/templates
  *
  * Also set URL config (required so links leave localhost):
  *   Site URL: https://gizmoztrades.com
