@@ -169,8 +169,8 @@ export default function HomeClient({
               </p>
             </div>
 
-            <div className="relative z-0 hidden h-full min-h-[400px] lg:block">
-              <div className="absolute right-0 top-1/2 aspect-[4/3] w-[105%] -translate-y-1/2 -rotate-2 transform overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-transform duration-500 hover:rotate-0">
+            <div className="relative z-0 mx-2 mb-4 mt-2 sm:mx-6 lg:mx-0 lg:mb-0 lg:mt-0 lg:h-full lg:min-h-[400px]">
+              <div className="relative aspect-[4/3] w-full -rotate-1 transform overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-transform duration-500 hover:rotate-0 lg:absolute lg:right-0 lg:top-1/2 lg:w-[105%] lg:-translate-y-1/2 lg:-rotate-2">
                 <img
                   src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1000&auto=format&fit=crop"
                   alt="Global logistics"
@@ -179,27 +179,27 @@ export default function HomeClient({
                 <div className="absolute inset-0 bg-brand-dark/20 mix-blend-overlay" />
               </div>
 
-              <div className="animate-float absolute -bottom-6 -left-6 rounded-2xl border border-white/20 bg-white/10 p-5 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-accent shadow-lg shadow-brand-accent/30">
-                    <i className="ri-ship-line text-xl text-white" />
+              <div className="animate-float absolute -bottom-5 -left-2 rounded-2xl border border-white/20 bg-white/10 p-3 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl lg:-bottom-6 lg:-left-6 lg:p-5">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-accent shadow-lg shadow-brand-accent/30 lg:h-12 lg:w-12">
+                    <i className="ri-ship-line text-lg text-white lg:text-xl" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-100">Status</p>
-                    <p className="font-bold text-white">In Transit to Accra</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-100 lg:text-xs">Status</p>
+                    <p className="text-sm font-bold text-white lg:text-base">In Transit to Accra</p>
                   </div>
                 </div>
               </div>
 
               <div
-                className="animate-float absolute -top-6 right-6 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl"
+                className="animate-float absolute -top-5 right-2 rounded-2xl border border-white/20 bg-white/10 p-3 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl lg:-top-6 lg:right-6 lg:p-4"
                 style={{ animationDelay: '1.5s' }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
-                    <i className="ri-shield-check-fill text-xl text-green-400" />
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20 lg:h-10 lg:w-10">
+                    <i className="ri-shield-check-fill text-lg text-green-400 lg:text-xl" />
                   </div>
-                  <p className="text-sm font-bold text-white">Verified Supplier</p>
+                  <p className="text-xs font-bold text-white lg:text-sm">Verified Supplier</p>
                 </div>
               </div>
             </div>
