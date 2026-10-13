@@ -126,21 +126,21 @@ export default function HomeClient({
           }}
           aria-hidden
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-24 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div className="hero-glow z-10 rounded-card-lg border border-white/20 bg-white/10 p-7 backdrop-blur-md md:p-10">
-              <p className="mb-3 text-xs uppercase tracking-[0.22em] text-blue-100/90">China to Ghana Sourcing</p>
-              <h1 className="font-heading text-4xl font-bold leading-tight md:text-5xl">
+        <div className="relative mx-auto max-w-7xl px-3 py-10 sm:px-6 md:py-24 lg:px-8">
+          <div className="grid grid-cols-[1.3fr_1fr] items-stretch gap-3 sm:gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
+            <div className="hero-glow z-10 rounded-card-lg border border-white/20 bg-white/10 p-4 backdrop-blur-md sm:p-7 md:p-10">
+              <p className="mb-2 text-[9px] uppercase tracking-[0.16em] text-blue-100/90 sm:mb-3 sm:text-xs sm:tracking-[0.22em]">China to Ghana Sourcing</p>
+              <h1 className="font-heading text-[1.35rem] font-bold leading-tight sm:text-4xl md:text-5xl">
                 Import From China Without the Stress
               </h1>
-              <p className="mt-4 max-w-2xl text-blue-100">
+              <p className="mt-2 max-w-2xl text-[11px] leading-snug text-blue-100 sm:mt-4 sm:text-base sm:leading-normal">
                 We source, pay, and deliver quality gadgets, electronics, and everyday goods to Ghana. You stay in the loop from start to finish.
               </p>
-              <div className="mt-7 flex flex-wrap gap-3">
+              <div className="mt-4 flex flex-wrap gap-2 sm:mt-7 sm:gap-3">
                 <Link
                   href="/shop"
                   prefetch
-                  className="btn-premium inline-flex items-center rounded-pill bg-brand-accent px-6 py-3 font-semibold text-white hover:bg-orange-600"
+                  className="btn-premium inline-flex items-center rounded-pill bg-brand-accent px-4 py-2 text-xs font-semibold text-white hover:bg-orange-600 sm:px-6 sm:py-3 sm:text-base"
                 >
                   Shop Now
                 </Link>
@@ -149,28 +149,29 @@ export default function HomeClient({
                     href={waHeroPrefilled}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-premium inline-flex items-center gap-2 rounded-pill border border-white/70 bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/20"
+                    className="btn-premium inline-flex items-center gap-1.5 rounded-pill border border-white/70 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
                   >
-                    <i className="ri-whatsapp-line text-lg" aria-hidden />
-                    Ask us on WhatsApp
+                    <i className="ri-whatsapp-line text-sm sm:text-lg" aria-hidden />
+                    <span className="hidden sm:inline">Ask us on WhatsApp</span>
+                    <span className="sm:hidden">WhatsApp</span>
                   </a>
                 ) : (
                   <Link
                     href="/categories"
                     prefetch
-                    className="btn-premium inline-flex items-center rounded-pill border border-white/70 bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/20"
+                    className="btn-premium inline-flex items-center rounded-pill border border-white/70 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 sm:px-6 sm:py-3 sm:text-base"
                   >
                     Browse Categories
                   </Link>
                 )}
               </div>
-              <p className="mt-6 text-sm leading-relaxed text-blue-100/80">
+              <p className="mt-6 hidden text-sm leading-relaxed text-blue-100/80 sm:block">
                 Verified suppliers. Clear prices before you pay. Real updates until delivery.
               </p>
             </div>
 
-            <div className="relative z-0 mx-2 mb-4 mt-2 sm:mx-6 lg:mx-0 lg:mb-0 lg:mt-0 lg:h-full lg:min-h-[400px]">
-              <div className="relative aspect-[4/3] w-full -rotate-1 transform overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-transform duration-500 hover:rotate-0 lg:absolute lg:right-0 lg:top-1/2 lg:w-[105%] lg:-translate-y-1/2 lg:-rotate-2">
+            <div className="relative z-0 h-full lg:min-h-[400px]">
+              <div className="relative h-full w-full -rotate-1 transform overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-transform duration-500 hover:rotate-0 lg:absolute lg:right-0 lg:top-1/2 lg:aspect-[4/3] lg:h-auto lg:w-[105%] lg:-translate-y-1/2 lg:-rotate-2">
                 <img
                   src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1000&auto=format&fit=crop"
                   alt="Global logistics"
@@ -179,27 +180,27 @@ export default function HomeClient({
                 <div className="absolute inset-0 bg-brand-dark/20 mix-blend-overlay" />
               </div>
 
-              <div className="animate-float absolute -bottom-5 -left-2 rounded-2xl border border-white/20 bg-white/10 p-3 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl lg:-bottom-6 lg:-left-6 lg:p-5">
-                <div className="flex items-center gap-3 lg:gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-accent shadow-lg shadow-brand-accent/30 lg:h-12 lg:w-12">
-                    <i className="ri-ship-line text-lg text-white lg:text-xl" />
+              <div className="animate-float absolute -bottom-3 -left-3 rounded-xl border border-white/20 bg-white/10 p-2 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:-bottom-5 sm:p-3 lg:-bottom-6 lg:-left-6 lg:rounded-2xl lg:p-5">
+                <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-accent shadow-lg shadow-brand-accent/30 sm:h-10 sm:w-10 lg:h-12 lg:w-12">
+                    <i className="ri-ship-line text-sm text-white sm:text-lg lg:text-xl" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-100 lg:text-xs">Status</p>
-                    <p className="text-sm font-bold text-white lg:text-base">In Transit to Accra</p>
+                    <p className="text-[8px] font-semibold uppercase tracking-wider text-blue-100 sm:text-[10px] lg:text-xs">Status</p>
+                    <p className="text-[10px] font-bold leading-tight text-white sm:text-sm lg:text-base">In Transit to Accra</p>
                   </div>
                 </div>
               </div>
 
               <div
-                className="animate-float absolute -top-5 right-2 rounded-2xl border border-white/20 bg-white/10 p-3 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl lg:-top-6 lg:right-6 lg:p-4"
+                className="animate-float absolute -top-3 right-1 rounded-xl border border-white/20 bg-white/10 p-1.5 shadow-[0_15px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:-top-5 sm:right-2 sm:p-3 lg:-top-6 lg:right-6 lg:rounded-2xl lg:p-4"
                 style={{ animationDelay: '1.5s' }}
               >
-                <div className="flex items-center gap-2 lg:gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20 lg:h-10 lg:w-10">
-                    <i className="ri-shield-check-fill text-lg text-green-400 lg:text-xl" />
+                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 sm:h-8 sm:w-8 lg:h-10 lg:w-10">
+                    <i className="ri-shield-check-fill text-xs text-green-400 sm:text-lg lg:text-xl" />
                   </div>
-                  <p className="text-xs font-bold text-white lg:text-sm">Verified Supplier</p>
+                  <p className="text-[9px] font-bold text-white sm:text-xs lg:text-sm">Verified Supplier</p>
                 </div>
               </div>
             </div>
