@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { verifyAuth } from '@/lib/auth';
+import { sendInvoiceCancelledEmail } from '@/lib/notifications';
 
 const HARD_LOCK = new Set(['shipped', 'delivered']);
 
@@ -92,6 +93,14 @@ export async function POST(req: Request) {
     if (updateError) {
       console.error('[orders/cancel]', updateError);
       return NextResponse.json({ error: 'Failed to cancel order.' }, { status: 500 });
+    }
+
+    if (updated.payment_status !== 'paid') {
+      try {
+        await sendInvoiceCancelledEmail(updated);
+      } catch (notifyErr) {
+        console.error('[orders/cancel] buyer email failed', notifyErr);
+      }
     }
 
     return NextResponse.json({ success: true, order: updated });

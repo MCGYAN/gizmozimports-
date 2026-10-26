@@ -285,7 +285,8 @@ export default function ExchangeInvoiceClient() {
                   <div>
                     <h2 className="font-semibold text-brand-primary">Already paid?</h2>
                     <p className="mt-1 text-sm text-slate-600">
-                      Tap below only after the money has left your account.
+                      Paste {exchange.exchange_number} as the reference on the transfer, then tap
+                      below only after the money has left your account.
                     </p>
                   </div>
                   <textarea

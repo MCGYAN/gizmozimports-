@@ -7,7 +7,6 @@ import InvoiceWatermark from '@/components/InvoiceWatermark';
 import { STORE_INVOICE_ISSUER } from '@/lib/bank-details';
 import { SITE_INVOICE_LOGO_PATH } from '@/lib/brand';
 import { formatMoney } from '@/lib/payment-routing';
-import { resolvePaymentReference } from '@/lib/payment-reference';
 import {
   EXCHANGE_CORRIDORS,
   formatCorridorBuyRate,
@@ -91,10 +90,6 @@ export default function ExchangeInvoiceDocument({ exchange }: Props) {
   const amountFrom = Number(exchange.amount_from || 0);
   const amountTo = Number(exchange.amount_to || 0);
   const rate = Number(exchange.rate || 0);
-  const paymentRef = resolvePaymentReference(
-    exchange.metadata?.payment_ref,
-    exchange.exchange_number,
-  );
   const description = `Buy RMB, ${meta.name} (${formatCorridorBuyRate(rate, country, 4)})`;
   const accounts = resolvePayAccounts(
     { country_code: country, pay_accounts: [] },
@@ -135,19 +130,15 @@ export default function ExchangeInvoiceDocument({ exchange }: Props) {
             {exchange.business_name ? <p>{exchange.business_name}</p> : null}
             {exchange.email ? <p>{exchange.email}</p> : null}
             {exchange.phone ? <p>{exchange.phone}</p> : null}
-            {paymentRef ? (
-              <p className="mt-1.5">
-                Transfer code (optional):{' '}
-                <span className="font-mono font-bold">{paymentRef}</span>
-                <InlineCopy value={paymentRef} />
-              </p>
-            ) : null}
           </div>
           <table className="w-full border-collapse text-[11px]">
             <tbody>
               <tr>
                 <td className="whitespace-nowrap py-px pr-3 font-semibold">Invoice No.:</td>
-                <td className="py-px text-right">{exchange.exchange_number}</td>
+                <td className="py-px text-right">
+                  {exchange.exchange_number}
+                  <InlineCopy value={exchange.exchange_number} />
+                </td>
               </tr>
               <tr>
                 <td className="whitespace-nowrap py-px pr-3 font-semibold">Pay-in country:</td>
@@ -227,7 +218,7 @@ export default function ExchangeInvoiceDocument({ exchange }: Props) {
         <InvoicePaymentFooter
           accounts={accounts}
           title={`Payment details (${meta.name}):`}
-          note={`Pay only these ${meta.name} accounts for this Buy RMB invoice.`}
+          note={`Pay only these ${meta.name} accounts. Use the invoice number as the transfer reference.`}
           withCopy
           pinned
           pdfMode="single"
@@ -270,12 +261,6 @@ export default function ExchangeInvoiceDocument({ exchange }: Props) {
             {exchange.business_name ? <p>{exchange.business_name}</p> : null}
             {exchange.email ? <p>{exchange.email}</p> : null}
             {exchange.phone ? <p>{exchange.phone}</p> : null}
-            {paymentRef ? (
-              <p className="mt-1.5">
-                Transfer code (optional):{' '}
-                <span className="font-mono font-bold">{paymentRef}</span>
-              </p>
-            ) : null}
           </div>
           <table className="w-full border-collapse text-[11px]">
             <tbody>
@@ -357,7 +342,7 @@ export default function ExchangeInvoiceDocument({ exchange }: Props) {
         <InvoicePaymentFooter
           accounts={accounts}
           title={`Payment details (${meta.name}):`}
-          note={`Pay only these ${meta.name} accounts for this Buy RMB invoice.`}
+          note={`Pay only these ${meta.name} accounts. Use the invoice number as the transfer reference.`}
           pdfMode="single"
           pinned
         />

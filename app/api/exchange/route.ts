@@ -6,7 +6,6 @@ import {
   createExchangeNumber,
   EXCHANGE_DUE_HOURS,
 } from '@/lib/rmb-exchange';
-import { createPaymentReference } from '@/lib/payment-reference';
 import { createAdminNotification } from '@/lib/admin-notifications';
 import {
   corridorIsReady,
@@ -187,7 +186,6 @@ export async function POST(req: Request) {
 
     const payAccounts = resolvePayAccounts(board);
     const exchangeNumber = createExchangeNumber();
-    const paymentRef = createPaymentReference('SN');
     const dueAt = new Date(Date.now() + EXCHANGE_DUE_HOURS * 3600000).toISOString();
 
     const qrPath = randomImagePath(exchangeNumber, safeQr.extension);
@@ -232,7 +230,6 @@ export async function POST(req: Request) {
           country_code: country,
           country_name: meta.name,
           rate_board_updated_at: board.updated_at,
-          payment_ref: paymentRef,
           guest_checkout: !userId,
           alipay_qr_uploaded_at: new Date().toISOString(),
           // Freeze pay-in accounts on the invoice so later admin edits cannot rewrite history

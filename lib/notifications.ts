@@ -450,6 +450,41 @@ ${emailButton('Track Your Order', trackingUrl)}
     }
 }
 
+/** Buyer email when an unpaid invoice is cancelled, so they do not pay a dead invoice. */
+export async function sendInvoiceCancelledEmail(order: {
+    email?: string | null;
+    order_number?: string | null;
+    id?: string;
+    shipping_address?: any;
+    metadata?: any;
+}) {
+    const to = String(order.email || '').trim();
+    if (!to.includes('@')) return;
+
+    const orderNumber = order.order_number || order.id || 'your order';
+    const shipping = order.shipping_address || {};
+    const meta = order.metadata || {};
+    const name =
+        shipping.full_name ||
+        [shipping.firstName, shipping.lastName].filter(Boolean).join(' ') ||
+        [meta.first_name, meta.last_name].filter(Boolean).join(' ') ||
+        'there';
+
+    await sendEmail({
+        to,
+        subject: `Invoice cancelled ${orderNumber}`,
+        html: emailLayout(`
+<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Do not pay this invoice</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Hi ${escapeHtml(name)}, invoice <strong>${escapeHtml(String(orderNumber))}</strong> was cancelled.
+</p>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0;">
+  Do not send Mobile Money or a bank transfer for it. If you already sent the money, reply to this email and we will sort it out.
+</p>
+`, `Invoice ${orderNumber} was cancelled. Do not pay it.`),
+    });
+}
+
 /** Admin-only: customer tapped “I’ve paid” and payment needs review. */
 export async function sendPaymentAwaitingAdminAlert(order: {
     id: string;

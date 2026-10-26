@@ -7,7 +7,6 @@ import InvoiceWatermark from '@/components/InvoiceWatermark';
 import { STORE_BANK_ACCOUNTS, STORE_INVOICE_ISSUER } from '@/lib/bank-details';
 import { SITE_INVOICE_LOGO_PATH } from '@/lib/brand';
 import { formatMoney } from '@/lib/payment-routing';
-import { resolvePaymentReference } from '@/lib/payment-reference';
 import {
   invoiceAddressClass,
   invoiceBodyClass,
@@ -145,13 +144,8 @@ export default function InvoiceDocument({ order }: Props) {
     `${order.metadata?.first_name || ''} ${order.metadata?.last_name || ''}`.trim() ||
     order.email ||
     'Customer';
-  const dueAt = order.metadata?.invoice_due_at;
   const currency = order.currency || 'GHS';
   const items = order.order_items || [];
-  const paymentRef = resolvePaymentReference(
-    order.metadata?.payment_ref,
-    order.order_number,
-  );
   const paymentLabel =
     order.payment_method === 'invoice' ? 'Bank Transfer' : order.payment_method || '—';
 
@@ -192,19 +186,15 @@ export default function InvoiceDocument({ order }: Props) {
             {order.email ? <p>{order.email}</p> : null}
             {order.phone || addr.phone ? <p>{order.phone || addr.phone}</p> : null}
             <p>{[addr.address, addr.city, addr.region].filter(Boolean).join(', ')}</p>
-            {paymentRef ? (
-              <p className="mt-2">
-                Transfer code (optional):{' '}
-                <span className="font-mono font-bold">{paymentRef}</span>
-                <InlineCopy value={paymentRef} />
-              </p>
-            ) : null}
           </div>
           <table className="w-full border-collapse self-start">
             <tbody>
               <tr>
                 <td className="whitespace-nowrap py-0.5 pr-3 font-semibold">Invoice No.:</td>
-                <td className="py-0.5 text-right">{order.order_number}</td>
+                <td className="py-0.5 text-right">
+                  {order.order_number}
+                  <InlineCopy value={order.order_number} />
+                </td>
               </tr>
               <tr>
                 <td className="whitespace-nowrap py-0.5 pr-3 font-semibold">Issue date:</td>
@@ -212,14 +202,6 @@ export default function InvoiceDocument({ order }: Props) {
                   {new Date(order.created_at).toLocaleDateString('en-GB')}
                 </td>
               </tr>
-              {dueAt ? (
-                <tr>
-                  <td className="whitespace-nowrap py-0.5 pr-3 font-semibold">Due date:</td>
-                  <td className="py-0.5 text-right">
-                    {new Date(dueAt).toLocaleDateString('en-GB')}
-                  </td>
-                </tr>
-              ) : null}
             </tbody>
           </table>
         </div>
@@ -261,7 +243,13 @@ export default function InvoiceDocument({ order }: Props) {
 
         <InvoiceTotalsTable order={order} currency={currency} paymentLabel={paymentLabel} />
         </div>
-        <InvoicePaymentFooter accounts={STORE_BANK_ACCOUNTS} withCopy pinned pdfMode="single" />
+        <InvoicePaymentFooter
+          accounts={STORE_BANK_ACCOUNTS}
+          withCopy
+          pinned
+          pdfMode="single"
+          note="Use the invoice number as the reference on your Mobile Money or bank transfer."
+        />
       </div>
 
       {/* ─── Official PDF / print layout (payment footer pinned to page bottom) ─── */}
@@ -305,12 +293,6 @@ export default function InvoiceDocument({ order }: Props) {
             {order.email ? <p>{order.email}</p> : null}
             {order.phone || addr.phone ? <p>{order.phone || addr.phone}</p> : null}
             <p>{[addr.address, addr.city, addr.region].filter(Boolean).join(', ')}</p>
-            {paymentRef ? (
-              <p className="mt-1.5">
-                Transfer code (optional):{' '}
-                <span className="font-mono font-bold">{paymentRef}</span>
-              </p>
-            ) : null}
           </div>
           <table className="w-full border-collapse text-[11px]">
             <tbody>
@@ -324,14 +306,6 @@ export default function InvoiceDocument({ order }: Props) {
                   {new Date(order.created_at).toLocaleDateString('en-GB')}
                 </td>
               </tr>
-              {dueAt ? (
-                <tr>
-                  <td className="whitespace-nowrap py-px pr-3 font-semibold">Due date:</td>
-                  <td className="py-px text-right">
-                    {new Date(dueAt).toLocaleDateString('en-GB')}
-                  </td>
-                </tr>
-              ) : null}
             </tbody>
           </table>
         </div>
@@ -377,6 +351,7 @@ export default function InvoiceDocument({ order }: Props) {
           accounts={STORE_BANK_ACCOUNTS}
           pdfMode="single"
           pinned
+          note="Use the invoice number as the reference on your Mobile Money or bank transfer."
         />
       </div>
 

@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation';
 import ExchangeInvoiceDocument from '@/components/ExchangeInvoiceDocument';
 import { supabase } from '@/lib/supabase';
 import { buildWhatsAppHref } from '@/lib/store-config';
-import { resolvePaymentReference } from '@/lib/payment-reference';
 import {
   EXCHANGE_CORRIDORS,
   formatLocalMoney,
@@ -129,10 +128,6 @@ export default function AdminExchangeDetailPage() {
   const countryMeta = EXCHANGE_CORRIDORS[country];
   const localPaid = formatLocalMoney(Number(exchange.amount_from || 0), country);
   const rmbToSend = Number(exchange.amount_to || 0).toFixed(2);
-  const paymentRef = resolvePaymentReference(
-    exchange.metadata?.payment_ref,
-    exchange.exchange_number,
-  );
   const wa = exchange.phone ? buildWhatsAppHref(exchange.phone) : '';
 
   const status = String(exchange.status || '');
@@ -158,7 +153,7 @@ export default function AdminExchangeDetailPage() {
             {exchange.customer_name}
           </h1>
           <p className="text-sm text-slate-500">
-            {countryMeta.name}. {exchange.exchange_number}. Code {paymentRef}
+            {countryMeta.name}. {exchange.exchange_number}
           </p>
         </div>
         <div className="flex gap-2">

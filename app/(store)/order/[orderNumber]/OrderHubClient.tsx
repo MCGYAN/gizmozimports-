@@ -13,12 +13,10 @@ import {
   visibleAccountOrderStatusSteps,
   type AccountOrderPackageSummary,
 } from '@/lib/account-order-status';
-import { formatMoney, isInvoiceExpired } from '@/lib/payment-routing';
-import { resolvePaymentReference } from '@/lib/payment-reference';
+import { formatMoney } from '@/lib/payment-routing';
 import { buildWhatsAppHref, resolveContactWhatsApp } from '@/lib/store-config';
 import {
   CheckCircle2,
-  Clock,
   Download,
   MessageCircle,
   Package,
@@ -43,7 +41,7 @@ export default function OrderHubPage() {
   const [submitting, setSubmitting] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [autoDownloadHint, setAutoDownloadHint] = useState(false);
-  const [now, setNow] = useState(Date.now());
+  const [refCopied, setRefCopied] = useState(false);
 
   const loadOrder = useCallback(async (orderNum: string, mail: string) => {
     setLoading(true);
@@ -92,11 +90,6 @@ export default function OrderHubPage() {
     if (orderNumber && emailFromUrl) loadOrder(orderNumber, emailFromUrl);
   }, [orderNumber, emailFromUrl, loadOrder]);
 
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 30000);
-    return () => clearInterval(t);
-  }, []);
-
   const orderStatus = useMemo(() => {
     if (!order) return null;
     const openShippingInvoiceId =
@@ -123,11 +116,7 @@ export default function OrderHubPage() {
 
   const packageCount = packages.length;
   const statusTone = accountOrderStatusTone(orderStatus?.key || 'awaiting_payment');
-  const dueAt = order?.metadata?.invoice_due_at as string | undefined;
-  const expired = isInvoiceExpired(dueAt);
-  const msLeft = dueAt ? new Date(dueAt).getTime() - now : 0;
-  const hoursLeft = Math.max(0, Math.floor(msLeft / 3600000));
-  const minsLeft = Math.max(0, Math.floor((msLeft % 3600000) / 60000));
+  const cancelled = order?.status === 'cancelled';
 
   const waHref = useMemo(() => {
     const base = buildWhatsAppHref(resolveContactWhatsApp(null));
@@ -344,7 +333,7 @@ export default function OrderHubPage() {
 
         {order ? (
           <div className="space-y-6">
-            <section className="store-card grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:p-5 print:hidden">
+            <section className="store-card grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5 print:hidden">
               <div className="flex items-start gap-3">
                 <ShieldCheck className="mt-0.5 h-5 w-5 text-brand-accent" />
                 <div>
@@ -363,21 +352,6 @@ export default function OrderHubPage() {
                   >
                     {orderStatus?.title || 'Awaiting payment'}
                   </span>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Clock className="mt-0.5 h-5 w-5 text-brand-accent" />
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Invoice deadline</p>
-                  <p className="font-bold text-brand-primary">
-                    {order.payment_status === 'paid'
-                      ? 'Paid. Closed'
-                      : expired
-                        ? 'Expired'
-                        : dueAt
-                          ? `${hoursLeft}h ${minsLeft}m left`
-                          : '—'}
-                  </p>
                 </div>
               </div>
             </section>
@@ -421,46 +395,62 @@ export default function OrderHubPage() {
             {order.payment_status !== 'paid' && (
               <section className="store-card space-y-4 p-5 sm:p-8 print:hidden">
                 <h2 className="text-xl font-bold text-brand-primary">Pay this invoice</h2>
-                <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-700">
-                  <li>Transfer the total using one of the bank or MoMo accounts on the invoice.</li>
-                  <li>
-                    Optional: add code{' '}
-                    <span className="font-mono font-bold">
-                      {resolvePaymentReference(order.metadata?.payment_ref, order.order_number)}
-                    </span>{' '}
-                    on the transfer if you can. It helps us match your payment faster.
-                  </li>
-                  <li>Tap “I’ve paid” so we can confirm and start your import.</li>
-                </ol>
-
-                {order.payment_status === 'awaiting_confirmation' ? (
-                  <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
-                    <p className="text-sm font-medium">
-                      Payment marked as sent. Waiting for Gizmoz Trades to confirm on the dashboard.
-                    </p>
-                  </div>
-                ) : expired ? (
-                  <p className="text-sm text-red-600">
-                    This invoice expired. Message us on WhatsApp to renew the order.
+                {cancelled ? (
+                  <p className="text-sm font-medium text-red-700">
+                    This invoice was cancelled. Do not send payment.
                   </p>
                 ) : (
                   <>
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder="Optional: MoMo/bank reference or screenshot note"
-                      className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-base"
-                      rows={2}
-                    />
-                    <button
-                      type="button"
-                      disabled={submitting}
-                      onClick={handlePaymentSent}
-                      className="w-full rounded-xl bg-brand-primary py-4 text-lg font-bold text-white disabled:opacity-60 sm:w-auto sm:px-10"
-                    >
-                      {submitting ? 'Sending…' : 'I’ve paid'}
-                    </button>
+                    <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-700">
+                      <li>Transfer the total using one of the bank or MoMo accounts on the invoice.</li>
+                      <li>
+                        Paste this order number as the reference:{' '}
+                        <span className="font-mono font-bold">{order.order_number}</span>{' '}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(order.order_number);
+                              setRefCopied(true);
+                              window.setTimeout(() => setRefCopied(false), 1600);
+                            } catch {
+                              alert(`Copy this: ${order.order_number}`);
+                            }
+                          }}
+                          className="font-semibold text-brand-primary underline-offset-2 hover:underline"
+                        >
+                          {refCopied ? 'Copied' : 'Copy'}
+                        </button>
+                      </li>
+                      <li>Tap “I’ve paid” so we can confirm and start your import.</li>
+                    </ol>
+
+                    {order.payment_status === 'awaiting_confirmation' ? (
+                      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                        <p className="text-sm font-medium">
+                          Payment marked as sent. Waiting for Gizmoz Trades to confirm on the dashboard.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <textarea
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          placeholder="Optional note"
+                          className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-base"
+                          rows={2}
+                        />
+                        <button
+                          type="button"
+                          disabled={submitting}
+                          onClick={handlePaymentSent}
+                          className="w-full rounded-xl bg-brand-primary py-4 text-lg font-bold text-white disabled:opacity-60 sm:w-auto sm:px-10"
+                        >
+                          {submitting ? 'Sending…' : 'I’ve paid'}
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </section>

@@ -2,11 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { verifyRecaptcha } from '@/lib/recaptcha';
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit';
-import {
-  getInvoiceDueAt,
-  resolveCheckoutPaymentChannel,
-} from '@/lib/payment-routing';
-import { createPaymentReference } from '@/lib/payment-reference';
+import { resolveCheckoutPaymentChannel } from '@/lib/payment-routing';
 import { createAdminNotification } from '@/lib/admin-notifications';
 import {
   cleanVariantDisplayLabel,
@@ -111,12 +107,10 @@ export async function POST(req: Request) {
     // Always route from the server total. Do not trust the client's claim
     // (avoids MoMo vs invoice mismatches if the UI and payload disagree).
     const paymentChannel = resolveCheckoutPaymentChannel(total);
-    const invoiceDueAt = paymentChannel === 'invoice' ? getInvoiceDueAt() : null;
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const trackingId = Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
     const trackingNumber = `SLI-${trackingId}`;
-    const paymentRef = createPaymentReference('SN');
 
     const orderPayload = {
       order_number: orderNumber,
@@ -161,9 +155,7 @@ export async function POST(req: Request) {
         last_name: lastName,
         tracking_number: trackingNumber,
         payment_channel: paymentChannel,
-        invoice_due_at: invoiceDueAt,
         fulfillment_stage: 'awaiting_payment',
-        payment_ref: paymentRef,
         service_country: 'Ghana',
         handoff_choice: 'after_package_ready',
       }
@@ -342,7 +334,6 @@ export async function POST(req: Request) {
       order: { ...order, order_items: orderItems },
       orderNumber: order.order_number,
       paymentChannel,
-      invoiceDueAt,
     });
   } catch (e) {
     console.error('[API orders] Error:', e);

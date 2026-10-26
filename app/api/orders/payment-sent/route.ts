@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit';
-import { isInvoiceExpired } from '@/lib/payment-routing';
 import { sendPaymentAwaitingAdminAlert } from '@/lib/notifications';
 import { createAdminNotification } from '@/lib/admin-notifications';
 
@@ -41,10 +40,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, message: 'Already paid.', order });
     }
 
-    const dueAt = order.metadata?.invoice_due_at;
-    if (isInvoiceExpired(dueAt)) {
+    if (order.status === 'cancelled') {
       return NextResponse.json(
-        { error: 'This invoice has expired. Contact us on WhatsApp to renew it.' },
+        { error: 'This invoice was cancelled. Do not send payment.' },
         { status: 400 },
       );
     }
