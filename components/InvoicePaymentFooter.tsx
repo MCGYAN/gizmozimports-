@@ -65,7 +65,19 @@ export default function InvoicePaymentFooter({
   withCopy = false,
   pinned = false,
 }: InvoicePaymentFooterProps) {
-  const accountHolder = holder || accounts[0]?.holder || STORE_INVOICE_ISSUER.legalName;
+  const singleHolder = holder || null;
+  const namesMatch =
+    accounts.length > 0 &&
+    accounts.every(
+      (account) =>
+        (account.registeredName || account.holder) ===
+        (accounts[0].registeredName || accounts[0].holder),
+    );
+  const sharedHolder =
+    singleHolder ||
+    (namesMatch
+      ? accounts[0]?.registeredName || accounts[0]?.holder || STORE_INVOICE_ISSUER.legalName
+      : null);
 
   const wrapperClass = pinned
     ? pdfMode === 'multi'
@@ -83,23 +95,29 @@ export default function InvoicePaymentFooter({
       className={wrapperClass}
     >
       <p className="font-bold uppercase tracking-wide">{title}</p>
-      <p className="mt-1">Account holder: {accountHolder}</p>
+      {sharedHolder ? <p className="mt-1">Account holder: {sharedHolder}</p> : null}
       {note ? <p className="mt-0.5 text-[10px] text-slate-600">{note}</p> : null}
 
       <div
         className="mt-2 grid overflow-hidden rounded-sm border border-black bg-transparent text-[10px] leading-tight text-black sm:text-[9px]"
         style={{ gridTemplateColumns: `repeat(${accounts.length + 1}, minmax(0, 1fr))` }}
       >
-        {accounts.map((account) => (
-          <div
-            key={`${account.bank}-${account.accountNumber}`}
-            className="flex flex-col justify-end border-r border-black/20 px-1.5 py-2 sm:px-2.5"
-          >
-            <p className="font-semibold">{accountColumnTitle(account)}</p>
-            <p className="mt-0.5 font-bold tabular-nums tracking-wide">{account.accountNumber}</p>
-            {withCopy ? <InlineCopy value={account.accountNumber} /> : null}
-          </div>
-        ))}
+        {accounts.map((account) => {
+          const name = account.registeredName || account.holder;
+          return (
+            <div
+              key={`${account.bank}-${account.accountNumber}`}
+              className="flex flex-col justify-end border-r border-black/20 px-1.5 py-2 sm:px-2.5"
+            >
+              <p className="font-semibold">{accountColumnTitle(account)}</p>
+              {!sharedHolder && name ? (
+                <p className="mt-0.5 text-[9px] leading-snug">{name}</p>
+              ) : null}
+              <p className="mt-0.5 font-bold tabular-nums tracking-wide">{account.accountNumber}</p>
+              {withCopy ? <InlineCopy value={account.accountNumber} /> : null}
+            </div>
+          );
+        })}
         <div className="flex items-end justify-center bg-transparent px-2 py-2">
           <img
             src={SITE_INVOICE_LOGO_PATH}

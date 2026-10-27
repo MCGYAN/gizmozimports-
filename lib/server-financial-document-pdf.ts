@@ -407,27 +407,40 @@ export async function generateFinancialDocumentPdf(
       paymentStartY + 16,
     );
   } else {
+    const namesMatch =
+      STORE_BANK_ACCOUNTS.length > 0 &&
+      STORE_BANK_ACCOUNTS.every(
+        (account) =>
+          (account.registeredName || account.holder) ===
+          (STORE_BANK_ACCOUNTS[0].registeredName || STORE_BANK_ACCOUNTS[0].holder),
+      );
+    const sharedHolder = namesMatch
+      ? STORE_BANK_ACCOUNTS[0]?.registeredName ||
+        STORE_BANK_ACCOUNTS[0]?.holder ||
+        STORE_INVOICE_ISSUER.legalName
+      : null;
+
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
     text(pdf, 'PAYMENT DETAILS:', left, paymentStartY);
     pdf.setFont('helvetica', 'normal');
-    text(
-      pdf,
-      `Account holder: ${STORE_BANK_ACCOUNTS[0]?.holder || STORE_INVOICE_ISSUER.legalName}`,
-      left,
-      paymentStartY + 5,
-    );
+    let nextY = paymentStartY + 5;
+    if (sharedHolder) {
+      text(pdf, `Account holder: ${sharedHolder}`, left, nextY);
+      nextY += 4;
+    }
     if (document.flow === 'shipping') {
       pdf.setFontSize(7.5);
       pdf.setTextColor(80, 80, 80);
       const note =
         'This cedi amount is held until the due date because the dollar rate changes. After the due date, request a fresh bill from your account page.';
-      pdf.text(pdf.splitTextToSize(note, right - left), left, paymentStartY + 9.5);
+      pdf.text(pdf.splitTextToSize(note, right - left), left, nextY);
       pdf.setTextColor(0, 0, 0);
+      nextY += 6;
     }
 
-    const boxTop = paymentStartY + (document.flow === 'shipping' ? 15 : 9);
-    const boxHeight = 22;
+    const boxTop = nextY + 1;
+    const boxHeight = sharedHolder ? 22 : 28;
     const boxWidth = right - left;
     const columns = STORE_BANK_ACCOUNTS.length + 1;
     const colWidth = boxWidth / columns;
@@ -452,15 +465,25 @@ export async function generateFinancialDocumentPdf(
           : account.branch
             ? `${account.bank} (${account.branch})`
             : account.bank;
+      const name = account.registeredName || account.holder;
       pdf.setFont('helvetica', 'bold');
       const titleLines = pdf.splitTextToSize(title, colWidth - 4);
+      const nameLines =
+        !sharedHolder && name ? pdf.splitTextToSize(name, colWidth - 4) : [];
       // Keep bank text near the bottom of each cell (less empty space above).
-      const textBlockH = titleLines.length * 3.2 + 4;
+      const textBlockH = titleLines.length * 3.2 + nameLines.length * 3 + 4;
       const textTop = boxTop + boxHeight - textBlockH - 2;
       pdf.text(titleLines, x, textTop + 3);
+      let lineY = textTop + 3 + titleLines.length * 3.2;
+      if (nameLines.length) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(6.5);
+        pdf.text(nameLines, x, lineY);
+        lineY += nameLines.length * 3;
+      }
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(7.5);
-      text(pdf, account.accountNumber, x, textTop + 3 + titleLines.length * 3.2);
+      text(pdf, account.accountNumber, x, lineY);
       pdf.setFontSize(7);
     });
 

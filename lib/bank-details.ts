@@ -10,19 +10,18 @@ export type BankAccount = {
   channel?: 'bank' | 'momo';
 };
 
-// TODO(gizmoz): replace placeholders with the real Gizmoz Trades bank and MoMo accounts before taking payments.
 export const STORE_BANK_ACCOUNTS: BankAccount[] = [
   {
-    holder: 'Gizmoz Trades',
-    bank: 'Bank account (to be added)',
-    accountNumber: 'Pending',
+    holder: 'Celestian Laryea',
+    bank: 'GCB',
+    accountNumber: '1341010154121',
     channel: 'bank',
   },
   {
-    holder: 'Gizmoz Trades',
-    bank: 'MTN MoMo (to be added)',
-    accountNumber: 'Pending',
-    registeredName: 'Gizmoz Trades',
+    holder: 'FELICIA NAA DEISA LARYEA',
+    bank: 'MTN',
+    accountNumber: '0555085242',
+    registeredName: 'FELICIA NAA DEISA LARYEA',
     channel: 'momo',
   },
 ];
