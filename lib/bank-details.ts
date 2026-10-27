@@ -31,6 +31,6 @@ export const STORE_INVOICE_ISSUER = {
   legalName: 'Gizmoz Trades',
   contactName: 'Customer Support',
   addressLines: ['Accra', 'Greater Accra Region', 'Ghana'],
-  phones: ['+233 20 959 7443'],
+  phones: ['+233 54 023 7911'],
   email: 'support@gizmoztrades.com',
 };

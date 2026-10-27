@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-const SUPPORT_PHONES = ['+233 (0) 246 033 792', '+233 (0) 579 033 792'];
+const SUPPORT_PHONES = ['+233 54 023 7911'];
 const TELEGRAM = 'https://gizmoztrades.com';
 const SOCIAL_HANDLE = '@example';
 

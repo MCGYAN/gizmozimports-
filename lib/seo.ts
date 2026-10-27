@@ -92,8 +92,8 @@ export const SEO = {
   language: 'en',
 
   contact: {
-    phone: '0209597443',
-    whatsapp: '0209597443',
+    phone: '0540237911',
+    whatsapp: '0540237911',
     email: 'support@gizmoztrades.com',
     country: 'GH',
     areaServed: 'Ghana',
