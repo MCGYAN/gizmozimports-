@@ -19,7 +19,7 @@ export default function Footer() {
     getSetting('site_tagline') ||
     'Your China sourcing partner in Ghana. We source, pay, and deliver quality products so you do not have to.';
   const contactAddress = getSetting('contact_address') || '';
-  const contactPhone = getSetting('contact_phone') || '';
+  const contactWhatsapp = getSetting('contact_whatsapp') || '';
   const socialFacebook = getSetting('social_facebook') || '';
   const socialInstagram = getSetting('social_instagram') || '';
   const socialTikTok = getSetting('social_tiktok') || '';
@@ -51,9 +51,9 @@ export default function Footer() {
               <p className="max-w-sm text-xs leading-snug text-blue-200/60 lg:text-sm lg:leading-relaxed">
                 {siteTagline}
               </p>
-              {(contactPhone || contactAddress) && (
+              {(contactWhatsapp || contactAddress) && (
                 <div className="space-y-1 text-xs text-blue-200/70 lg:text-sm">
-                  {contactPhone ? <p>Call / WhatsApp: {contactPhone}</p> : null}
+                  {contactWhatsapp ? <p>WhatsApp: {contactWhatsapp}</p> : null}
                   {contactAddress ? <p className="line-clamp-2">{contactAddress}</p> : null}
                 </div>
               )}

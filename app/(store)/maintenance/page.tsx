@@ -65,11 +65,13 @@ export default function MaintenancePage() {
               Email us
             </a>
             <a
-              href="tel:"
+              href="https://wa.me/233540237911"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-900 px-6 py-3 rounded-full font-medium hover:bg-gray-50 transition-colors whitespace-nowrap"
             >
-              <i className="ri-phone-line"></i>
-              Call us
+              <i className="ri-whatsapp-line"></i>
+              WhatsApp
             </a>
           </div>
         </div>

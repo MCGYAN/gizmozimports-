@@ -55,9 +55,6 @@ export default function PricingGuidePage() {
             <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-pill bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white">
               Chat on WhatsApp
             </a>
-            <a href={leadConfig.telUrl(leadConfig.ghanaPhone)} className="inline-flex rounded-pill border border-brand px-5 py-2.5 text-sm font-semibold text-brand">
-              Call Now
-            </a>
           </div>
         </div>
       </div>

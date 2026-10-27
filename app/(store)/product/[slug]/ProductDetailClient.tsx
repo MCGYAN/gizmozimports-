@@ -12,7 +12,7 @@ import { notFound } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useCMS } from '@/context/CMSContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { buildTelHref, buildWhatsAppHref, getImportProductMode, resolveContactWhatsApp } from '@/lib/store-config';
+import { buildWhatsAppHref, getImportProductMode, resolveContactWhatsApp } from '@/lib/store-config';
 import { formatStoreMoney, STORE_CURRENCY } from '@/lib/currency';
 import {
   buildAvailabilityWhatsAppText,
@@ -360,7 +360,6 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
   const waAvailability = waBase
     ? `${waBase}${waBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(buildAvailabilityWhatsAppText(product.name, shareUrl))}`
     : '';
-  const telDirect = buildTelHref(getSetting('contact_phone'));
   const allowOnlineCheckout = resolveDirectPayment(product.commerce?.directPayment ?? null, importMode);
   const showImportDetails = Boolean(product.commerce?.importType || product.commerce?.importNotes);
   const variantsForSelectedColor = selectedColor
@@ -806,15 +805,6 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     </p>
                   </div>
                 )}
-
-                {telDirect ? (
-                  <p className="mb-6 text-sm text-gray-500">
-                    Prefer a call?{' '}
-                    <a href={telDirect} className="font-semibold text-brand-primary hover:text-brand-accent">
-                      Phone us
-                    </a>
-                  </p>
-                ) : null}
 
                 <div className="border-t border-gray-200 pt-6 space-y-4">
                   <div className="flex items-center text-gray-700">

@@ -7,10 +7,8 @@ import PageHero from '@/components/PageHero';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useRecaptcha } from '@/hooks/useRecaptcha';
 import {
-  buildTelHref,
   buildWhatsAppHref,
   resolveContactEmail,
-  resolveContactPhone,
   resolveContactWhatsApp,
 } from '@/lib/store-config';
 import { STORE_INVOICE_ISSUER } from '@/lib/bank-details';
@@ -108,7 +106,6 @@ export default function ContactPage() {
 
   // Contact details: CMS when set, otherwise invoice issuer defaults
   const contactEmail = resolveContactEmail(getSetting('contact_email'));
-  const contactPhone = resolveContactPhone(getSetting('contact_phone'));
   const contactWhatsapp = resolveContactWhatsApp(getSetting('contact_whatsapp'));
   const primaryAddressLine =
     getSetting('contact_address') || STORE_INVOICE_ISSUER.addressLines.slice(0, 2).join(', ');
@@ -122,30 +119,11 @@ export default function ContactPage() {
   const heroContent = pageContent?.content || 'Our friendly team is here to help. Reach out through any of our contact channels.';
 
   const waLink = buildWhatsAppHref(contactWhatsapp);
-  const telLink = buildTelHref(contactPhone);
 
   const addressParts = [primaryAddressLine, secondaryAddressLine].filter(Boolean);
   const locationDescription = addressParts.length ? addressParts.join(' • ') : '';
 
   const contactMethods = [
-    ...(contactPhone
-      ? [
-          {
-            icon: 'ri-phone-line',
-            title: 'Call Us',
-            value: contactPhone,
-            link: telLink,
-            description: 'Mon-Fri, 8am-6pm GMT',
-          },
-        ]
-      : []),
-    {
-      icon: 'ri-mail-line',
-      title: 'Email Us',
-      value: contactEmail,
-      link: `mailto:${contactEmail}`,
-      description: 'We respond within 24 hours',
-    },
     ...(contactWhatsapp
       ? [
           {
@@ -157,6 +135,13 @@ export default function ContactPage() {
           },
         ]
       : []),
+    {
+      icon: 'ri-mail-line',
+      title: 'Email Us',
+      value: contactEmail,
+      link: `mailto:${contactEmail}`,
+      description: 'We respond within 24 hours',
+    },
     ...(socialFacebook
       ? [
           {

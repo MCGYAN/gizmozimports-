@@ -4,14 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useCMS } from '@/context/CMSContext';
-import {
-  buildTelHref,
-  buildWhatsAppHref,
-  resolveContactPhone,
-  resolveContactWhatsApp,
-} from '@/lib/store-config';
+import { buildWhatsAppHref, resolveContactWhatsApp } from '@/lib/store-config';
 import type { LucideIcon } from 'lucide-react';
-import { Home, LayoutGrid, Phone, User, MessageCircle } from 'lucide-react';
+import { Home, LayoutGrid, MessageCircle, User, HelpCircle } from 'lucide-react';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -20,7 +15,6 @@ export default function MobileBottomNav() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const waHref = buildWhatsAppHref(resolveContactWhatsApp(getSetting('contact_whatsapp')));
-  const telHref = buildTelHref(resolveContactPhone(getSetting('contact_phone')));
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -54,9 +48,9 @@ export default function MobileBottomNav() {
           <MobileItem href="/shop" label="Shop" active={isActive('/shop')} icon={LayoutGrid} />
           <div className="relative flex flex-col items-center justify-end pb-1">
             <a
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={waHref || '/contact'}
+              target={waHref ? '_blank' : undefined}
+              rel={waHref ? 'noopener noreferrer' : undefined}
               className="-mt-5 mb-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-brand-accent text-white shadow-md shadow-brand-accent/30 active:scale-95"
               aria-label="Chat on WhatsApp"
             >
@@ -64,17 +58,7 @@ export default function MobileBottomNav() {
             </a>
             <span className="text-[10px] font-medium text-slate-500">WhatsApp</span>
           </div>
-          {telHref ? (
-            <a
-              href={telHref}
-              className="flex flex-col items-center justify-end gap-0.5 pb-1 text-slate-500 active:opacity-70"
-            >
-              <Phone className="h-5 w-5" strokeWidth={1.75} />
-              <span className="text-[10px] font-medium">Call</span>
-            </a>
-          ) : (
-            <MobileItem href="/contact" label="Call" active={isActive('/contact')} icon={Phone} />
-          )}
+          <MobileItem href="/contact" label="Ask" active={isActive('/contact')} icon={HelpCircle} />
           <MobileItem href="/account" label="Account" active={isActive('/account')} icon={User} />
         </div>
       </div>
