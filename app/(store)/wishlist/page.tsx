@@ -38,7 +38,7 @@ export default function WishlistPage() {
         subtitle="Keep track of imports you like. When you are ready, we help you bring them home."
       />
 
-      <section className="border-b border-white/40 py-8 liquid-glass">
+      <section className="border-b border-slate-200 bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div>
@@ -96,19 +96,19 @@ export default function WishlistPage() {
         </section>
       )}
 
-      <section className="store-section bg-white/20 backdrop-blur-sm">
+      <section className="store-section bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="bg-gradient-to-r from-blue-700 to-blue-800 rounded-2xl p-12 text-center text-white">
+          <div className="bg-[#172554] p-12 text-center text-white">
             <h2 className="text-3xl font-bold mb-4">Share your import shortlist</h2>
             <p className="text-white/80 mb-8 text-lg">Loop in partners or family who co-sign big buys so everyone sees the same Gizmoz Trades listings.</p>
             <div className="flex justify-center space-x-4">
-              <button className="w-12 h-12 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+              <button className="w-12 h-12 flex items-center justify-center bg-white/15 hover:bg-white/25 rounded-lg transition-colors">
                 <i className="ri-facebook-fill text-xl"></i>
               </button>
-              <button className="w-12 h-12 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+              <button className="w-12 h-12 flex items-center justify-center bg-white/15 hover:bg-white/25 rounded-lg transition-colors">
                 <i className="ri-twitter-x-fill text-xl"></i>
               </button>
-              <button className="w-12 h-12 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+              <button className="w-12 h-12 flex items-center justify-center bg-white/15 hover:bg-white/25 rounded-lg transition-colors">
                 <i className="ri-whatsapp-fill text-xl"></i>
               </button>
               <button className="w-12 h-12 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-lg transition-colors">

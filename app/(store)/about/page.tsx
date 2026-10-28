@@ -27,12 +27,12 @@ const STEPS = [
 ];
 
 const CATEGORIES = [
-  { title: 'Electronics & Gadgets', text: 'Phones, accessories, computers, and smart devices.', icon: 'ri-smartphone-line' },
+  { title: 'Gadgets & Electronic Products', text: 'Phones, accessories, computers, and smart devices.', icon: 'ri-smartphone-line' },
+  { title: 'Construction Equipment', text: 'Tools, machinery, and site equipment for building projects.', icon: 'ri-building-2-line' },
+  { title: 'Auto & Auto Parts', text: 'Vehicle parts, accessories, and automotive supplies.', icon: 'ri-car-line' },
+  { title: 'Stationery', text: 'Office, school, and business stationery supplies.', icon: 'ri-pencil-ruler-2-line' },
+  { title: 'Laboratory Experiment Equipment', text: 'Lab instruments, glassware, and experiment supplies.', icon: 'ri-flask-line' },
   { title: 'Home Appliances', text: 'Kitchen, laundry, and utility appliances.', icon: 'ri-home-gear-line' },
-  { title: 'Furniture', text: 'Office and home furniture with pre-shipment checks.', icon: 'ri-sofa-line' },
-  { title: 'Fashion & Accessories', text: 'Shoes, bags, fabrics, and private label options.', icon: 'ri-t-shirt-2-line' },
-  { title: 'Industrial & Tools', text: 'Machinery parts, hand tools, and workshop equipment.', icon: 'ri-tools-line' },
-  { title: 'Bulk Wholesale Goods', text: 'Container and mixed goods for retail and distribution.', icon: 'ri-box-3-line' },
 ];
 
 const VALUES = [
@@ -59,10 +59,7 @@ export default function AboutPage() {
       <section className="border-b border-slate-200/80 bg-white">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="mx-auto max-w-2xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-accent sm:text-xs">
-              About Gizmoz Trades
-            </p>
-            <h2 className="mt-2 font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
+            <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
               The right product, from the right source
             </h2>
             <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-slate-600 sm:text-base md:text-lg">
@@ -72,12 +69,13 @@ export default function AboutPage() {
                 quality products from China.
               </p>
               <p>
-                We specialise in gadgets and electronics, and we also source home appliances,
-                furniture, fashion, tools, and bulk wholesale goods based on what each customer needs.
+                We specialise in gadgets and electronics, and we also source construction equipment,
+                auto parts, stationery, laboratory equipment, and home appliances based on what each
+                customer needs.
               </p>
               <p>
                 Importing should not feel risky. We give you clear prices, practical guidance, and a
-                team you can reach on WhatsApp or phone throughout the process.
+                team you can reach on WhatsApp throughout the process.
               </p>
             </div>
           </div>
@@ -88,10 +86,7 @@ export default function AboutPage() {
       <section className="border-b border-slate-200/80 bg-[#eef2f7]">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-accent sm:text-xs">
-              How we work
-            </p>
-            <h2 className="mt-2 font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
+            <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
               Source, check, pay, deliver
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
@@ -108,7 +103,7 @@ export default function AboutPage() {
                 <span className="absolute -left-[9px] top-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent md:left-0 md:top-[-9px]">
                   <span className="h-1.5 w-1.5 rounded-full bg-white" />
                 </span>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-brand-accent">
+                <p className="text-[11px] font-semibold text-brand-accent">
                   Step {index + 1}
                 </p>
                 <h3 className="mt-1.5 font-heading text-lg font-bold text-brand-primary">{step.title}</h3>
@@ -123,11 +118,8 @@ export default function AboutPage() {
       <section className="hero-mesh overflow-hidden text-white">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-orange-300 sm:text-xs">
-              What we source
-            </p>
-            <h2 className="mt-2 font-heading text-[1.625rem] font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-              Everything from gadgets to full containers
+            <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+              What we source for Ghana
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-blue-100 sm:text-base">
               Send your product image or description and we will source it for you.
@@ -136,8 +128,8 @@ export default function AboutPage() {
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
             {CATEGORIES.map((cat) => (
-              <div key={cat.title} className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-md">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-accent shadow-lg shadow-brand-accent/30">
+              <div key={cat.title} className="border border-white/15 bg-white/8 p-5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-accent">
                   <i className={`${cat.icon} text-lg text-white`} aria-hidden />
                 </div>
                 <h3 className="mt-4 font-heading text-base font-bold">{cat.title}</h3>
@@ -149,7 +141,7 @@ export default function AboutPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/shop"
-              className="btn-premium inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-pill bg-brand-accent px-6 py-3 text-sm font-semibold text-white hover:bg-orange-600 sm:w-auto"
+              className="btn-premium inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-semibold text-white hover:bg-orange-600 sm:w-auto"
             >
               See products
               <ArrowRight className="h-4 w-4" />
@@ -159,7 +151,7 @@ export default function AboutPage() {
                 href={whatsApp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-premium inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-pill border border-white/70 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20 sm:w-auto"
+                className="btn-premium inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-white/60 bg-transparent px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 sm:w-auto"
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp a quote
@@ -173,10 +165,7 @@ export default function AboutPage() {
       <section className="border-b border-slate-200/80 bg-white">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-accent sm:text-xs">
-              Why Gizmoz Trades
-            </p>
-            <h2 className="mt-2 font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
+            <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
               Shop China with someone on your side
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-slate-600 sm:text-base md:text-lg">
@@ -187,7 +176,7 @@ export default function AboutPage() {
 
           <div className="mx-auto mt-8 grid max-w-4xl gap-3 sm:grid-cols-3">
             {VALUES.map(([title, text]) => (
-              <div key={title} className="card-premium rounded-card p-5 text-center">
+              <div key={title} className="border border-slate-200/80 bg-white p-5 text-center">
                 <p className="text-sm font-bold text-brand-primary">{title}</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-500">{text}</p>
               </div>
@@ -210,7 +199,7 @@ export default function AboutPage() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/shop"
-                className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-pill bg-brand px-6 py-3 text-[15px] font-semibold text-white hover:bg-brand-dark sm:w-auto"
+                className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-[15px] font-semibold text-white hover:bg-brand-dark sm:w-auto"
               >
                 Start shopping
                 <ArrowRight className="h-4 w-4" />
@@ -220,7 +209,7 @@ export default function AboutPage() {
                   href={whatsApp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-pill border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
+                  className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-brand-accent" />
                   Talk to us
@@ -228,7 +217,7 @@ export default function AboutPage() {
               ) : (
                 <Link
                   href="/contact"
-                  className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-pill border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
+                  className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-brand-accent" />
                   Talk to us

@@ -857,18 +857,9 @@ img {
     @apply mx-auto w-full max-w-store px-4 sm:px-6 lg:px-8;
   }
 
-  /* Interactive Premium Buttons */
+  /* Interactive buttons — colour shift only, no lift/glow theatre */
   .btn-interactive {
-    @apply relative overflow-hidden transition-all duration-300 ease-out 
-           hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(249,115,22,0.3)] active:translate-y-0 active:shadow-sm;
-  }
-
-  .btn-interactive::after {
-    @apply content-[''] absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300;
-  }
-
-  .btn-interactive:hover::after {
-    @apply opacity-100;
+    @apply transition-colors duration-200 ease-out;
   }
 
   /* Premium Glassmorphism */
@@ -880,55 +871,29 @@ img {
     @apply bg-[#1E3A8A]/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)];
   }
 
-  /* Liquid glass — frosted card surfaces */
+  /* Calm card surfaces — frosted lightly, no decorative glass theatre */
   .liquid-glass {
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.82) 0%,
-      rgba(255, 255, 255, 0.52) 45%,
-      rgba(255, 255, 255, 0.72) 100%
-    );
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    box-shadow:
-      0 8px 32px rgba(30,58,138, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   }
 
   .liquid-glass-card {
-    @apply liquid-glass rounded-2xl transition-all duration-300;
+    @apply liquid-glass rounded-2xl;
   }
 
   .liquid-glass-card-interactive {
-    @apply liquid-glass-card hover:-translate-y-1 hover:border-brand-accent/25 hover:shadow-[0_16px_48px_rgba(30,58,138,0.1)];
+    @apply liquid-glass-card transition-colors duration-200 hover:border-brand-accent/30;
   }
 
   .liquid-glass-well {
-    background: linear-gradient(
-      180deg,
-      rgba(248, 250, 252, 0.85) 0%,
-      rgba(241, 245, 249, 0.55) 100%
-    );
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    background: #f8fafc;
+    border: 1px solid rgba(226, 232, 240, 0.95);
   }
 
   .liquid-glass-inset {
-    background: linear-gradient(
-      135deg,
-      rgba(30,58,138, 0.88) 0%,
-      rgba(30,58,138, 0.72) 100%
-    );
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    background: #1e3a8a;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow:
-      0 4px 20px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .store-section {
@@ -939,28 +904,18 @@ img {
     @apply min-h-screen text-brand-foreground;
   }
 
-  /* Ambient mesh — lets frosted panels read as glass sitewide */
+  /* Calm site wash — brand blue only, no floating colour blobs */
   .store-site-bg {
-    background-color: #eef2f7;
-    background-image:
-      radial-gradient(ellipse 85% 55% at 15% -8%, rgba(249,115,22, 0.09), transparent 52%),
-      radial-gradient(ellipse 65% 45% at 92% 8%, rgba(30,58,138, 0.07), transparent 48%),
-      radial-gradient(ellipse 75% 55% at 50% 105%, rgba(30,58,138, 0.05), transparent 58%),
-      linear-gradient(180deg, #f6f8fb 0%, #eef2f7 45%, #e9eef5 100%);
-    background-attachment: fixed;
+    background-color: #f4f6f9;
+    background-image: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   }
 
   .store-page-header {
-    @apply relative overflow-hidden bg-gradient-to-br from-brand-primary via-[#172554] to-[#0f1a3d] py-14 md:py-16;
-  }
-
-  .store-page-header::before {
-    content: '';
-    @apply pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(249,115,22,0.14),transparent)];
+    @apply relative overflow-hidden bg-[#172554] py-14 md:py-16;
   }
 
   .store-card {
-    @apply liquid-glass rounded-3xl transition-all duration-300;
+    @apply liquid-glass rounded-2xl transition-colors duration-200;
   }
 
   .store-card-interactive {
@@ -976,25 +931,25 @@ img {
   }
 
   .store-input {
-    @apply w-full rounded-xl border border-white/55 bg-white/50 px-4 py-3 text-sm text-brand-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-xl transition-all placeholder:text-slate-400 focus:border-brand-accent/50 focus:outline-none focus:ring-2 focus:ring-brand-accent/25;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-brand-foreground transition-colors placeholder:text-slate-400 focus:border-brand-accent/50 focus:outline-none focus:ring-2 focus:ring-brand-accent/25;
   }
 
   .store-chip {
-    @apply inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/45 px-4 py-2 text-sm font-semibold text-brand-foreground shadow-[0_2px_8px_rgba(30,58,138,0.04)] backdrop-blur-lg transition-all hover:border-brand-accent/30 hover:bg-white/60;
+    @apply inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-foreground transition-colors hover:border-brand-accent/30;
   }
 
   .store-chip-active {
-    @apply border-brand-accent bg-brand-accent text-white shadow-md shadow-brand-accent/25;
+    @apply border-brand-accent bg-brand-accent text-white;
   }
 
   .store-eyebrow {
-    @apply text-xs font-bold uppercase tracking-[0.2em] text-brand-accent;
+    @apply text-sm font-medium text-brand-accent;
   }
 
   /* Mobile storefront — editorial rhythm */
   @media (max-width: 767px) {
     .mobile-section {
-      @apply border-b border-white/40 bg-white/35 py-11 backdrop-blur-md;
+      @apply border-b border-slate-200 bg-white py-11;
     }
 
     .mobile-section-head {
@@ -1188,58 +1143,35 @@ img {
 
 /* Gizmoz Trades signature surfaces */
 .glass-nav {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px) saturate(1.35);
-  -webkit-backdrop-filter: blur(16px) saturate(1.35);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
 }
 
 .hero-mesh {
-  background:
-    radial-gradient(1200px circle at 0% 0%, rgba(255, 255, 255, 0.2), transparent 40%),
-    radial-gradient(900px circle at 100% 0%, rgba(249,115,22, 0.24), transparent 36%),
-    linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 55%, #172554 100%);
+  background: #1e3a8a;
 }
 
 .hero-glow {
-  box-shadow: 0 30px 80px -45px rgba(15, 23, 42, 0.55);
+  box-shadow: none;
 }
 
 .btn-premium {
-  position: relative;
-  overflow: hidden;
-  transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease;
-}
-
-.btn-premium::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
-  transform: translateX(-130%);
-  transition: transform 420ms ease;
+  transition: background-color 180ms ease, border-color 180ms ease, opacity 180ms ease;
 }
 
 .btn-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px -16px rgba(2, 6, 23, 0.55);
-}
-
-.btn-premium:hover::after {
-  transform: translateX(130%);
+  opacity: 0.94;
 }
 
 .card-premium {
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 32px -24px rgba(15, 23, 42, 0.24);
-  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 180ms ease;
 }
 
 .card-premium:hover {
-  transform: translateY(-4px);
   border-color: rgba(29, 78, 216, 0.28);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 22px 44px -24px rgba(15, 23, 42, 0.36);
 }
 
 .text-gradient-brand {

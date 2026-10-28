@@ -235,7 +235,7 @@ export default function BlogPage() {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-brand-primary to-[#0f1a3d] py-16">
+      <div className="bg-[#172554] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">Ready to Start Shopping?</h2>
           <p className="text-xl text-white/80 mb-8 leading-relaxed">
@@ -243,7 +243,7 @@ export default function BlogPage() {
           </p>
           <Link
             href="/shop"
-            className="inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-full font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
           >
             Explore Products
             <i className="ri-arrow-right-line"></i>

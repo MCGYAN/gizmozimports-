@@ -51,7 +51,7 @@ export default function MobileBottomNav() {
               href={waHref || '/contact'}
               target={waHref ? '_blank' : undefined}
               rel={waHref ? 'noopener noreferrer' : undefined}
-              className="-mt-5 mb-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-brand-accent text-white shadow-md shadow-brand-accent/30 active:scale-95"
+              className="-mt-5 mb-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-brand-accent text-white active:opacity-90"
               aria-label="Chat on WhatsApp"
             >
               <MessageCircle className="h-5 w-5" strokeWidth={2} />

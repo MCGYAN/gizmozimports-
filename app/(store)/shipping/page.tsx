@@ -16,10 +16,10 @@ export default function ShippingPage() {
       </div>
 
       <div className="store-container store-section">
-        <section className="mb-16 overflow-hidden rounded-3xl border border-brand-primary/10 bg-gradient-to-br from-brand-primary to-[#071529] p-6 text-white sm:p-8">
+        <section className="mb-16 overflow-hidden border border-brand-primary/10 bg-[#172554] p-6 text-white sm:p-8">
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+              <p className="text-sm font-medium text-brand-accent">
                 Already buying in China?
               </p>
               <h2 className="mt-2 font-heading text-2xl font-bold sm:text-3xl">
@@ -195,14 +195,14 @@ export default function ShippingPage() {
             </Link>
             <Link
               href="/order-tracking"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border-2 border-slate-200 bg-white px-8 py-4 font-medium text-brand-primary transition-colors hover:border-brand-accent"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-8 py-4 font-medium text-brand-primary transition-colors hover:border-brand-accent"
             >
               Find my order
             </Link>
           </div>
         </div>
 
-        <div className="rounded-2xl bg-gradient-to-br from-brand-primary to-[#0f1a3d] p-8 text-center text-white">
+        <div className="bg-[#172554] p-8 text-center text-white">
           <h2 className="mb-4 text-3xl font-bold">Questions about delivery?</h2>
           <p className="mb-6 leading-relaxed text-white/80">
             Ask about timing, pickup, or where your order stands.
@@ -210,13 +210,13 @@ export default function ShippingPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-blue-50"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-blue-50"
             >
               Contact Support
             </Link>
             <Link
               href="/faqs"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-accent px-6 py-3 font-medium text-white transition-colors hover:bg-[#e85f12]"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-accent px-6 py-3 font-medium text-white transition-colors hover:bg-[#e85f12]"
             >
               View FAQs
             </Link>

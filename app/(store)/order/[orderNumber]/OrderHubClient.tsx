@@ -280,7 +280,7 @@ export default function OrderHubPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-white to-[#eef2f7]">
+    <main className="min-h-screen bg-[#f8fafc]">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 print:max-w-none print:px-0 print:py-0">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
           <div>

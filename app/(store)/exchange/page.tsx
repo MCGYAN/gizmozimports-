@@ -151,7 +151,7 @@ export default function ExchangePage() {
     <main className="min-h-screen bg-[#1E3A8A] text-white">
       <div className="mx-auto max-w-xl px-4 py-12 sm:px-6">
         <header>
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-accent">Buy RMB</p>
+          <p className="text-sm font-medium text-brand-accent">Buy RMB</p>
           <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">
             Pay locally. Get RMB on Alipay.
           </h1>

@@ -39,7 +39,7 @@ export default function HowItWorksPage() {
         <div className="mt-10 rounded-card-lg bg-brand-accent p-8 text-white max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold">Start your import in minutes</h2>
           <p className="mt-2 text-orange-100">Send your product details now and get a response quickly.</p>
-          <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex rounded-pill bg-white px-6 py-3 font-semibold text-brand-accent">
+          <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex rounded-xl bg-white px-6 py-3 font-semibold text-brand-accent">
             Chat on WhatsApp
           </a>
         </div>

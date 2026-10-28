@@ -72,7 +72,7 @@ export default function WhatWeSourcePage() {
             href={leadConfig.whatsappUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex rounded-pill bg-brand-accent px-6 py-3 font-semibold text-white"
+            className="mt-5 inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-white"
           >
             Request Custom Sourcing
           </a>

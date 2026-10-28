@@ -92,11 +92,8 @@ export default function FAQsPage() {
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-brand-primary to-[#0f1a3d] py-16">
+      <div className="bg-[#172554] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="ri-customer-service-2-line text-3xl text-white"></i>
-          </div>
           <h2 className="text-3xl font-bold text-white mb-4">Still have questions?</h2>
           <p className="text-xl text-white/80 mb-8 leading-relaxed">
             Talk to us. We reply within 24 hours.
@@ -104,14 +101,14 @@ export default function FAQsPage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-full font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
             >
               <i className="ri-mail-line text-lg"></i>
               Contact Support
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-4 rounded-full font-medium hover:bg-[#e85f12] transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-4 rounded-xl font-medium hover:bg-[#e85f12] transition-colors whitespace-nowrap"
             >
               <i className="ri-customer-service-2-line text-lg"></i>
               More help

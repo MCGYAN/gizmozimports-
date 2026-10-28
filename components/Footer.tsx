@@ -6,10 +6,10 @@ import StoreLogo from '@/components/StoreLogo';
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 
 const linkClass =
-  'text-blue-100/65 transition-colors active:text-white max-lg:text-[13px] lg:hover:text-blue-300 lg:hover:translate-x-1 lg:transition-all lg:duration-300';
+  'text-blue-100/65 transition-colors active:text-white max-lg:text-[13px] lg:hover:text-white';
 
 const mobileHeadingClass =
-  'mb-2 text-[11px] font-semibold uppercase tracking-wider text-brand-accent lg:mb-4 lg:text-base lg:normal-case lg:tracking-normal lg:font-bold lg:text-white';
+  'mb-2 text-[11px] font-semibold text-brand-accent lg:mb-4 lg:text-base lg:font-bold lg:text-white';
 
 export default function Footer() {
   const { getSetting } = useCMS();
@@ -36,11 +36,7 @@ export default function Footer() {
 
   return (
     <footer className="relative z-0 mt-8 text-white lg:mt-16">
-      <div className="absolute inset-0 -z-10 overflow-hidden bg-blue-950 lg:rounded-t-[3rem]" aria-hidden>
-        <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-blue-800 to-transparent opacity-30" />
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand/20 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-brand-accent/20 blur-3xl" />
-      </div>
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-blue-950" aria-hidden />
 
       <div className="store-container pb-[calc(4.75rem+env(safe-area-inset-bottom))] pt-8 lg:pb-10 lg:pt-16">
         <div className="lg:grid lg:grid-cols-4 lg:gap-12">
@@ -78,7 +74,7 @@ export default function Footer() {
           </div>
 
           {/* Links */}
-          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 sm:gap-x-8 lg:col-span-3 lg:mt-0 lg:gap-12 lg:rounded-2xl lg:border lg:border-white/10 lg:bg-white/[0.03] lg:p-8 lg:backdrop-blur-sm">
+          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 sm:gap-x-8 lg:col-span-3 lg:mt-0 lg:gap-12 lg:border lg:border-white/10 lg:p-8">
             <div>
               <h4 className={mobileHeadingClass}>Shop</h4>
               <ul className="space-y-1.5 text-sm lg:space-y-3">

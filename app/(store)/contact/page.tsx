@@ -208,10 +208,10 @@ export default function ContactPage() {
               href={method.link}
               target={method.link.startsWith('http') ? '_blank' : '_self'}
               rel={method.link.startsWith('http') ? 'noopener noreferrer' : ''}
-              className="liquid-glass-card liquid-glass-card-interactive cursor-pointer p-6 transition-all"
+              className="cursor-pointer border border-slate-200 bg-white p-6 transition-colors hover:border-brand-primary/30"
             >
-              <div className="w-12 h-12 bg-brand-light rounded-full flex items-center justify-center mb-4">
-                <i className={`${method.icon} text-2xl text-brand-primary`}></i>
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-brand-light">
+                <i className={`${method.icon} text-xl text-brand-primary`}></i>
               </div>
               <h3 className="font-bold text-gray-900 mb-2">{method.title}</h3>
               <p className="text-brand-primary font-medium mb-1">{method.value}</p>
@@ -353,12 +353,9 @@ export default function ContactPage() {
               ))}
             </div>
 
-            <div className="bg-gradient-to-br from-blue-700 to-blue-900 p-8 rounded-2xl text-white">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                <i className="ri-customer-service-2-line text-2xl"></i>
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Need help now?</h3>
-              <p className="text-blue-100 mb-6 leading-relaxed">
+            <div className="bg-[#172554] p-8 text-white">
+              <h3 className="mb-3 text-2xl font-bold">Need help now?</h3>
+              <p className="mb-6 leading-relaxed text-blue-100">
                 We are here Monday to Friday, 8am to 6pm. For urgent questions, message us on WhatsApp.
               </p>
               {waLink ? (
@@ -366,7 +363,7 @@ export default function ContactPage() {
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white text-brand-primary px-6 py-3 rounded-full font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-blue-50"
                 >
                   <i className="ri-whatsapp-line text-xl"></i>
                   Chat on WhatsApp

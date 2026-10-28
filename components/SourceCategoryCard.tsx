@@ -18,15 +18,17 @@ export default function SourceCategoryCard({
   return (
     <Link
       href={href}
-      className={`rounded-card border p-5 transition hover:-translate-y-0.5 hover:shadow-md ${
-        highlighted ? 'border-brand-accent bg-orange-50' : 'border-gray-200 bg-white'
+      className={`border p-5 transition-colors ${
+        highlighted
+          ? 'border-brand-accent bg-orange-50'
+          : 'border-slate-200 bg-white hover:border-brand-primary/30'
       }`}
     >
-      <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">
+      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-brand-primary/8 text-brand-primary">
         <i className={`${icon} text-xl`} />
       </div>
       <h3 className="text-lg font-semibold text-brand-black">{title}</h3>
-      <p className="mt-2 text-sm text-gray-600">{description}</p>
+      <p className="mt-2 text-sm leading-relaxed text-slate-600">{description}</p>
     </Link>
   );
 }

@@ -23,19 +23,10 @@ const MOBILE_MILESTONES = [
 
 export default function ImportJourneyTimeline() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#1E3A8A] via-[#172554] to-[#0f1a3d] py-8 md:py-20">
-      <div className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-brand-accent/10 blur-3xl" aria-hidden />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(249,115,22,0.12),transparent)]"
-        aria-hidden
-      />
-
+    <section className="relative overflow-hidden bg-[#172554] py-8 md:py-20">
       <div className="store-container relative">
         <div className="md:max-w-2xl">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-accent md:text-xs md:tracking-[0.2em]">
-            Tracking
-          </p>
-          <h2 className="font-heading mt-1 text-[1.35rem] font-bold leading-tight tracking-tight text-white md:text-[1.75rem] lg:text-[2.25rem]">
+          <h2 className="font-heading text-[1.35rem] font-bold leading-tight tracking-tight text-white md:text-[1.75rem] lg:text-[2.25rem]">
             Never wonder where your order is
           </h2>
           <p className="mt-1 hidden text-sm leading-relaxed text-white/70 md:mt-2 md:block md:text-base">
@@ -43,14 +34,20 @@ export default function ImportJourneyTimeline() {
           </p>
         </div>
 
-        {/* Mobile — 5-step progress track */}
         <div className="mt-5 md:hidden">
           <div className="relative flex justify-between">
             <div className="absolute left-2 right-2 top-[11px] h-0.5 bg-white/15" aria-hidden />
-            <div className="absolute left-2 top-[11px] h-0.5 w-[88%] bg-gradient-to-r from-brand-accent via-brand-accent/80 to-brand-accent/40" aria-hidden />
+            <div
+              className="absolute left-2 top-[11px] h-0.5 w-[88%] bg-brand-accent"
+              aria-hidden
+            />
             {MOBILE_MILESTONES.map((m, i) => (
-              <div key={m.label} className="relative z-10 flex flex-col items-center" style={{ width: `${100 / MOBILE_MILESTONES.length}%` }}>
-                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-white ring-2 ring-[#1E3A8A]">
+              <div
+                key={m.label}
+                className="relative z-10 flex flex-col items-center"
+                style={{ width: `${100 / MOBILE_MILESTONES.length}%` }}
+              >
+                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-white ring-2 ring-[#172554]">
                   {i + 1}
                 </span>
                 <span className="mt-2 max-w-[4.5rem] text-center text-[9px] font-semibold leading-tight text-white/90">
@@ -64,23 +61,23 @@ export default function ImportJourneyTimeline() {
           </p>
         </div>
 
-        {/* Desktop — pill chips */}
         <div className="relative mt-8 hidden md:mt-10 md:block">
-          <div className="pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent" aria-hidden />
-          <div className="flex flex-wrap justify-center gap-2.5">
+          <div className="flex flex-wrap justify-center gap-2">
             {STAGES.map((label, i) => (
               <div key={label} className="flex items-center gap-2">
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3.5 py-2.5 backdrop-blur-xl transition-colors duration-300 hover:border-brand-accent/30 hover:bg-white/[0.1]">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-accent text-[10px] font-bold text-white">
+                <div className="flex items-center gap-2 rounded-md border border-white/15 bg-white/5 px-3 py-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-brand-accent text-[10px] font-bold text-white">
                     {i + 1}
                   </span>
-                  <span className="whitespace-nowrap text-sm font-medium text-white/90">{label}</span>
+                  <span className="whitespace-nowrap text-sm font-medium text-white/90">
+                    {label}
+                  </span>
                 </div>
-                {i < STAGES.length - 1 && (
-                  <span className="text-white/20" aria-hidden>
+                {i < STAGES.length - 1 ? (
+                  <span className="text-white/25" aria-hidden>
                     ·
                   </span>
-                )}
+                ) : null}
               </div>
             ))}
           </div>

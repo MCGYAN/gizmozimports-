@@ -67,13 +67,13 @@ function FindMyOrderContent() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-white to-[#eef2f7]">
+    <main className="min-h-screen bg-[#f8fafc]">
       <div className="mx-auto max-w-lg px-4 py-12 sm:py-16">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-primary text-white">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-brand-primary text-white">
             <PackageSearch className="h-7 w-7" strokeWidth={1.75} />
           </div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-accent">
+          <p className="text-sm font-medium text-brand-accent">
             No account needed
           </p>
           <h1 className="mt-2 font-heading text-3xl font-bold text-brand-primary sm:text-4xl">

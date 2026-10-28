@@ -11,14 +11,10 @@ const STEPS = [
 
 export default function ProcessSteps() {
   return (
-    <section className="relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-[#f1f5f9]/50 via-[#eef2f8]/55 to-[#f4f7fb]/40 py-8 md:store-section md:py-16 lg:py-20">
-      <div className="pointer-events-none absolute -left-24 bottom-0 h-48 w-48 rounded-full bg-brand-primary/5 blur-3xl" aria-hidden />
-      <div className="store-container relative">
+    <section className="border-b border-slate-200/80 bg-white py-8 md:store-section md:py-16 lg:py-20">
+      <div className="store-container">
         <div className="md:max-w-xl">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-accent md:text-xs md:tracking-[0.2em]">
-            Process
-          </p>
-          <h2 className="font-heading mt-1 text-[1.35rem] font-bold leading-tight tracking-tight text-brand-primary md:mt-0 md:text-[1.75rem] lg:text-[2.25rem]">
+          <h2 className="font-heading text-[1.35rem] font-bold leading-tight tracking-tight text-brand-primary md:text-[1.75rem] lg:text-[2.25rem]">
             How it works
           </h2>
           <p className="mt-1 hidden text-sm leading-relaxed text-slate-600 md:mt-2 md:block md:text-base">
@@ -26,20 +22,19 @@ export default function ProcessSteps() {
           </p>
         </div>
 
-        {/* Mobile — vertical timeline */}
         <div className="mt-4 md:hidden">
           {STEPS.map((step, i) => (
             <div key={step.title} className="relative flex gap-3 pb-4 last:pb-0">
-              {i < STEPS.length - 1 && (
+              {i < STEPS.length - 1 ? (
                 <div
-                  className="absolute left-[15px] top-8 bottom-0 w-px bg-gradient-to-b from-brand-accent/40 to-brand-accent/10"
+                  className="absolute left-[15px] top-8 bottom-0 w-px bg-slate-200"
                   aria-hidden
                 />
-              )}
-              <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-accent text-[11px] font-bold text-white shadow-[0_2px_8px_rgba(249,115,22,0.35)]">
+              ) : null}
+              <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-accent text-[11px] font-bold text-white">
                 {i + 1}
               </span>
-              <div className="min-w-0 flex-1 liquid-glass-card p-3 pb-4 last:border-0">
+              <div className="min-w-0 flex-1 border border-slate-200 bg-slate-50 p-3 pb-4">
                 <h3 className="font-heading text-[14px] font-bold leading-snug text-brand-primary">
                   {step.title}
                 </h3>
@@ -49,23 +44,18 @@ export default function ProcessSteps() {
           ))}
         </div>
 
-        {/* Desktop grid */}
-        <div className="relative mt-8 hidden md:block md:mt-10">
-          <div
-            className="pointer-events-none absolute left-[12%] right-[12%] top-7 hidden h-px bg-gradient-to-r from-transparent via-brand-accent/25 to-transparent lg:block"
-            aria-hidden
-          />
+        <div className="mt-8 hidden md:mt-10 md:block">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {STEPS.map((step, i) => (
               <div
                 key={step.title}
-                className="liquid-glass-card relative p-5 transition-all duration-300 hover:-translate-y-0.5"
+                className="border border-slate-200 bg-white p-5"
               >
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-accent text-sm font-bold text-white shadow-[0_4px_12px_rgba(249,115,22,0.35)]">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-accent text-sm font-bold text-white">
                     {i + 1}
                   </span>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl liquid-glass-well">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-100">
                     <step.icon className="h-[18px] w-[18px] text-brand-primary" strokeWidth={1.75} />
                   </span>
                 </div>

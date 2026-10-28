@@ -356,7 +356,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
 
-        <div className="mt-16 bg-gradient-to-br from-brand-primary to-[#0f1a3d] rounded-2xl p-12 text-center text-white">
+        <div className="mt-16 bg-[#172554] p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Enjoyed This Article?</h2>
           <p className="text-white/80 mb-8 text-lg">
             Subscribe to our newsletter for more shopping tips and exclusive offers
@@ -365,11 +365,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
             <input
               type="email"
               placeholder="Your email address"
-              className="flex-1 px-6 py-4 rounded-full text-gray-900 focus:ring-2 focus:ring-white"
+              className="flex-1 px-6 py-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-white"
             />
             <button
               type="submit"
-              className="bg-white text-brand-primary px-8 py-4 rounded-full font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
+              className="bg-white text-brand-primary px-8 py-4 rounded-xl font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
             >
               Subscribe
             </button>

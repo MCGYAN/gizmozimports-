@@ -52,7 +52,7 @@ export default function PricingGuidePage() {
             Share product image/specifications and quantity. We will provide a detailed estimate for import to Ghana.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-pill bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white">
+            <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-xl bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white">
               Chat on WhatsApp
             </a>
           </div>

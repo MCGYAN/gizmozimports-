@@ -10,13 +10,6 @@ export const revalidate = 300;
 
 export const metadata: Metadata = pageMetadata('categories', { path: '/categories' });
 
-const PLACEHOLDER_BGS = [
-  'bg-gradient-to-br from-brand-primary via-[#172554] to-[#0f1a3d]',
-  'bg-gradient-to-br from-[#172554] via-brand-primary to-[#0f1a3d]',
-  'bg-gradient-to-br from-[#1a0f08] via-brand-primary to-[#0f1a3d]',
-  'bg-gradient-to-br from-brand-primary via-slate-900 to-slate-950',
-];
-
 export default async function CategoriesPage() {
   const { data: categoriesData } = await supabase
     .from('categories')
@@ -43,11 +36,11 @@ export default async function CategoriesPage() {
       <div className="store-container py-12 md:py-16">
         {categories.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-6">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <Link
                 key={category.id}
                 href={`/shop?category=${category.slug}`}
-                className="group liquid-glass-card liquid-glass-card-interactive overflow-hidden"
+                className="group overflow-hidden border border-slate-200 bg-white transition-colors hover:border-brand-primary/30"
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   {category.image_url ? (
@@ -56,16 +49,13 @@ export default async function CategoriesPage() {
                       alt={category.name}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]"
+                      className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
                     />
                   ) : (
-                    <div
-                      className={`absolute inset-0 ${PLACEHOLDER_BGS[index % PLACEHOLDER_BGS.length]}`}
-                      aria-hidden
-                    />
+                    <div className="absolute inset-0 bg-[#172554]" aria-hidden />
                   )}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 via-black/15 to-transparent" aria-hidden />
-                  <h3 className="absolute bottom-4 left-4 right-4 font-heading text-lg font-bold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" aria-hidden />
+                  <h3 className="absolute bottom-4 left-4 right-4 font-heading text-lg font-bold leading-tight text-white">
                     {category.name}
                   </h3>
                 </div>
@@ -75,7 +65,7 @@ export default async function CategoriesPage() {
                     {category.description ||
                       'We help you source it, ship it, and get it home. No surprises.'}
                   </p>
-                  <div className="mt-4 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-brand-accent transition-all group-hover:gap-2">
+                  <div className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-brand-accent">
                     <span>View category</span>
                     <ArrowRight className="h-4 w-4" />
                   </div>
@@ -84,18 +74,17 @@ export default async function CategoriesPage() {
             ))}
           </div>
         ) : (
-          <div className="liquid-glass-card py-20 text-center">
-            <Inbox className="mx-auto mb-4 h-16 w-16 text-slate-300" />
-            <p className="text-xl font-medium text-brand-foreground/70">
+          <div className="border border-slate-200 bg-white py-20 text-center">
+            <Inbox className="mx-auto mb-4 h-12 w-12 text-slate-300" />
+            <p className="text-lg font-medium text-brand-foreground/70">
               No categories yet. Check back soon or browse featured products in the shop.
             </p>
           </div>
         )}
       </div>
 
-      <div className="relative overflow-hidden bg-brand-primary py-16 md:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(249,115,22,0.14),transparent)]" aria-hidden />
-        <div className="store-container relative z-10 max-w-3xl text-center">
+      <div className="bg-[#172554] py-16 md:py-20">
+        <div className="store-container max-w-3xl text-center">
           <h2 className="font-heading text-2xl font-bold text-white md:text-3xl">
             Not sure where to start?
           </h2>
@@ -112,7 +101,7 @@ export default async function CategoriesPage() {
             </Link>
             <Link
               href="/contact"
-              className="btn-interactive inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-8 py-4 font-bold text-white hover:bg-white/15"
+              className="btn-interactive inline-flex items-center gap-2 rounded-xl border border-white/30 bg-transparent px-8 py-4 font-bold text-white hover:bg-white/10"
             >
               <HeadphonesIcon className="h-5 w-5" />
               Talk to Gizmoz Trades

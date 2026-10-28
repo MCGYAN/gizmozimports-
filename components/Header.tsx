@@ -138,7 +138,7 @@ export default function Header() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`btn-premium inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-pill px-3 text-[11px] font-semibold transition lg:h-9 lg:px-4 lg:text-xs ${
+                      className={`btn-premium inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-3 text-[11px] font-semibold transition lg:h-9 lg:px-4 lg:text-xs ${
                         link.primary
                           ? 'bg-brand-accent text-white hover:bg-orange-600'
                           : 'border border-brand/20 bg-white text-brand hover:bg-blue-50'

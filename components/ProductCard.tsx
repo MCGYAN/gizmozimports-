@@ -107,18 +107,18 @@ export default function ProductCard({
     addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq });
   };
 
-  const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-white font-bold transition-all shadow-[0_4px_12px_rgba(249,115,22,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(249,115,22,0.35)] disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
+  const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-white font-bold transition-colors hover:bg-orange-600 disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
     compact ? 'h-8 rounded-lg px-3 text-[10px] lg:h-9 lg:rounded-xl lg:px-4 lg:text-xs' : 'h-9 rounded-xl px-3 text-[11px] sm:h-10 sm:px-5 sm:text-xs'
   }`;
   const openProductForOptions =
     mode === 'vehicles' || mode === 'equipment' || hasVariants;
 
   return (
-    <div className={`group liquid-glass-card liquid-glass-card-interactive flex h-full flex-col overflow-hidden ${compact ? 'max-lg:rounded-xl' : ''}`}>
+    <div className={`group flex h-full flex-col overflow-hidden border border-slate-200 bg-white transition-colors hover:border-brand-primary/25 ${compact ? 'max-lg:rounded-xl rounded-2xl' : 'rounded-2xl'}`}>
       {/* Product Image */}
       <Link
         href={`/product/${slug}`}
-        className={`relative block w-full shrink-0 overflow-hidden liquid-glass-well ${
+        className={`relative block w-full shrink-0 overflow-hidden bg-slate-50 ${
           compact
             ? 'aspect-square max-lg:p-2.5 lg:aspect-[4/3] lg:p-6'
             : 'aspect-[4/3] p-3.5 sm:p-5 md:p-6'
@@ -128,18 +128,18 @@ export default function ProductCard({
           src={image}
           alt={name}
           fit="contain"
-          className="h-full w-full object-contain transition-transform duration-500 ease-out mix-blend-multiply md:group-hover:scale-[1.05]"
+          className="h-full w-full object-contain transition-transform duration-300 ease-out mix-blend-multiply md:group-hover:scale-[1.02]"
           sizes={compact ? '(max-width: 1024px) 45vw, 25vw' : '(max-width: 640px) 72vw, 260px'}
         />
 
         <div className={`absolute left-3 top-3 z-10 flex flex-col gap-1.5 ${compact ? 'max-lg:left-2 max-lg:top-2' : ''}`}>
           {badge && (
-            <span className="rounded-full bg-brand-primary/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+            <span className="rounded-md bg-brand-primary px-2 py-0.5 text-[9px] font-semibold text-white">
               {badge}
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded-full bg-brand-accent/95 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur-sm">
+            <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[9px] font-semibold text-white">
               -{discount}%
             </span>
           )}
@@ -148,7 +148,7 @@ export default function ProductCard({
         <button
           type="button"
           onClick={handleWishlistToggle}
-          className={`absolute right-3 top-3 z-20 flex items-center justify-center rounded-full bg-white/80 text-slate-400 shadow-sm backdrop-blur-sm ring-1 ring-slate-200 transition-all duration-300 hover:scale-110 hover:bg-white hover:text-red-500 hover:shadow-md ${
+          className={`absolute right-3 top-3 z-20 flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 transition-colors hover:text-red-500 ${
             compact ? 'h-7 w-7 max-lg:right-2 max-lg:top-2 lg:h-8 lg:w-8' : 'h-8 w-8'
           }`}
           aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -157,8 +157,8 @@ export default function ProductCard({
         </button>
 
         {!inStock && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm">
-            <span className="liquid-glass-inset rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+            <span className="rounded-md bg-brand-primary px-4 py-1.5 text-[10px] font-semibold text-white">
               Out of Stock
             </span>
           </div>
