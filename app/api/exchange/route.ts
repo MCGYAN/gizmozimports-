@@ -23,6 +23,7 @@ import {
   sanitizeImageFile,
   SecureImageError,
 } from '@/lib/secure-image';
+import { getBuyRmbStorefrontEnabled } from '@/lib/buy-rmb-storefront';
 
 const ALIPAY_BUCKET = 'exchange-alipay';
 
@@ -98,6 +99,14 @@ export async function POST(req: Request) {
     const rateLimit = checkRateLimit(`exchange:${clientId}`, RATE_LIMITS.payment);
     if (!rateLimit.success) {
       return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
+    }
+
+    const storefrontEnabled = await getBuyRmbStorefrontEnabled();
+    if (!storefrontEnabled) {
+      return NextResponse.json(
+        { error: 'Buy RMB is turned off on the store right now.' },
+        { status: 403 },
+      );
     }
 
     const payload = await readCreatePayload(req);

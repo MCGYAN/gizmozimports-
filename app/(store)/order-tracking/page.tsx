@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PackageSearch } from 'lucide-react';
+import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
 
 function FindMyOrderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlOrder = searchParams.get('order') || '';
   const urlEmail = searchParams.get('email') || '';
+  const { enabled: buyRmbEnabled } = useBuyRmbStorefront();
 
   const [orderNumber, setOrderNumber] = useState(urlOrder);
   const [email, setEmail] = useState(urlEmail);
@@ -134,12 +136,14 @@ function FindMyOrderContent() {
         </form>
 
         <div className="mt-6 space-y-3 text-center text-sm text-slate-600">
-          <p>
-            Looking up a <span className="font-semibold text-brand-primary">Buy RMB</span> transfer?{' '}
-            <Link href="/exchange/lookup" className="font-semibold text-brand-accent hover:underline">
-              Find RMB invoice
-            </Link>
-          </p>
+          {buyRmbEnabled ? (
+            <p>
+              Looking up a <span className="font-semibold text-brand-primary">Buy RMB</span> transfer?{' '}
+              <Link href="/exchange/lookup" className="font-semibold text-brand-accent hover:underline">
+                Find RMB invoice
+              </Link>
+            </p>
+          ) : null}
           <p className="text-xs text-slate-500">
             Order number is on your invoice, confirmation email, or checkout success screen.
           </p>

@@ -15,6 +15,7 @@ import {
 } from '@/lib/auth-remember';
 import AnnouncementBar from './AnnouncementBar';
 import { Search, User, ShoppingCart, Menu, X } from 'lucide-react';
+import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const { enabled: buyRmbEnabled } = useBuyRmbStorefront();
 
   const { cartCount, isCartOpen, setIsCartOpen } = useCart();
 
@@ -71,7 +73,9 @@ export default function Header() {
     { label: 'Contact', href: '/contact' },
   ];
   const serviceLinks = [
-    { label: 'Buy RMB', shortLabel: 'RMB', href: '/exchange', primary: false },
+    ...(buyRmbEnabled
+      ? [{ label: 'Buy RMB', shortLabel: 'RMB', href: '/exchange', primary: false }]
+      : []),
     {
       label: 'China Warehouse',
       shortLabel: 'Warehouse',

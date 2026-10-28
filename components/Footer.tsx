@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCMS } from '@/context/CMSContext';
 import StoreLogo from '@/components/StoreLogo';
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
 
 const linkClass =
   'text-blue-100/65 transition-colors active:text-white max-lg:text-[13px] lg:hover:text-white';
@@ -13,6 +14,7 @@ const mobileHeadingClass =
 
 export default function Footer() {
   const { getSetting } = useCMS();
+  const { enabled: buyRmbEnabled } = useBuyRmbStorefront();
 
   const siteName = getSetting('site_name') || 'Gizmoz Trades';
   const siteTagline =
@@ -82,7 +84,9 @@ export default function Footer() {
                 <li><Link href="/categories" className={linkClass}>Categories</Link></li>
                 <li><Link href="/what-we-source" className={linkClass}>What we source</Link></li>
                 <li><Link href="/pricing-guide" className={linkClass}>Pricing guide</Link></li>
-                <li><Link href="/exchange" className={linkClass}>Buy RMB</Link></li>
+                {buyRmbEnabled ? (
+                  <li><Link href="/exchange" className={linkClass}>Buy RMB</Link></li>
+                ) : null}
               </ul>
             </div>
 
@@ -91,7 +95,9 @@ export default function Footer() {
               <ul className="space-y-1.5 text-sm lg:space-y-3">
                 <li><Link href="/contact" className={linkClass}>Contact us</Link></li>
                 <li><Link href="/order-tracking" className={linkClass}>Track my order</Link></li>
-                <li><Link href="/exchange/lookup" className={linkClass}>Find RMB invoice</Link></li>
+                {buyRmbEnabled ? (
+                  <li><Link href="/exchange/lookup" className={linkClass}>Find RMB invoice</Link></li>
+                ) : null}
                 <li><Link href="/shipping" className={linkClass}>Shipping &amp; delivery</Link></li>
                 <li><Link href="/returns" className={linkClass}>Returns</Link></li>
                 <li><Link href="/faqs" className={linkClass}>FAQs</Link></li>

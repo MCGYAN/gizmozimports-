@@ -133,11 +133,11 @@ export function corridorIsReady(
   if (!board.is_live) {
     return {
       ok: false,
-      reason: `${EXCHANGE_CORRIDORS[board.country_code].name} Buy RMB is not open on the site yet. Message Gizmoz Trades on WhatsApp.`,
+      reason: 'Today’s rate is not published yet. Check back soon or message Gizmoz Trades if you need help.',
     };
   }
   if (!(Number(board.buy_rmb_rate) > 0)) {
-    return { ok: false, reason: 'Today’s rate is not published for this country yet.' };
+    return { ok: false, reason: 'Today’s rate is not published yet.' };
   }
   if (board.valid_until && new Date(board.valid_until).getTime() <= Date.now()) {
     return { ok: false, reason: 'Today’s rate for this country has expired.' };

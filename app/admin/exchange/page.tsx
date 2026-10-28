@@ -75,6 +75,8 @@ export default function AdminExchangePage() {
   const [repriceOpen, setRepriceOpen] = useState(false);
   const [repriceChanges, setRepriceChanges] = useState<ProductRepriceRow[]>([]);
   const [pendingBuyRate, setPendingBuyRate] = useState<number | null>(null);
+  const [storefrontEnabled, setStorefrontEnabled] = useState(true);
+  const [togglingStorefront, setTogglingStorefront] = useState(false);
 
   const meta = EXCHANGE_CORRIDORS[deskCountry];
   const board = boards[deskCountry];
@@ -120,12 +122,14 @@ export default function AdminExchangePage() {
     try {
       const headers = await authHeaders();
       const countryQs = listFilter === 'ALL' ? '' : `&country=${listFilter}`;
-      const [rateRes, listRes] = await Promise.all([
+      const [rateRes, listRes, storefrontRes] = await Promise.all([
         fetch('/api/exchange/rate?all=1'),
         fetch(`/api/exchange?admin=1${countryQs}`, { headers }),
+        fetch('/api/exchange/storefront'),
       ]);
       const rateData = await rateRes.json();
       const listData = await listRes.json();
+      const storefrontData = await storefrontRes.json().catch(() => ({}));
       const next: Partial<Record<ExchangeCountryCode, CorridorRateBoard>> = {};
       for (const b of rateData.boards || []) {
         if (b?.country_code) next[b.country_code as ExchangeCountryCode] = b;
@@ -133,8 +137,31 @@ export default function AdminExchangePage() {
       setBoards(next);
       applyBoardToForm(next[deskCountry]);
       setExchanges(listData.exchanges || []);
+      if (typeof storefrontData.enabled === 'boolean') {
+        setStorefrontEnabled(storefrontData.enabled);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleStorefront = async (nextEnabled: boolean) => {
+    setTogglingStorefront(true);
+    try {
+      const headers = await authHeaders();
+      const res = await fetch('/api/exchange/storefront', {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ enabled: nextEnabled }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Could not update store visibility');
+        return;
+      }
+      setStorefrontEnabled(Boolean(data.enabled));
+    } finally {
+      setTogglingStorefront(false);
     }
   };
 
@@ -233,18 +260,63 @@ export default function AdminExchangePage() {
         </div>
       </div>
 
+      <div
+        className={`rounded-2xl border p-5 ${
+          storefrontEnabled
+            ? 'border-emerald-200 bg-emerald-50'
+            : 'border-slate-200 bg-slate-50'
+        }`}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-brand-primary">Show Buy RMB on the online store</p>
+            <p className="mt-1 text-sm text-slate-600">
+              {storefrontEnabled
+                ? 'ON. Customers can see Buy RMB in the header, footer, and shop links. They still need a published rate to place a request.'
+                : 'OFF. Customers will not see any Buy RMB button or page on the store. Your admin desk still works.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={storefrontEnabled}
+            disabled={togglingStorefront || loading}
+            onClick={() => void toggleStorefront(!storefrontEnabled)}
+            className={`relative h-8 w-14 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
+              storefrontEnabled ? 'bg-emerald-600' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                storefrontEnabled ? 'left-7' : 'left-1'
+              }`}
+            />
+            <span className="sr-only">
+              {storefrontEnabled ? 'Turn Buy RMB storefront off' : 'Turn Buy RMB storefront on'}
+            </span>
+          </button>
+        </div>
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Store status: {storefrontEnabled ? 'Visible to customers' : 'Hidden from customers'}
+        </p>
+      </div>
+
       <form onSubmit={saveRate} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-bold text-brand-primary">{meta.name}</h2>
+          <h2 className="font-bold text-brand-primary">{meta.name} rate</h2>
           <label className="flex items-center gap-2 text-sm font-medium">
             <input
               type="checkbox"
               checked={form.is_live}
               onChange={(e) => setForm({ ...form, is_live: e.target.checked })}
             />
-            Live on website
+            Publish this country&apos;s rate
           </label>
         </div>
+        <p className="text-xs text-slate-500">
+          Publishing a rate only works if Buy RMB is shown on the store above. If the store is on but
+          this rate is not published, customers see &quot;rate not published yet.&quot;
+        </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-medium text-slate-700">

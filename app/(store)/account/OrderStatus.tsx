@@ -16,6 +16,7 @@ import {
   type AccountOrderPackageSummary,
 } from '@/lib/account-order-status';
 import { SHIPPING_STATUS_LABELS, type ShippingPackageStatus } from '@/lib/shipping';
+import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
 
 type ShopStatusOrder = {
   kind?: 'shop';
@@ -64,6 +65,7 @@ export default function OrderStatus({
   loading,
   focusOrderNumber,
 }: OrderStatusProps) {
+  const { enabled: buyRmbEnabled } = useBuyRmbStorefront();
   const ranked = useMemo(() => {
     const shopRows = orders.map((order) => {
       const packages = order.packages || [];
@@ -128,12 +130,14 @@ export default function OrderStatus({
           >
             Go to shop
           </Link>
-          <Link
-            href="/exchange"
-            className="inline-flex rounded-xl border border-brand-primary px-5 py-2.5 text-sm font-bold text-brand-primary"
-          >
-            Buy RMB
-          </Link>
+          {buyRmbEnabled ? (
+            <Link
+              href="/exchange"
+              className="inline-flex rounded-xl border border-brand-primary px-5 py-2.5 text-sm font-bold text-brand-primary"
+            >
+              Buy RMB
+            </Link>
+          ) : null}
         </div>
       </div>
     );

@@ -17,9 +17,11 @@ import {
   type ExchangeCountryCode,
 } from '@/lib/exchange-corridors';
 import { Check, ShieldCheck, Upload } from 'lucide-react';
+import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
 
 export default function ExchangePage() {
   const router = useRouter();
+  const { enabled: buyRmbEnabled, loading: storefrontLoading } = useBuyRmbStorefront();
   const [country, setCountry] = useState<ExchangeCountryCode>('GH');
   const [boards, setBoards] = useState<Partial<Record<ExchangeCountryCode, CorridorRateBoard>>>({});
   const [amount, setAmount] = useState('');
@@ -41,6 +43,10 @@ export default function ExchangePage() {
   const ready = corridorIsReady(board);
 
   useEffect(() => {
+    if (!buyRmbEnabled && !storefrontLoading) {
+      setLoading(false);
+      return;
+    }
     fetch('/api/exchange/rate?all=1')
       .then((r) => r.json())
       .then((d) => {
@@ -64,7 +70,7 @@ export default function ExchangePage() {
         setForm((prev) => (prev.email ? prev : { ...prev, email: accountEmail }));
       }
     })();
-  }, []);
+  }, [buyRmbEnabled, storefrontLoading]);
 
   useEffect(() => {
     if (!alipayFile) {
@@ -146,6 +152,26 @@ export default function ExchangePage() {
 
   const inputClass =
     'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-accent';
+
+  if (!storefrontLoading && !buyRmbEnabled) {
+    return (
+      <main className="min-h-screen bg-[#1E3A8A] text-white">
+        <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+          <h1 className="font-heading text-3xl font-bold">Buy RMB is off right now</h1>
+          <p className="mt-3 text-blue-100">
+            This service is not available on the store at the moment. You can still shop products
+            as usual.
+          </p>
+          <Link
+            href="/shop"
+            className="mt-8 inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-white"
+          >
+            Go to shop
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#1E3A8A] text-white">
