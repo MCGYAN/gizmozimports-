@@ -115,13 +115,13 @@ export default function AboutPage() {
       </section>
 
       {/* What we source */}
-      <section className="overflow-hidden bg-[#172554] text-white">
+      <section className="border-b border-slate-200/80 bg-[#eef2f7]">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
-            <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+            <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
               What we source for Ghana
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-blue-100/90 sm:text-base">
+            <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
               Send your product image or description and we will source it for you.
             </p>
           </div>
@@ -130,11 +130,11 @@ export default function AboutPage() {
             {CATEGORIES.map((cat) => (
               <div
                 key={cat.title}
-                className="rounded-xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-md transition-colors duration-200 hover:border-white/25 hover:bg-white/[0.1]"
+                className="border border-slate-200 bg-white p-5"
               >
                 <i className={`${cat.icon} text-xl text-brand-accent`} aria-hidden />
-                <h3 className="mt-4 font-heading text-base font-bold text-white">{cat.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-blue-100/75">{cat.text}</p>
+                <h3 className="mt-3 font-heading text-base font-bold text-brand-primary">{cat.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{cat.text}</p>
               </div>
             ))}
           </div>
@@ -152,7 +152,7 @@ export default function AboutPage() {
                 href={whatsApp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-white/35 bg-transparent px-6 py-3 text-sm font-semibold text-white sm:w-auto"
+                className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-brand-primary sm:w-auto"
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp a quote
@@ -177,7 +177,7 @@ export default function AboutPage() {
 
           <div className="mx-auto mt-8 grid max-w-4xl gap-3 sm:grid-cols-3">
             {VALUES.map(([title, text]) => (
-              <div key={title} className="liquid-glass-card p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(30,58,138,0.06)]">
+              <div key={title} className="border border-slate-200 bg-white p-5 text-center">
                 <p className="text-sm font-bold text-brand-primary">{title}</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-500">{text}</p>
               </div>
