@@ -115,25 +115,26 @@ export default function AboutPage() {
       </section>
 
       {/* What we source */}
-      <section className="hero-mesh overflow-hidden text-white">
+      <section className="overflow-hidden bg-[#172554] text-white">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
               What we source for Ghana
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-blue-100 sm:text-base">
+            <p className="mt-3 text-[15px] leading-relaxed text-blue-100/90 sm:text-base">
               Send your product image or description and we will source it for you.
             </p>
           </div>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
             {CATEGORIES.map((cat) => (
-              <div key={cat.title} className="liquid-glass-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(255,255,255,0.1)]">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-accent shadow-lg shadow-brand-accent/20">
-                  <i className={`${cat.icon} text-lg text-white`} aria-hidden />
-                </div>
+              <div
+                key={cat.title}
+                className="rounded-xl border border-white/15 bg-white/[0.06] p-5 backdrop-blur-md transition-colors duration-200 hover:border-white/25 hover:bg-white/[0.1]"
+              >
+                <i className={`${cat.icon} text-xl text-brand-accent`} aria-hidden />
                 <h3 className="mt-4 font-heading text-base font-bold text-white">{cat.title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-blue-100/85">{cat.text}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-blue-100/75">{cat.text}</p>
               </div>
             ))}
           </div>
@@ -141,7 +142,7 @@ export default function AboutPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/shop"
-              className="btn-premium inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-semibold text-white hover:bg-orange-600 sm:w-auto"
+              className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-semibold text-white sm:w-auto"
             >
               See products
               <ArrowRight className="h-4 w-4" />
@@ -151,7 +152,7 @@ export default function AboutPage() {
                 href={whatsApp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-premium inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-white/60 bg-transparent px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 sm:w-auto"
+                className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-white/35 bg-transparent px-6 py-3 text-sm font-semibold text-white sm:w-auto"
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp a quote
