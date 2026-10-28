@@ -160,31 +160,6 @@ export default function HomeClient({
                 />
                 <div className="absolute inset-0 bg-brand-dark/20" />
               </div>
-
-              <div className="liquid-glass-inset absolute -bottom-3 -left-3 rounded-xl p-2 sm:-bottom-5 sm:p-3 lg:-bottom-6 lg:-left-6 lg:p-4">
-                <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-accent shadow-lg shadow-brand-accent/20 sm:h-10 sm:w-10 lg:h-11 lg:w-11">
-                    <i className="ri-ship-line text-sm text-white sm:text-lg lg:text-xl" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-medium text-blue-100 sm:text-xs">Status</p>
-                    <p className="text-[10px] font-semibold leading-tight text-white sm:text-sm lg:text-base">
-                      In Transit to Accra
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="liquid-glass-inset absolute -top-3 right-1 rounded-xl p-1.5 sm:-top-5 sm:right-2 sm:p-3 lg:-top-6 lg:right-6 lg:p-3">
-                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 sm:h-8 sm:w-8 lg:h-9 lg:w-9">
-                    <i className="ri-shield-check-fill text-xs text-emerald-400 sm:text-lg" />
-                  </div>
-                  <p className="text-[10px] font-semibold text-white sm:text-xs lg:text-sm">
-                    Verified Supplier
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
