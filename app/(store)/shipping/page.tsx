@@ -32,7 +32,7 @@ export default function ShippingPage() {
             </div>
             <Link
               href="/account?tab=warehouse"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-accent px-6 font-bold text-white"
+              className="btn-interactive inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-accent px-6 font-bold text-white"
             >
               Get my shipping mark
             </Link>
@@ -195,7 +195,7 @@ export default function ShippingPage() {
             </Link>
             <Link
               href="/order-tracking"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-8 py-4 font-medium text-brand-primary transition-colors hover:border-brand-accent"
+              className="btn-interactive inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-8 py-4 font-medium text-brand-primary"
             >
               Find my order
             </Link>
@@ -210,13 +210,13 @@ export default function ShippingPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 font-medium text-brand-primary transition-colors hover:bg-blue-50"
+              className="btn-interactive inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 font-medium text-brand-primary"
             >
               Contact Support
             </Link>
             <Link
               href="/faqs"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-accent px-6 py-3 font-medium text-white transition-colors hover:bg-[#e85f12]"
+              className="btn-interactive inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-accent px-6 py-3 font-medium text-white"
             >
               View FAQs
             </Link>

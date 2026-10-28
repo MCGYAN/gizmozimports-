@@ -369,7 +369,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
             />
             <button
               type="submit"
-              className="bg-white text-brand-primary px-8 py-4 rounded-xl font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
+              className="btn-interactive bg-white text-brand-primary px-8 py-4 rounded-xl font-medium whitespace-nowrap"
             >
               Subscribe
             </button>

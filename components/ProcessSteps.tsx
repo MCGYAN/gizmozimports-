@@ -1,50 +1,37 @@
 export default function ProcessSteps() {
   const steps = [
     {
-      code: '01',
       title: 'Tell us what you need',
-      description: 'Send a product photo, specs, quantity, and target timeline on WhatsApp or pick from the store.',
+      description: 'Send product photo, specs, quantity, and timeline on WhatsApp.',
     },
     {
-      code: '02',
       title: 'We source and verify',
-      description: 'We compare factories in China, confirm build quality, and share verification details.',
+      description: 'We compare suppliers, confirm quality, and share verification proof.',
     },
     {
-      code: '03',
       title: 'You get full cost breakdown',
-      description: 'Supplier price, local China transport, air or sea freight, clearing, and our service fee—itemised.',
+      description: 'Product cost + local China logistics + shipping + customs + service fee.',
     },
     {
-      code: '04',
-      title: 'Pay and track to Ghana',
-      description: 'Once approved, we pay the supplier, consolidate at our warehouse, and update you until pickup in Accra.',
+      title: 'Pay and ship with updates',
+      description: 'Once approved, we ship and keep you updated until delivery in Ghana.',
     },
   ];
 
   return (
     <section>
-      <div className="mb-6 border-b border-slate-200 pb-4">
-        <p className="text-xs font-semibold text-brand-accent">Step-by-step</p>
-        <h2 className="mt-1 font-heading text-2xl font-bold text-brand-primary md:text-3xl">
-          Four stages from quote to delivery
-        </h2>
-      </div>
-      <ol className="grid gap-px border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
-        {steps.map((step) => (
-          <li key={step.code} className="flex flex-col justify-between bg-white p-6">
-            <div>
-              <span className="font-mono text-xs font-semibold text-brand-accent">
-                STAGE {step.code}
-              </span>
-              <h3 className="mt-3 font-heading text-base font-bold text-brand-primary">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.description}</p>
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-black">How it works</h2>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        {steps.map((step, index) => (
+          <article key={step.title} className="rounded-card border border-gray-200 bg-white p-5">
+            <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
+              {index + 1}
             </div>
-          </li>
+            <h3 className="font-semibold text-brand-black">{step.title}</h3>
+            <p className="mt-2 text-sm text-gray-600">{step.description}</p>
+          </article>
         ))}
-      </ol>
+      </div>
     </section>
   );
 }

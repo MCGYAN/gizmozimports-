@@ -196,29 +196,26 @@ export default function ContactPage() {
     <div className="store-page">
       <PageHero
         size="large"
-        kicker="Accra Desk · Mon–Fri 8am–6pm"
         title="We are here to help"
         subtitle="Quotes, timelines, or a quick question. Talk to real people who move imports from China to Ghana."
       />
 
-      <div className="store-container store-section">
-        <div className="mb-14 grid gap-px border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="store-container store-section">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {contactMethods.map((method, index) => (
             <a
               key={index}
               href={method.link}
               target={method.link.startsWith('http') ? '_blank' : '_self'}
               rel={method.link.startsWith('http') ? 'noopener noreferrer' : ''}
-              className="group flex flex-col justify-between bg-white p-6 transition-colors hover:bg-[#f8fafc]"
+              className="liquid-glass-card liquid-glass-card-interactive cursor-pointer p-6"
             >
-              <div>
-                <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-brand-primary group-hover:bg-brand-primary group-hover:text-white">
-                  <i className={`${method.icon} text-lg`}></i>
-                </div>
-                <h3 className="font-heading text-sm font-bold text-brand-primary">{method.title}</h3>
-                <p className="mt-1 break-all font-medium text-slate-900">{method.value}</p>
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg liquid-glass-well">
+                <i className={`${method.icon} text-xl text-brand-primary`}></i>
               </div>
-              <p className="mt-3 text-xs text-slate-500">{method.description}</p>
+              <h3 className="font-bold text-gray-900 mb-2">{method.title}</h3>
+              <p className="text-brand-primary font-medium mb-1">{method.value}</p>
+              <p className="text-sm text-gray-500">{method.description}</p>
             </a>
           ))}
         </div>

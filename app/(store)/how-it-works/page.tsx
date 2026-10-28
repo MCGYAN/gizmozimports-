@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import PageHero from '@/components/PageHero';
 import ProcessSteps from '@/components/ProcessSteps';
 import { leadConfig } from '@/lib/leadConfig';
 
@@ -13,68 +11,39 @@ export const metadata: Metadata = {
 
 export default function HowItWorksPage() {
   return (
-    <main className="min-h-screen bg-white">
-      <PageHero
-        size="large"
-        kicker="Import Workflow · 4 Stages"
-        title="How It Works"
-        subtitle="Built for first-time and repeat importers in Ghana. You see supplier specs, full landed cost, and shipment checkpoints before and after payment."
-      />
-
-      <section className="store-section border-b border-slate-200 bg-white">
-        <div className="store-container">
-          <ProcessSteps />
-
-          <div className="mt-12 grid gap-px border border-slate-200 bg-slate-200 md:grid-cols-2">
-            <article className="bg-[#f8fafc] p-6 sm:p-8">
-              <p className="font-mono text-xs font-semibold text-brand-accent">FREIGHT SELECTION</p>
-              <h2 className="mt-1 font-heading text-lg font-bold text-brand-primary">
-                Air express vs. sea freight
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Air freight arrives faster for compact electronics, samples, and urgent stock. Sea freight lowers your landed cost on heavy construction gear, appliances, and bulk cartons.
-              </p>
-            </article>
-            <article className="bg-[#f8fafc] p-6 sm:p-8">
-              <p className="font-mono text-xs font-semibold text-brand-accent">SETTLEMENT &amp; INVOICES</p>
-              <h2 className="mt-1 font-heading text-lg font-bold text-brand-primary">
-                Verified quote before payment
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                We confirm product specs and issue a clear Cedi breakdown first. Smaller shop orders can be paid at checkout; orders from GH¢ 2,000+ receive an official invoice for MTN MoMo or GCB Bank transfer.
-              </p>
-            </article>
-          </div>
-
-          <div className="mt-10 flex flex-col items-start justify-between gap-6 border border-slate-200 bg-[#172554] p-6 text-white sm:p-8 md:flex-row md:items-center">
-            <div>
-              <h2 className="font-heading text-xl font-bold sm:text-2xl">
-                Ready to price an import?
-              </h2>
-              <p className="mt-1.5 text-sm text-blue-100/85 sm:text-base">
-                Send your product details on WhatsApp or review our landed-cost breakdown first.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={leadConfig.whatsappUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-premium inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
-              >
-                <i className="ri-whatsapp-line text-base" aria-hidden />
-                Chat on WhatsApp
-              </a>
-              <Link
-                href="/pricing-guide"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/25 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                Pricing guide
-              </Link>
-            </div>
-          </div>
+    <main className="min-h-screen bg-white py-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl md:text-5xl font-bold text-brand-black">How It Works</h1>
+          <p className="mt-4 text-gray-600">
+            Our process is built for first-time and experienced importers in Ghana. You always know cost, timeline, and shipment status.
+          </p>
         </div>
-      </section>
+        <div className="mt-12 max-w-5xl mx-auto">
+          <ProcessSteps />
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-5xl mx-auto">
+          <article className="liquid-glass-card p-5">
+            <h2 className="font-semibold text-brand-black">Typical timelines</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Air freight often arrives faster for urgent orders, while sea freight is better for large bulk orders with lower landed cost.
+            </p>
+          </article>
+          <article className="liquid-glass-card p-5">
+            <h2 className="font-semibold text-brand-black">Payment flow</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We provide verified quotation details first, then proceed with payment and supplier execution only after your approval.
+            </p>
+          </article>
+        </div>
+        <div className="mt-10 liquid-glass-inset rounded-2xl p-8 text-white max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold">Start your import in minutes</h2>
+          <p className="mt-2 text-blue-100">Send your product details now and get a response quickly.</p>
+          <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="btn-interactive mt-5 inline-flex rounded-xl bg-white px-6 py-3 font-semibold text-brand-primary">
+            Chat on WhatsApp
+          </a>
+        </div>
+      </div>
     </main>
   );
 }

@@ -859,7 +859,7 @@ img {
 
   /* Interactive buttons — colour shift only, no lift/glow theatre */
   .btn-interactive {
-    @apply transition-colors duration-200 ease-out;
+    @apply transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(30,58,138,0.12)] active:translate-y-0 active:shadow-sm;
   }
 
   /* Premium Glassmorphism */
@@ -873,9 +873,11 @@ img {
 
   /* Calm card surfaces — frosted lightly, no decorative glass theatre */
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 24px -8px rgba(15, 23, 42, 0.05);
   }
 
   .liquid-glass-card {
@@ -883,17 +885,23 @@ img {
   }
 
   .liquid-glass-card-interactive {
-    @apply liquid-glass-card transition-colors duration-200 hover:border-brand-accent/30;
+    @apply liquid-glass-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_-12px_rgba(15,23,42,0.1)] hover:border-brand-accent/30 hover:bg-white/95;
   }
 
   .liquid-glass-well {
-    background: #f8fafc;
-    border: 1px solid rgba(226, 232, 240, 0.95);
+    background: rgba(248, 250, 252, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
   }
 
   .liquid-glass-inset {
-    background: #1e3a8a;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(30, 58, 138, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   .store-section {
@@ -1143,16 +1151,27 @@ img {
 
 /* Gizmoz Trades signature surfaces */
 .glass-nav {
-  background: rgba(255, 255, 255, 0.96);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .hero-mesh {
-  background: #1e3a8a;
+  background: linear-gradient(145deg, #1e3a8a 0%, #172554 100%);
+  position: relative;
+}
+.hero-mesh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: overlay;
 }
 
 .hero-glow {
-  box-shadow: none;
+  box-shadow: 0 20px 40px -20px rgba(15, 23, 42, 0.3);
 }
 
 .btn-premium {

@@ -54,7 +54,7 @@ export default function WishlistPage() {
             {wishlistItems.length > 0 && (
               <button
                 onClick={addAllToCart}
-                className="bg-gray-900 hover:bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
+                className="btn-interactive bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap"
               >
                 Add All to Cart
               </button>
@@ -71,7 +71,7 @@ export default function WishlistPage() {
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Nothing saved yet</h2>
             <p className="text-gray-600 mb-8 text-lg">Tap the heart on anything you like. We keep your list ready for when you are ready.</p>
-            <Link href="/shop" className="inline-block bg-gray-900 hover:bg-brand-primary text-white px-8 py-4 rounded-lg font-semibold transition-colors whitespace-nowrap">
+            <Link href="/shop" className="btn-interactive inline-block bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold whitespace-nowrap">
               Start an Order
             </Link>
           </div>

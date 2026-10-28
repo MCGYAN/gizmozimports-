@@ -94,14 +94,14 @@ export default async function CategoriesPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex items-center gap-2 rounded-xl bg-brand-accent px-8 py-4 font-bold text-white hover:bg-brand-accent/90"
+              className="btn-interactive inline-flex items-center gap-2 rounded-xl bg-brand-accent px-8 py-4 font-bold text-white"
             >
               <Search className="h-5 w-5" />
               Browse featured products
             </Link>
             <Link
               href="/contact"
-              className="btn-interactive inline-flex items-center gap-2 rounded-xl border border-white/30 bg-transparent px-8 py-4 font-bold text-white hover:bg-white/10"
+              className="btn-interactive inline-flex items-center gap-2 rounded-xl border border-white/30 bg-transparent px-8 py-4 font-bold text-white"
             >
               <HeadphonesIcon className="h-5 w-5" />
               Talk to Gizmoz Trades

@@ -241,13 +241,13 @@ export default function BlogPage() {
           <p className="text-xl text-white/80 mb-8 leading-relaxed">
             Browse our latest articles
           </p>
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
-          >
-            Explore Products
-            <i className="ri-arrow-right-line"></i>
-          </Link>
+            <Link
+              href="/shop"
+              className="btn-interactive inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium whitespace-nowrap"
+            >
+              Explore Products
+              <i className="ri-arrow-right-line"></i>
+            </Link>
         </div>
       </div>
     </div>

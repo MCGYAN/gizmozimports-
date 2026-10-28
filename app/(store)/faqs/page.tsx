@@ -101,14 +101,14 @@ export default function FAQsPage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium hover:bg-blue-50 transition-colors whitespace-nowrap"
+              className="btn-interactive inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium whitespace-nowrap"
             >
               <i className="ri-mail-line text-lg"></i>
               Contact Support
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-4 rounded-xl font-medium hover:bg-[#e85f12] transition-colors whitespace-nowrap"
+              className="btn-interactive inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-4 rounded-xl font-medium whitespace-nowrap"
             >
               <i className="ri-customer-service-2-line text-lg"></i>
               More help

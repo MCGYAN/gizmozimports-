@@ -34,7 +34,7 @@ export default function ProcessSteps() {
               <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-accent text-[11px] font-bold text-white">
                 {i + 1}
               </span>
-              <div className="min-w-0 flex-1 border border-slate-200 bg-slate-50 p-3 pb-4">
+              <div className="min-w-0 flex-1 liquid-glass-card p-3 pb-4">
                 <h3 className="font-heading text-[14px] font-bold leading-snug text-brand-primary">
                   {step.title}
                 </h3>
@@ -49,13 +49,13 @@ export default function ProcessSteps() {
             {STEPS.map((step, i) => (
               <div
                 key={step.title}
-                className="border border-slate-200 bg-white p-5"
+                className="liquid-glass-card liquid-glass-card-interactive p-5"
               >
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-accent text-sm font-bold text-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-accent text-sm font-bold text-white shadow-md shadow-brand-accent/20">
                     {i + 1}
                   </span>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-100">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg liquid-glass-well">
                     <step.icon className="h-[18px] w-[18px] text-brand-primary" strokeWidth={1.75} />
                   </span>
                 </div>

@@ -18,7 +18,7 @@ export default function CategoryCard({
     <Link
       href={`/shop?category=${slug}`}
       prefetch
-      className="group relative aspect-square w-[72vw] max-w-[17rem] flex-none snap-start overflow-hidden rounded-xl border border-slate-200/80 sm:aspect-[4/5] sm:w-[260px] md:w-[280px] lg:w-full lg:max-w-none"
+      className="group relative aspect-square w-[72vw] max-w-[17rem] flex-none snap-start overflow-hidden rounded-2xl border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_-8px_rgba(15,23,42,0.12)] sm:aspect-[4/5] sm:w-[260px] md:w-[280px] lg:w-full lg:max-w-none"
     >
       {image ? (
         <Image
