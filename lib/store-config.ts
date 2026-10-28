@@ -24,7 +24,7 @@ export function getDefaultPhoneCountryCode(): string {
 /** Store defaults when CMS / env contact fields are unset (matches invoice issuer). */
 export const DEFAULT_CONTACT_PHONE = '0540237911';
 export const DEFAULT_CONTACT_WHATSAPP = '0540237911';
-export const DEFAULT_CONTACT_EMAIL = 'support@gizmoztrades.com';
+export const DEFAULT_CONTACT_EMAIL = 'gizmozexports@gmail.com';
 
 function isPlaceholderContact(value?: string | null): boolean {
   const v = value?.trim().toLowerCase() || '';

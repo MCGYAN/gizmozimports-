@@ -94,7 +94,7 @@ export const SEO = {
   contact: {
     phone: '0540237911',
     whatsapp: '0540237911',
-    email: 'support@gizmoztrades.com',
+    email: 'gizmozexports@gmail.com',
     country: 'GH',
     areaServed: 'Ghana',
   },

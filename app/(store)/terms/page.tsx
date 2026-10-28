@@ -300,7 +300,7 @@ export default function TermsPage() {
                   <i className="ri-mail-line text-brand-primary text-xl mt-1"></i>
                   <div>
                     <p className="font-medium text-gray-900">Email</p>
-                    <a href="mailto:support@gizmoztrades.com" className="text-brand-primary hover:underline">support@gizmoztrades.com</a>
+                    <a href="mailto:gizmozexports@gmail.com" className="text-brand-primary hover:underline">gizmozexports@gmail.com</a>
                   </div>
                 </div>
 
