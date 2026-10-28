@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
           <article className="liquid-glass-card p-5">
             <h2 className="font-semibold text-brand-black">Typical timelines</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Air freight often arrives faster for urgent orders, while sea freight is better for large bulk orders with lower landed cost.
+              Shipping timelines depend on what you are buying and volume. We share a clear estimate before you commit.
             </p>
           </article>
           <article className="liquid-glass-card p-5">

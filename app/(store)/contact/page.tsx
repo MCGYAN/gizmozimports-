@@ -180,7 +180,7 @@ export default function ContactPage() {
   const faqs = [
     {
       question: 'How long does an import take?',
-      answer: 'It depends on air or sea and what you are buying. We give you a real date up front. We update you if anything changes. No vague "soon" answers.'
+      answer: 'It depends on shipping and what you are buying. We give you a real date up front. We update you if anything changes. No vague "soon" answers.'
     },
     {
       question: 'Do you only ship to Ghana?',

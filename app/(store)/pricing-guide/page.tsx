@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const rows = [
   { item: 'Product cost', details: 'Supplier invoice after negotiation and verification.' },
   { item: 'China local logistics', details: 'Factory to warehouse or consolidation point in China.' },
-  { item: 'Freight', details: 'Air or sea freight based on urgency, volume, and budget.' },
+  { item: 'Shipping', details: 'Shipping cost based on volume, weight, and destination.' },
   { item: 'Customs & clearance', details: 'Import duties and handling for Ghana entry.' },
   { item: 'Service fee', details: 'Sourcing, communication, quality checks, and update management.' },
 ];
