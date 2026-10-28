@@ -13,10 +13,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { executeRecaptcha } from '@/lib/recaptcha';
 import { downloadElementAsPdf } from '@/lib/download-pdf';
 import { ShoppingCart, ArrowLeft, UserCircle } from 'lucide-react';
-import {
-  INVOICE_PAYMENT_THRESHOLD,
-  resolveCheckoutPaymentChannel,
-} from '@/lib/payment-routing';
+import { resolveCheckoutPaymentChannel } from '@/lib/payment-routing';
 
 /** Contact details remembered locally so repeat buyers skip retyping. */
 const CONTACT_STORAGE_KEY = 'gizmoz-checkout-contact';
@@ -74,7 +71,7 @@ export default function CheckoutPage() {
     region: ''
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'moolre' | 'invoice'>('moolre');
+  const [paymentMethod, setPaymentMethod] = useState<'moolre' | 'invoice'>('invoice');
   const [errors, setErrors] = useState<any>({});
 
   // Restore remembered contact details, then let a signed-in session override email
@@ -105,8 +102,6 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost + tax;
 
   useEffect(() => {
-    // Don't flip invoice ↔ MoMo while an order is in flight (clearCart would
-    // drop total to 0 and wrongly show "under GH¢2000").
     if (isLoading) return;
     setPaymentMethod(resolveCheckoutPaymentChannel(total));
   }, [total, isLoading]);
@@ -377,16 +372,8 @@ export default function CheckoutPage() {
             {/* Payment + single CTA */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="rounded-xl border border-brand-accent/25 bg-brand-accent/10 px-4 py-3 text-sm text-brand-primary">
-                {paymentMethod === 'invoice' ? (
-                  <>
-                    Cart total is GH¢{total.toFixed(2)} (at or above GH¢{INVOICE_PAYMENT_THRESHOLD.toFixed(0)}).
-                    You get the invoice now with bank details. Pay by transfer, then tap “I’ve paid”.
-                  </>
-                ) : (
-                  <>
-                    Cart total is under GH¢{INVOICE_PAYMENT_THRESHOLD.toFixed(0)}. Fast checkout with Mobile Money.
-                  </>
-                )}
+                Cart total is GH¢{total.toFixed(2)}. You get an invoice with bank and MoMo details.
+                Pay by transfer, then tap “I’ve paid” on your order page.
               </div>
 
               <button
@@ -402,17 +389,13 @@ export default function CheckoutPage() {
                     </svg>
                     Processing...
                   </>
-                ) : paymentMethod === 'invoice' ? (
-                  `Get invoice and pay GH¢${total.toFixed(2)}`
                 ) : (
-                  `Pay GH¢${total.toFixed(2)} with Mobile Money`
+                  `Get invoice and pay GH¢${total.toFixed(2)}`
                 )}
               </button>
-              {paymentMethod === 'invoice' ? (
-                <p className="mt-2 text-center text-xs text-gray-500">
-                  You’ll get the invoice now. Pay by bank transfer, then tap I’ve paid.
-                </p>
-              ) : null}
+              <p className="mt-2 text-center text-xs text-gray-500">
+                You’ll get the invoice now. Pay by bank transfer or MoMo, then tap I’ve paid.
+              </p>
             </div>
           </div>
 

@@ -188,7 +188,7 @@ export default function ContactPage() {
     },
     {
       question: 'How do I pay?',
-      answer: 'Your invoice shows MoMo or bank details. Smaller orders may pay online by MoMo. After you pay, confirm so we can process the order.'
+      answer: 'Your invoice shows MoMo or bank details. Pay using those details, then confirm so we can process the order.'
     }
   ];
 

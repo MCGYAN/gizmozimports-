@@ -35,8 +35,8 @@ export default function HowItWorksPage() {
           <article className="border border-slate-200 bg-white p-5">
             <h2 className="font-semibold text-brand-black">How you pay</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Smaller orders can pay by MoMo online. Larger orders get an invoice with bank or MoMo
-              details. You pay, then confirm so we can process the order.
+              Every order gets an invoice with bank or MoMo details. You pay, then tap I’ve paid so
+              we can confirm and process the order.
             </p>
           </article>
         </div>

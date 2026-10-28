@@ -18,8 +18,8 @@ const STEPS = [
   {
     icon: CreditCard,
     title: 'Pay',
-    desc: 'Pay by MoMo or bank using the details on your invoice.',
-    mobileDesc: 'Pay by MoMo or bank on your invoice.',
+    desc: 'Pay by bank or MoMo using the details on your invoice.',
+    mobileDesc: 'Pay by bank or MoMo on your invoice.',
   },
   {
     icon: MapPin,

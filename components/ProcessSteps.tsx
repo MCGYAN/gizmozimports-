@@ -10,7 +10,7 @@ export default function ProcessSteps() {
     },
     {
       title: 'Pay',
-      description: 'Pay by MoMo or bank using the details on your invoice. Then mark that you have paid.',
+      description: 'Pay by bank or MoMo using the details on your invoice. Then mark that you have paid.',
     },
     {
       title: 'Track to Ghana',

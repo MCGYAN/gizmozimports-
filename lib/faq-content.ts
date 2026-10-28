@@ -68,7 +68,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'payment',
     question: 'How can I pay?',
     answer:
-      'Smaller carts usually pay with Mobile Money at checkout. Larger carts (about GH¢2,000 and above) get an invoice with bank or MoMo transfer details. Pay the invoice, then tap I’ve paid on your order page.',
+      'Every order gets an invoice with bank or MoMo transfer details. Pay the invoice, then tap I’ve paid on your order page so we can confirm and process your order.',
   },
   {
     category: 'payment',
@@ -80,7 +80,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'payment',
     question: 'Do you accept cash on delivery?',
     answer:
-      'No. Pay online by Mobile Money or by the invoice transfer details before we source and ship.',
+      'No. Pay using the bank or MoMo details on your invoice before we source and ship.',
   },
   {
     category: 'payment',
