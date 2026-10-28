@@ -179,16 +179,16 @@ export default function ContactPage() {
 
   const faqs = [
     {
-      question: 'How long does an import take?',
-      answer: 'It depends on shipping and what you are buying. We give you a real date up front. We update you if anything changes. No vague "soon" answers.'
+      question: 'How do I place an order?',
+      answer: 'Shop the products on the site, checkout, get your invoice, and pay. Then track your order from China to Ghana. WhatsApp us only if you need help.'
     },
     {
-      question: 'Do you only ship to Ghana?',
-      answer: 'Yes. China to Ghana is what we do best. Ask us if you need something different. We will tell you honestly.'
+      question: 'How long does shipping take?',
+      answer: 'It depends on what you buy and how it ships. We share a clear estimate for your order and update you if anything changes.'
     },
     {
       question: 'How do I pay?',
-      answer: 'MOMO, bank transfer, cash in store, or card. Big orders may need staged payments. We explain everything before you commit.'
+      answer: 'Your invoice shows MoMo or bank details. Smaller orders may pay online by MoMo. After you pay, confirm so we can process the order.'
     }
   ];
 
@@ -196,8 +196,8 @@ export default function ContactPage() {
     <div className="store-page">
       <PageHero
         size="large"
-        title="We are here to help"
-        subtitle="Quotes, timelines, or a quick question. Talk to real people who move imports from China to Ghana."
+        title="Questions? We are here."
+        subtitle="Need help with an order, invoice, payment, or tracking? Ask us. Ready to buy? Start in the shop."
       />
 
         <div className="store-container store-section">

@@ -9,20 +9,20 @@ import { buildWhatsAppHref } from '@/lib/store-config';
 
 const STEPS = [
   {
-    title: 'We source it',
-    text: 'Send a product link, photo, or description. We find reliable suppliers in China for exactly what you need.',
+    title: 'You shop',
+    text: 'Browse listed products on the site and choose what you want.',
   },
   {
-    title: 'We confirm quality',
-    text: 'Specs, condition, and the full price are checked before money moves. You know what you are getting, not guessing from photos.',
+    title: 'You get an invoice',
+    text: 'Checkout and receive a clear invoice for your order.',
   },
   {
-    title: 'We pay and consolidate',
-    text: 'We handle supplier payments and gather your goods at our China warehouse, so you avoid scams and failed transfers.',
+    title: 'You pay',
+    text: 'Pay by MoMo or bank using the details on your invoice, then confirm payment.',
   },
   {
-    title: 'We bring it to Ghana',
-    text: 'Shipping, clearing support, and real updates until you pick up in Accra or we arrange delivery.',
+    title: 'You track',
+    text: 'Follow your order from China to Ghana until it is ready for you.',
   },
 ];
 
@@ -36,9 +36,9 @@ const CATEGORIES = [
 ];
 
 const VALUES = [
-  ['Verified suppliers', 'We vet sellers before you pay a pesewa.'],
-  ['Clear pricing', 'Product, shipping, and fees shown up front.'],
-  ['Real updates', 'Track every step from China to your door.'],
+  ['Clear invoice', 'You see what to pay before money moves.'],
+  ['Simple payment', 'MoMo or bank — details are on your invoice.'],
+  ['Real tracking', 'Follow every step from China to Ghana.'],
 ];
 
 export default function AboutPage() {
@@ -51,8 +51,8 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#f7f8fa]">
       <PageHero
         size="large"
-        title="Your trusted China sourcing partner in Ghana."
-        subtitle="We source, pay, and deliver quality products from China, so you can shop with confidence."
+        title="Buy from China the clear way."
+        subtitle="Shop listed products. Get your invoice. Pay. Track your order from China to Ghana."
       />
 
       {/* Story */}
@@ -60,22 +60,21 @@ export default function AboutPage() {
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="mx-auto max-w-2xl">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              The right product, from the right source
+              Built for Ghana buyers who want control
             </h2>
             <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-slate-600 sm:text-base md:text-lg">
               <p>
-                <span className="font-semibold text-brand-primary">Gizmoz Trades</span> is a
-                sourcing and import company that connects shoppers and businesses in Ghana with
-                quality products from China.
+                <span className="font-semibold text-brand-primary">Gizmoz Trades</span> helps people
+                and businesses in Ghana buy goods from China without living in WhatsApp chats.
               </p>
               <p>
-                We specialise in gadgets and electronics, and we also source construction equipment,
-                auto parts, stationery, laboratory equipment, and home appliances based on what each
-                customer needs.
+                You shop what is listed — gadgets, electronics, construction equipment, auto parts,
+                stationery, lab equipment, and home appliances. You get an invoice, you pay, and you
+                track the journey to Ghana.
               </p>
               <p>
-                Importing should not feel risky. We give you clear prices, practical guidance, and a
-                team you can reach on WhatsApp throughout the process.
+                Need a question answered? Message us on WhatsApp. Ready to buy what you see? Order
+                on the site.
               </p>
             </div>
           </div>
@@ -87,10 +86,10 @@ export default function AboutPage() {
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              Source, check, pay, deliver
+              Shop, invoice, pay, track
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              Not just a price. Care before the goods leave China, and updates until they reach you.
+              A clear path from the product list to Ghana — so you always know what to do next.
             </p>
           </div>
 
@@ -119,10 +118,10 @@ export default function AboutPage() {
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              What we source for Ghana
+              What you can buy with us
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              Send your product image or description and we will source it for you.
+              Start in the shop. If an item is not listed yet, ask us and we will help.
             </p>
           </div>
 
@@ -155,7 +154,7 @@ export default function AboutPage() {
                 className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-brand-primary sm:w-auto"
               >
                 <MessageCircle className="h-4 w-4" />
-                WhatsApp a quote
+                Need help? WhatsApp us
               </a>
             ) : null}
           </div>
@@ -167,11 +166,11 @@ export default function AboutPage() {
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              Shop China with someone on your side
+              You stay in charge of your order
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-slate-600 sm:text-base md:text-lg">
-              We are based in {address} and serve customers across Ghana. Our team handles the
-              supplier, the payment, and the shipping, and keeps you informed at every step.
+              We are based in {address} and serve customers across Ghana. You order on the site.
+              We handle China. You see the status as your goods move.
             </p>
           </div>
 
@@ -191,18 +190,17 @@ export default function AboutPage() {
         <div className="store-container py-10 sm:py-14 md:py-16">
           <div className="mx-auto max-w-xl text-center">
             <h2 className="font-heading text-xl font-bold text-brand-primary sm:text-2xl">
-              Ready to import without the stress?
+              Ready to order?
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              Tell us what you need. We will help you source it with care, clear communication,
-              and practical support.
+              Start in the shop. Get your invoice. Pay. Track your order to Ghana.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/shop"
                 className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-[15px] font-semibold text-white hover:bg-brand-dark sm:w-auto"
               >
-                Start shopping
+                Shop products
                 <ArrowRight className="h-4 w-4" />
               </Link>
               {whatsApp ? (
@@ -213,7 +211,7 @@ export default function AboutPage() {
                   className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-brand-accent" />
-                  Talk to us
+                  Need help? WhatsApp us
                 </a>
               ) : (
                 <Link
@@ -221,7 +219,7 @@ export default function AboutPage() {
                   className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-brand-accent" />
-                  Talk to us
+                  Need help? Contact us
                 </Link>
               )}
             </div>

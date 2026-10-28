@@ -17,7 +17,7 @@ export default function Footer() {
   const siteName = getSetting('site_name') || 'Gizmoz Trades';
   const siteTagline =
     getSetting('site_tagline') ||
-    'Your China sourcing partner in Ghana. We source, pay, and deliver quality products so you do not have to.';
+    'Shop from China to Ghana: get your invoice, pay, and track your order — WhatsApp only when you need help.';
   const contactAddress = getSetting('contact_address') || '';
   const contactWhatsapp = getSetting('contact_whatsapp') || '';
   const socialFacebook = getSetting('social_facebook') || '';

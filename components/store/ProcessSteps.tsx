@@ -1,12 +1,32 @@
 'use client';
 
-import { Search, MessageCircle, Package, MapPin } from 'lucide-react';
+import { Search, FileText, CreditCard, MapPin } from 'lucide-react';
 
 const STEPS = [
-  { icon: Search, title: 'Look around', desc: 'Find what you need. Gadgets, appliances, and more.', mobileDesc: 'Browse gadgets, appliances & more.' },
-  { icon: MessageCircle, title: 'Ask or order', desc: 'Message us on WhatsApp or buy online when you are ready.', mobileDesc: 'WhatsApp us or buy online.' },
-  { icon: Package, title: 'We handle it', desc: 'We source it and ship it from China. You do not have to.', mobileDesc: 'We source & ship from China.' },
-  { icon: MapPin, title: 'It arrives home', desc: 'Your import lands in Ghana. You know when and where.', mobileDesc: 'Lands in Ghana. You track it.' },
+  {
+    icon: Search,
+    title: 'Shop the list',
+    desc: 'Browse products on the site. Pick what you want.',
+    mobileDesc: 'Browse and pick what you want.',
+  },
+  {
+    icon: FileText,
+    title: 'Get your invoice',
+    desc: 'Checkout and receive a clear invoice for your order.',
+    mobileDesc: 'Checkout and get a clear invoice.',
+  },
+  {
+    icon: CreditCard,
+    title: 'Pay',
+    desc: 'Pay by MoMo or bank using the details on your invoice.',
+    mobileDesc: 'Pay by MoMo or bank on your invoice.',
+  },
+  {
+    icon: MapPin,
+    title: 'Track to Ghana',
+    desc: 'Follow your order step by step from China to Ghana.',
+    mobileDesc: 'Track it from China to Ghana.',
+  },
 ];
 
 export default function ProcessSteps() {
@@ -15,10 +35,10 @@ export default function ProcessSteps() {
       <div className="store-container">
         <div className="md:max-w-xl">
           <h2 className="font-heading text-[1.35rem] font-bold leading-tight tracking-tight text-brand-primary md:text-[1.75rem] lg:text-[2.25rem]">
-            How it works
+            How buying works
           </h2>
           <p className="mt-1 hidden text-sm leading-relaxed text-slate-600 md:mt-2 md:block md:text-base">
-            Four steps. No confusion. Easier than you thought.
+            Four clear steps. No chasing. You stay in control.
           </p>
         </div>
 
@@ -34,7 +54,7 @@ export default function ProcessSteps() {
               <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-accent text-[11px] font-bold text-white">
                 {i + 1}
               </span>
-              <div className="min-w-0 flex-1 liquid-glass-card p-3 pb-4">
+              <div className="min-w-0 flex-1 border border-slate-200 bg-slate-50 p-3 pb-4">
                 <h3 className="font-heading text-[14px] font-bold leading-snug text-brand-primary">
                   {step.title}
                 </h3>
@@ -49,13 +69,13 @@ export default function ProcessSteps() {
             {STEPS.map((step, i) => (
               <div
                 key={step.title}
-                className="liquid-glass-card liquid-glass-card-interactive p-5"
+                className="border border-slate-200 bg-white p-5"
               >
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-accent text-sm font-bold text-white shadow-md shadow-brand-accent/20">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-accent text-sm font-bold text-white">
                     {i + 1}
                   </span>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg liquid-glass-well">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
                     <step.icon className="h-[18px] w-[18px] text-brand-primary" strokeWidth={1.75} />
                   </span>
                 </div>

@@ -1,19 +1,20 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { leadConfig } from '@/lib/leadConfig';
 
 export const metadata: Metadata = {
   title: 'Pricing Guide | Import Goods from China to Ghana',
   description:
-    'Understand the complete pricing guide for importing from China to Ghana: product cost, local logistics, freight, customs, and sourcing service fee.',
-  keywords: ['import goods from China to Ghana', 'buy from China Ghana', 'China sourcing agent Ghana'],
+    'Understand pricing when you buy with Gizmoz Trades: product cost, China logistics, shipping, customs, and service fee.',
+  keywords: ['import goods from China to Ghana', 'buy from China Ghana', 'China sourcing Ghana'],
 };
 
 const rows = [
-  { item: 'Product cost', details: 'Supplier invoice after negotiation and verification.' },
-  { item: 'China local logistics', details: 'Factory to warehouse or consolidation point in China.' },
+  { item: 'Product cost', details: 'The price of the goods on your invoice.' },
+  { item: 'China local logistics', details: 'Moving goods inside China to our warehouse when needed.' },
   { item: 'Shipping', details: 'Shipping cost based on volume, weight, and destination.' },
-  { item: 'Customs & clearance', details: 'Import duties and handling for Ghana entry.' },
-  { item: 'Service fee', details: 'Sourcing, communication, quality checks, and update management.' },
+  { item: 'Customs & clearance', details: 'Import duties and handling for Ghana entry when they apply.' },
+  { item: 'Service fee', details: 'Handling, updates, and support through the order.' },
 ];
 
 export default function PricingGuidePage() {
@@ -23,7 +24,8 @@ export default function PricingGuidePage() {
         <div className="max-w-3xl">
           <h1 className="text-3xl md:text-5xl font-bold text-brand-black">Pricing Guide</h1>
           <p className="mt-4 text-gray-600">
-            We do not hide fees. Every quote from Gizmoz Trades includes the full landed-cost structure before you commit.
+            When you order on the site, your invoice shows what to pay. Extra shipping or clearance
+            costs are explained when they apply — we do not hide fees.
           </p>
         </div>
 
@@ -46,14 +48,26 @@ export default function PricingGuidePage() {
           </table>
         </div>
 
-        <div className="mt-8 liquid-glass-card p-6 max-w-5xl mx-auto">
-          <h2 className="text-xl font-semibold text-brand-black">Need an exact quote?</h2>
+        <div className="mt-8 border border-slate-200 bg-slate-50 p-6 max-w-5xl mx-auto">
+          <h2 className="text-xl font-semibold text-brand-black">Want the exact amount?</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Share product image/specifications and quantity. We will provide a detailed estimate for import to Ghana.
+            Shop a listed product to get your invoice. If the item is not listed, message us with a
+            photo and quantity and we will help.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="btn-interactive inline-flex rounded-xl bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white">
-              Chat on WhatsApp
+            <Link
+              href="/shop"
+              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Shop products
+            </Link>
+            <a
+              href={leadConfig.whatsappUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-interactive inline-flex rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-brand-primary"
+            >
+              Need help? WhatsApp us
             </a>
           </div>
         </div>

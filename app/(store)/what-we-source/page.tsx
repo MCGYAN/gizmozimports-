@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import SourceCategoryCard from '@/components/SourceCategoryCard';
 import { leadConfig } from '@/lib/leadConfig';
 
 export const metadata: Metadata = {
-  title: 'What We Source | China Sourcing Agent Ghana',
+  title: 'What We Source | Shop China to Ghana | Gizmoz Trades',
   description:
-    'See the products Gizmoz Trades can help you import from China to Ghana: gadgets, electronics, construction equipment, auto parts, stationery, lab equipment, and home appliances.',
-  keywords: ['China sourcing agent Ghana', 'import goods from China to Ghana', 'buy from China Ghana'],
+    'See the product types Gizmoz Trades helps Ghana buyers get from China: gadgets, electronics, construction equipment, auto parts, stationery, lab equipment, and home appliances.',
+  keywords: ['buy from China Ghana', 'import goods from China to Ghana', 'China sourcing Ghana'],
 };
 
 const SOURCE_CATEGORIES = [
@@ -47,10 +48,10 @@ export default function WhatWeSourcePage() {
     <main className="min-h-screen bg-white py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
-          <h1 className="text-3xl md:text-5xl font-bold text-brand-black">What We Source</h1>
+          <h1 className="text-3xl md:text-5xl font-bold text-brand-black">What You Can Buy</h1>
           <p className="mt-4 text-gray-600">
-            We source directly from vetted Chinese suppliers and help clients in Ghana import
-            confidently with transparent pricing and shipping updates.
+            Start with products listed in the shop. Order online, get your invoice, pay, and track
+            your goods from China to Ghana.
           </p>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -60,22 +61,31 @@ export default function WhatWeSourcePage() {
               title={category.title}
               description={category.description}
               icon={category.icon}
+              href="/shop"
             />
           ))}
         </div>
-        <div className="mt-10 liquid-glass-inset rounded-2xl p-8 text-white">
-          <h2 className="text-2xl font-bold">Need something not listed?</h2>
+        <div className="mt-10 bg-[#172554] p-8 text-white">
+          <h2 className="text-2xl font-bold">Cannot find it in the shop?</h2>
           <p className="mt-2 text-blue-100">
-            Send your product image or description and we will source it for you.
+            Message us with a photo or short description. We will tell you if we can help.
           </p>
-          <a
-            href={leadConfig.whatsappUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-interactive mt-5 inline-flex rounded-xl bg-white px-6 py-3 font-semibold text-brand-primary"
-          >
-            Request Custom Sourcing
-          </a>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href="/shop"
+              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-white"
+            >
+              Shop products
+            </Link>
+            <a
+              href={leadConfig.whatsappUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-interactive inline-flex rounded-xl border border-white/40 bg-transparent px-6 py-3 font-semibold text-white"
+            >
+              Need help? WhatsApp us
+            </a>
+          </div>
         </div>
       </div>
     </main>

@@ -27,10 +27,10 @@ export default function ImportJourneyTimeline() {
       <div className="store-container relative">
         <div className="md:max-w-2xl">
           <h2 className="font-heading text-[1.35rem] font-bold leading-tight tracking-tight text-white md:text-[1.75rem] lg:text-[2.25rem]">
-            Never wonder where your order is
+            Track your order from China to Ghana
           </h2>
           <p className="mt-1 hidden text-sm leading-relaxed text-white/70 md:mt-2 md:block md:text-base">
-            Every step is clear. From China to Ghana to your door.
+            After you pay, follow each step online — no need to keep asking where it is.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function ImportJourneyTimeline() {
             ))}
           </div>
           <p className="mt-4 text-center text-[11px] text-white/45">
-            Full status in your account · steps vary by product
+            Full status on your order page · steps can vary by product
           </p>
         </div>
 

@@ -29,7 +29,7 @@ export default function HomeClient({
 
   const waHero = buildWhatsAppHref(getSetting('contact_whatsapp'));
   const waHeroPrefilled = waHero
-    ? `${waHero}${waHero.includes('?') ? '&' : '?'}text=${encodeURIComponent('Hi Gizmoz Trades, I want to import from China.')}`
+    ? `${waHero}${waHero.includes('?') ? '&' : '?'}text=${encodeURIComponent('Hi Gizmoz Trades, I need help with an order on the website.')}`
     : '';
 
   const scrollCategorySlider = (direction: 'left' | 'right') => {
@@ -108,14 +108,14 @@ export default function HomeClient({
           <div className="grid grid-cols-[1.3fr_1fr] items-stretch gap-3 sm:gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
             <div className="z-10 py-1 sm:py-2 md:py-4">
               <p className="mb-2 text-[11px] font-medium text-blue-100/85 sm:mb-3 sm:text-sm">
-                China to Ghana sourcing
+                China to Ghana — shop, pay, track
               </p>
               <h1 className="font-heading text-[1.35rem] font-bold leading-tight sm:text-4xl md:text-5xl">
-                Import From China Without the Stress
+                Shop. Get your invoice. Track it to Ghana.
               </h1>
               <p className="mt-2 max-w-2xl text-[11px] leading-snug text-blue-100 sm:mt-4 sm:text-base sm:leading-normal">
-                We source, pay, and deliver quality gadgets, electronics, and everyday goods to
-                Ghana. You stay in the loop from start to finish.
+                Pick from the products listed here. Pay with your invoice. Then follow your order
+                from China to Ghana — no chasing for updates.
               </p>
               <div className="mt-4 flex flex-wrap gap-2 sm:mt-7 sm:gap-3">
                 <Link
@@ -123,31 +123,18 @@ export default function HomeClient({
                   prefetch
                   className="btn-premium inline-flex items-center rounded-xl bg-brand-accent px-4 py-2 text-xs font-semibold text-white hover:bg-orange-600 sm:px-6 sm:py-3 sm:text-base"
                 >
-                  Shop Now
+                  Shop products
                 </Link>
-                {waHeroPrefilled ? (
-                  <a
-                    href={waHeroPrefilled}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-premium inline-flex items-center gap-1.5 rounded-xl border border-white/60 bg-transparent px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    <i className="ri-whatsapp-line text-sm sm:text-lg" aria-hidden />
-                    <span className="hidden sm:inline">Ask us on WhatsApp</span>
-                    <span className="sm:hidden">WhatsApp</span>
-                  </a>
-                ) : (
-                  <Link
-                    href="/categories"
-                    prefetch
-                    className="btn-premium inline-flex items-center rounded-xl border border-white/60 bg-transparent px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    Browse Categories
-                  </Link>
-                )}
+                <Link
+                  href="/order-tracking"
+                  prefetch
+                  className="btn-premium inline-flex items-center rounded-xl border border-white/60 bg-transparent px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 sm:px-6 sm:py-3 sm:text-base"
+                >
+                  Track my order
+                </Link>
               </div>
               <p className="mt-6 hidden text-sm leading-relaxed text-blue-100/80 sm:block">
-                Verified suppliers. Clear prices before you pay. Real updates until delivery.
+                Clear invoice. Pay your way. Real status until it reaches Ghana.
               </p>
             </div>
 
@@ -195,7 +182,7 @@ export default function HomeClient({
                 Shop by Category
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-base">
-                Pick a category. We help you import it.
+                Pick a category. Order from what is listed.
               </p>
             </div>
             {hasCategories ? (
@@ -247,8 +234,7 @@ export default function HomeClient({
             <div className="border border-slate-200 bg-slate-50 px-6 py-10 text-center rounded-2xl">
               <p className="font-heading text-lg font-bold text-brand-primary">Categories coming soon</p>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
-                We are setting up import categories. Message us on WhatsApp if you already know what
-                you need.
+                Browse the shop for listed products, or contact us if you need help finding something.
               </p>
             </div>
           )}
@@ -264,7 +250,7 @@ export default function HomeClient({
                 Featured products
               </h2>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 md:mt-3 md:text-base">
-                Hand picked for you. See the price up front. Or ask for a quote.
+                See the price. Order. Get your invoice and pay.
               </p>
             </div>
             <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
@@ -286,8 +272,7 @@ export default function HomeClient({
             <div className="border border-slate-200 bg-white px-6 py-10 text-center rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)]">
               <p className="font-heading text-lg font-bold text-brand-primary">New products coming soon</p>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
-                We are adding imports to the shop. Browse the shop or contact us if you already know
-                what you need.
+                New products are being added. Check the shop, or contact us if you need help.
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <Link
