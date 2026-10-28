@@ -211,27 +211,27 @@ function ShopContent({
       />
 
       {/* Mobile Filter Toggle */}
-      <div className="sticky top-[72px] z-20 border-b border-white/40 liquid-glass px-4 py-4 md:hidden">
+      <div className="sticky top-[68px] z-20 border-b border-slate-200 bg-white px-4 py-3.5 md:hidden">
         <div className="flex justify-between items-center">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center space-x-2 text-brand-primary font-medium"
+            className="flex items-center space-x-2 text-brand-primary font-semibold text-sm"
           >
-            <Filter className="w-5 h-5" />
-            <span>Filters & Sort</span>
+            <Filter className="w-4 h-4" />
+            <span>Filters &amp; Sort</span>
           </button>
-          <span className="text-sm text-gray-500">{totalProducts} listings</span>
+          <span className="text-xs font-medium text-slate-500">{totalProducts} listings</span>
         </div>
       </div>
 
-      <section className="py-12">
+      <section className="py-10 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col gap-8 md:flex-row">
             <aside
-              className={`${isFilterOpen ? 'fixed inset-0 z-50 overflow-y-auto liquid-glass' : 'hidden'} md:block md:w-64 md:flex-shrink-0`}
+              className={`${isFilterOpen ? 'fixed inset-0 z-50 overflow-y-auto bg-white' : 'hidden'} md:block md:w-64 md:flex-shrink-0`}
             >
               <div className="md:sticky md:top-28">
-                <div className="liquid-glass-card p-6 md:bg-transparent md:px-4 md:py-0 md:shadow-none md:backdrop-blur-none md:border-0">
+                <div className="p-6 md:border md:border-slate-200 md:bg-[#f8fafc] md:p-5">
                   <div className="mb-6 flex items-center justify-between md:hidden">
                     <h2 className="text-xl font-bold text-brand-primary">Filters</h2>
                     <button

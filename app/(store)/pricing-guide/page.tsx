@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import PageHero from '@/components/PageHero';
 import { leadConfig } from '@/lib/leadConfig';
 
 export const metadata: Metadata = {
@@ -9,55 +11,111 @@ export const metadata: Metadata = {
 };
 
 const rows = [
-  { item: 'Product cost', details: 'Supplier invoice after negotiation and verification.' },
-  { item: 'China local logistics', details: 'Factory to warehouse or consolidation point in China.' },
-  { item: 'Freight', details: 'Air or sea freight based on urgency, volume, and budget.' },
-  { item: 'Customs & clearance', details: 'Import duties and handling for Ghana entry.' },
-  { item: 'Service fee', details: 'Sourcing, communication, quality checks, and update management.' },
+  {
+    code: '01',
+    item: 'Product cost',
+    stage: 'Supplier invoice',
+    details: 'Ex-factory or wholesale price in RMB converted to GH¢ after specification and supplier verification.',
+  },
+  {
+    code: '02',
+    item: 'China inland logistics',
+    stage: 'Factory → Warehouse',
+    details: 'Domestic transport from the supplier floor to our consolidation warehouse in China.',
+  },
+  {
+    code: '03',
+    item: 'International freight',
+    stage: 'China → Ghana',
+    details: 'Air express (charged by weight) or sea container freight (charged by CBM volume).',
+  },
+  {
+    code: '04',
+    item: 'Customs & port clearing',
+    stage: 'Tema / Kotoka',
+    details: 'Import duties, port handling, and clearing charges required for entry into Ghana.',
+  },
+  {
+    code: '05',
+    item: 'Sourcing & handling fee',
+    stage: 'Gizmoz desk',
+    details: 'Supplier vetting, RMB settlement, pre-shipment checks, and status tracking until pickup.',
+  },
 ];
 
 export default function PricingGuidePage() {
   return (
-    <main className="min-h-screen bg-white py-14">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <h1 className="text-3xl md:text-5xl font-bold text-brand-black">Pricing Guide</h1>
-          <p className="mt-4 text-gray-600">
-            We do not hide fees. Every quote from Gizmoz Trades includes the full landed-cost structure before you commit.
-          </p>
-        </div>
+    <main className="min-h-screen bg-white">
+      <PageHero
+        size="large"
+        kicker="Landed Cost Schedule"
+        title="Pricing Guide"
+        subtitle="We do not hide fees inside vague shipping estimates. Every quote breaks out the five cost lines below before you pay."
+      />
 
-        <div className="mt-12 overflow-hidden rounded-card border border-gray-200 shadow-sm max-w-5xl mx-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-brand-surface">
-              <tr>
-                <th className="px-4 py-3 font-semibold text-brand-black">Cost item</th>
-                <th className="px-4 py-3 font-semibold text-brand-black">What it covers</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.item} className="border-t border-gray-200">
-                  <td className="px-4 py-3 font-medium text-brand-black">{row.item}</td>
-                  <td className="px-4 py-3 text-gray-600">{row.details}</td>
+      <section className="store-section border-b border-slate-200 bg-white">
+        <div className="store-container">
+          <div className="overflow-x-auto border border-slate-200">
+            <table className="w-full min-w-[600px] border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-[#f8fafc] text-xs font-semibold text-slate-600">
+                  <th className="w-16 px-4 py-3.5 font-mono">#</th>
+                  <th className="px-4 py-3.5">Cost line</th>
+                  <th className="px-4 py-3.5">Stage</th>
+                  <th className="px-4 py-3.5">What it covers</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {rows.map((row) => (
+                  <tr key={row.code} className="bg-white">
+                    <td className="px-4 py-4 font-mono text-xs font-semibold text-brand-accent">
+                      {row.code}
+                    </td>
+                    <td className="px-4 py-4 font-heading font-bold text-brand-primary">
+                      {row.item}
+                    </td>
+                    <td className="px-4 py-4 text-xs font-medium text-slate-500">
+                      {row.stage}
+                    </td>
+                    <td className="px-4 py-4 leading-relaxed text-slate-600">
+                      {row.details}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        <div className="mt-8 rounded-card border border-gray-200 bg-brand-surface p-6 max-w-5xl mx-auto">
-          <h2 className="text-xl font-semibold text-brand-black">Need an exact quote?</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Share product image/specifications and quantity. We will provide a detailed estimate for import to Ghana.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <a href={leadConfig.whatsappUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-xl bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white">
-              Chat on WhatsApp
-            </a>
+          <div className="mt-10 grid items-center gap-6 border border-slate-200 bg-[#f8fafc] p-6 sm:p-8 md:grid-cols-12">
+            <div className="md:col-span-8">
+              <p className="text-xs font-semibold text-brand-accent">Estimate your shipment</p>
+              <h2 className="mt-1 font-heading text-xl font-bold text-brand-primary">
+                Want an exact landed quote in Cedis?
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+                Send the product image, specification, and quantity on WhatsApp. We will prepare a complete cost sheet before you commit.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 md:col-span-4 md:justify-end">
+              <a
+                href={leadConfig.whatsappUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-premium inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
+              >
+                <i className="ri-whatsapp-line text-base" aria-hidden />
+                Chat on WhatsApp
+              </a>
+              <Link
+                href="/exchange"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-brand-primary hover:border-brand-primary"
+              >
+                Check RMB rate
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

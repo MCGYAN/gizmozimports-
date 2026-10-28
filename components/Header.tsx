@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import MiniCart from './MiniCart';
 import StoreLogo from './StoreLogo';
 import { useCart } from '@/context/CartContext';
@@ -22,6 +22,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const pathname = usePathname() || '/';
 
   const { cartCount, isCartOpen, setIsCartOpen } = useCart();
 
@@ -119,29 +120,40 @@ export default function Header() {
                 <StoreLogo priority className="group" />
               </div>
 
-              <div className="mx-1 hidden min-w-0 flex-1 items-center justify-center gap-2 md:flex lg:mx-2 lg:gap-3 xl:mx-4 xl:gap-4">
-                <div className="flex min-w-0 items-center gap-3 rounded-full border border-slate-200/70 bg-white/60 px-4 py-1.5 lg:gap-4 xl:gap-6 xl:px-5">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`shrink-0 whitespace-nowrap py-1 text-xs font-medium text-gray-700 transition-colors hover:text-brand lg:text-[13px] xl:text-sm ${
-                        link.href === '/how-it-works' || link.href === '/about' ? 'hidden xl:inline' : ''
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
+              <div className="mx-1 hidden min-w-0 flex-1 items-center justify-center gap-3 md:flex lg:mx-3 lg:gap-5 xl:mx-6 xl:gap-6">
+                <nav aria-label="Main navigation" className="flex min-w-0 items-center gap-4 lg:gap-5 xl:gap-7">
+                  {navLinks.map((link) => {
+                    const isActive =
+                      link.href === '/'
+                        ? pathname === '/'
+                        : pathname === link.href || pathname.startsWith(`${link.href}/`);
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`relative shrink-0 whitespace-nowrap py-1.5 text-xs font-medium transition-colors lg:text-[13px] xl:text-sm ${
+                          link.href === '/how-it-works' || link.href === '/about' ? 'hidden xl:inline-block' : ''
+                        } ${
+                          isActive
+                            ? 'font-semibold text-brand-primary after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-brand-accent'
+                            : 'text-slate-600 hover:text-brand-primary'
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+                <span className="hidden h-4 w-px bg-slate-200 lg:block" aria-hidden />
                 <div className="flex shrink-0 items-center gap-1.5 lg:gap-2">
                   {serviceLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`btn-premium inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-3 text-[11px] font-semibold transition lg:h-9 lg:px-4 lg:text-xs ${
+                      className={`btn-premium inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-3 text-[11px] font-semibold transition lg:h-9 lg:px-3.5 lg:text-xs ${
                         link.primary
                           ? 'bg-brand-accent text-white hover:bg-orange-600'
-                          : 'border border-brand/20 bg-white text-brand hover:bg-blue-50'
+                          : 'border border-slate-200 bg-slate-50 text-brand-primary hover:border-brand-primary/30 hover:bg-white'
                       }`}
                     >
                       <span className="xl:hidden">{link.shortLabel}</span>
@@ -158,10 +170,10 @@ export default function Header() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search products..."
-                      className="w-full rounded-full border border-slate-200 bg-white/80 py-2 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-brand/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/15 transition-colors lg:pl-10 lg:pr-4 lg:text-sm"
+                      placeholder="Search imports..."
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50/80 py-2 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-brand-primary/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/10 transition-colors lg:pl-9 lg:pr-3.5 lg:text-sm"
                     />
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none lg:left-3.5" strokeWidth={2} />
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" strokeWidth={2} />
                   </form>
                 </div>
 
@@ -184,7 +196,7 @@ export default function Header() {
                   className="hidden sm:flex shrink-0 items-center gap-2 text-slate-800 hover:text-brand transition-colors group"
                   aria-label="Account"
                 >
-                  <User className="w-5 h-5 group-hover:scale-110 transition-transform" strokeWidth={1.75} />
+                  <User className="w-5 h-5" strokeWidth={1.75} />
                   <span className="font-medium text-sm hidden xl:inline">Account</span>
                 </Link>
 
@@ -195,9 +207,9 @@ export default function Header() {
                     onClick={() => setIsCartOpen(!isCartOpen)}
                     aria-label="Cart"
                   >
-                    <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" strokeWidth={1.75} />
+                    <ShoppingCart className="w-5 h-5" strokeWidth={1.75} />
                     {cartCount > 0 && (
-                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-[10px] font-bold text-white shadow-sm sm:-right-1 sm:-top-1">
+                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-[10px] font-bold text-white sm:-right-1 sm:-top-1">
                         {cartCount}
                       </span>
                     )}
@@ -216,8 +228,8 @@ export default function Header() {
                     enterKeyHint="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full rounded-full border border-slate-200 bg-white py-3 pl-11 pr-4 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand/40 focus:outline-none focus:ring-2 focus:ring-brand/15"
+                    placeholder="Search imports..."
+                    className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-11 pr-4 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand/40 focus:outline-none focus:ring-2 focus:ring-brand/15"
                     autoFocus
                   />
                   <Search className="absolute left-4 h-5 w-5 text-slate-400 pointer-events-none" />
