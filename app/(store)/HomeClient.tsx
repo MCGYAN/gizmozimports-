@@ -16,15 +16,6 @@ import {
 const ImportJourneyTimeline = dynamic(() => import('@/components/store/ImportJourneyTimeline'), { loading: () => null });
 const ImportCta = dynamic(() => import('@/components/store/ImportCta'), { loading: () => null });
 
-const FALLBACK_CATEGORIES = [
-  { slug: 'electronics', name: 'Electronics & Gadgets' },
-  { slug: 'home-appliances', name: 'Home Appliances' },
-  { slug: 'furniture', name: 'Furniture' },
-  { slug: 'fashion', name: 'Fashion & Accessories' },
-  { slug: 'tools', name: 'Industrial & Tools' },
-  { slug: 'wholesale', name: 'Bulk Wholesale Goods' },
-];
-
 export default function HomeClient({
   featuredProducts,
   categories,
@@ -50,12 +41,8 @@ export default function HomeClient({
     }
   };
 
-
-  const displayCategories =
-    categories.length > 0
-      ? categories.filter((c: any) => !c.parent_id).slice(0, 8)
-      : FALLBACK_CATEGORIES;
-
+  const displayCategories = categories.filter((c: any) => !c.parent_id).slice(0, 8);
+  const hasCategories = displayCategories.length > 0;
   const hasFeaturedProducts = featuredProducts.length > 0;
 
   const renderProductCard = (product: any) => {
@@ -208,65 +195,67 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="store-section relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-white/45 via-[#eef2f8]/55 to-[#f8fafc]/35">
-        <div className="pointer-events-none absolute -left-32 top-0 h-64 w-64 rounded-full bg-brand-accent/5 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -right-24 bottom-0 h-48 w-48 rounded-full bg-brand-primary/5 blur-3xl" aria-hidden />
-        <div className="store-container relative">
-          <div className="mb-5 flex flex-col items-start justify-between gap-4 md:mb-7 md:flex-row md:items-end">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-accent">Browse</p>
-              <h2 className="font-heading text-[1.75rem] font-bold tracking-tight text-brand-primary md:text-[2.25rem]">
-                Shop by Category
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-base">
-                Pick a category. We help you import it.
-              </p>
-            </div>
-            <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
-              <div className="hidden gap-3 md:flex lg:hidden">
-                <button
-                  type="button"
-                  onClick={() => scrollCategorySlider('left')}
-                  className="btn-interactive flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-primary shadow-sm hover:border-brand-accent/30"
-                  aria-label="Scroll categories left"
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollCategorySlider('right')}
-                  className="btn-interactive flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-primary shadow-sm hover:border-brand-accent/30"
-                  aria-label="Scroll categories right"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </button>
+      {/* Categories — only when real categories exist */}
+      {hasCategories ? (
+        <section className="store-section relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-white/45 via-[#eef2f8]/55 to-[#f8fafc]/35">
+          <div className="pointer-events-none absolute -left-32 top-0 h-64 w-64 rounded-full bg-brand-accent/5 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -right-24 bottom-0 h-48 w-48 rounded-full bg-brand-primary/5 blur-3xl" aria-hidden />
+          <div className="store-container relative">
+            <div className="mb-5 flex flex-col items-start justify-between gap-4 md:mb-7 md:flex-row md:items-end">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-accent">Browse</p>
+                <h2 className="font-heading text-[1.75rem] font-bold tracking-tight text-brand-primary md:text-[2.25rem]">
+                  Shop by Category
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-base">
+                  Pick a category. We help you import it.
+                </p>
               </div>
-              <Link
-                href="/categories"
-                prefetch
-                className="btn-interactive inline-flex min-h-[44px] items-center justify-center rounded-xl border border-brand-primary/15 bg-white px-5 py-2.5 text-sm font-bold text-brand-primary shadow-sm hover:border-brand-accent/40 hover:text-brand-accent"
-              >
-                View all categories
-              </Link>
+              <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
+                <div className="hidden gap-3 md:flex lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => scrollCategorySlider('left')}
+                    className="btn-interactive flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-primary shadow-sm hover:border-brand-accent/30"
+                    aria-label="Scroll categories left"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollCategorySlider('right')}
+                    className="btn-interactive flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-primary shadow-sm hover:border-brand-accent/30"
+                    aria-label="Scroll categories right"
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                </div>
+                <Link
+                  href="/categories"
+                  prefetch
+                  className="btn-interactive inline-flex min-h-[44px] items-center justify-center rounded-xl border border-brand-primary/15 bg-white px-5 py-2.5 text-sm font-bold text-brand-primary shadow-sm hover:border-brand-accent/40 hover:text-brand-accent"
+                >
+                  View all categories
+                </Link>
+              </div>
+            </div>
+            <div
+              ref={categorySliderRef}
+              className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-1 scrollbar-hide sm:mx-0 sm:gap-4 sm:px-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0 xl:gap-5"
+            >
+              {displayCategories.map((cat: any, idx: number) => (
+                <CategoryCard
+                  key={cat.id || cat.slug}
+                  slug={cat.slug}
+                  name={cat.name}
+                  image={cat.image_url || cat.image}
+                  index={idx}
+                />
+              ))}
             </div>
           </div>
-          <div
-            ref={categorySliderRef}
-            className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-1 scrollbar-hide sm:mx-0 sm:gap-4 sm:px-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0 xl:gap-5"
-          >
-            {displayCategories.map((cat: any, idx: number) => (
-              <CategoryCard
-                key={cat.id || cat.slug}
-                slug={cat.slug}
-                name={cat.name}
-                image={cat.image_url || cat.image}
-                index={idx}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Featured */}
       <section className="store-section relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-[#f8fafc]/50 via-[#f1f5f9]/55 to-[#eef2f7]/40">
