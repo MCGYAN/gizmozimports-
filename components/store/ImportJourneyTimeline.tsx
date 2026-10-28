@@ -30,7 +30,7 @@ export default function ImportJourneyTimeline() {
             Track your order from China to Ghana
           </h2>
           <p className="mt-1 hidden text-sm leading-relaxed text-white/70 md:mt-2 md:block md:text-base">
-            After you pay, follow each step online — no need to keep asking where it is.
+            After you pay, follow each step online. No need to keep asking where it is.
           </p>
         </div>
 

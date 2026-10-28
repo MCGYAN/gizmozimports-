@@ -25,7 +25,7 @@ export default function PricingGuidePage() {
           <h1 className="text-3xl md:text-5xl font-bold text-brand-black">Pricing Guide</h1>
           <p className="mt-4 text-gray-600">
             When you order on the site, your invoice shows what to pay. Extra shipping or clearance
-            costs are explained when they apply — we do not hide fees.
+            costs are explained when they apply. We do not hide fees.
           </p>
         </div>
 

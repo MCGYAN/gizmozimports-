@@ -54,7 +54,7 @@ export default function ImportCta({ whatsAppHref }: ImportCtaProps) {
           </h3>
           <p className="mt-2 max-w-lg text-base leading-relaxed text-slate-600">
             Shop what is listed. Get your invoice. Pay. Then track your order from China to Ghana.
-            WhatsApp is for questions — not for placing every order.
+            WhatsApp is for questions, not for placing every order.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">

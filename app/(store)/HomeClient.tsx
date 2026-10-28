@@ -108,14 +108,14 @@ export default function HomeClient({
           <div className="grid grid-cols-[1.3fr_1fr] items-stretch gap-3 sm:gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
             <div className="z-10 py-1 sm:py-2 md:py-4">
               <p className="mb-2 text-[11px] font-medium text-blue-100/85 sm:mb-3 sm:text-sm">
-                China to Ghana — shop, pay, track
+                China to Ghana. Shop, pay, track.
               </p>
               <h1 className="font-heading text-[1.35rem] font-bold leading-tight sm:text-4xl md:text-5xl">
                 Shop. Get your invoice. Track it to Ghana.
               </h1>
               <p className="mt-2 max-w-2xl text-[11px] leading-snug text-blue-100 sm:mt-4 sm:text-base sm:leading-normal">
                 Pick from the products listed here. Pay with your invoice. Then follow your order
-                from China to Ghana — no chasing for updates.
+                from China to Ghana. No chasing for updates.
               </p>
               <div className="mt-4 flex flex-wrap gap-2 sm:mt-7 sm:gap-3">
                 <Link

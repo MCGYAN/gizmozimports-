@@ -37,7 +37,7 @@ const CATEGORIES = [
 
 const VALUES = [
   ['Clear invoice', 'You see what to pay before money moves.'],
-  ['Simple payment', 'MoMo or bank — details are on your invoice.'],
+  ['Simple payment', 'MoMo or bank. Details are on your invoice.'],
   ['Real tracking', 'Follow every step from China to Ghana.'],
 ];
 
@@ -68,7 +68,7 @@ export default function AboutPage() {
                 and businesses in Ghana buy goods from China without living in WhatsApp chats.
               </p>
               <p>
-                You shop what is listed — gadgets, electronics, construction equipment, auto parts,
+                You shop what is listed: gadgets, electronics, construction equipment, auto parts,
                 stationery, lab equipment, and home appliances. You get an invoice, you pay, and you
                 track the journey to Ghana.
               </p>
@@ -89,7 +89,7 @@ export default function AboutPage() {
               Shop, invoice, pay, track
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              A clear path from the product list to Ghana — so you always know what to do next.
+              A clear path from the product list to Ghana, so you always know what to do next.
             </p>
           </div>
 

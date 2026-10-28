@@ -18,7 +18,7 @@ export default function HowItWorksPage() {
           <h1 className="text-3xl md:text-5xl font-bold text-brand-black">How It Works</h1>
           <p className="mt-4 text-gray-600">
             You shop on the site. You get an invoice. You pay. Then you track your order from China
-            to Ghana. WhatsApp is for questions — not for every order.
+            to Ghana. WhatsApp is for questions, not for every order.
           </p>
         </div>
         <div className="mt-12 max-w-5xl mx-auto">
