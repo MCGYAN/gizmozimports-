@@ -195,22 +195,22 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* Categories — only when real categories exist */}
-      {hasCategories ? (
-        <section className="store-section relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-white/45 via-[#eef2f8]/55 to-[#f8fafc]/35">
-          <div className="pointer-events-none absolute -left-32 top-0 h-64 w-64 rounded-full bg-brand-accent/5 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -right-24 bottom-0 h-48 w-48 rounded-full bg-brand-primary/5 blur-3xl" aria-hidden />
-          <div className="store-container relative">
-            <div className="mb-5 flex flex-col items-start justify-between gap-4 md:mb-7 md:flex-row md:items-end">
-              <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-accent">Browse</p>
-                <h2 className="font-heading text-[1.75rem] font-bold tracking-tight text-brand-primary md:text-[2.25rem]">
-                  Shop by Category
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-base">
-                  Pick a category. We help you import it.
-                </p>
-              </div>
+      {/* Categories */}
+      <section className="store-section relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-white/45 via-[#eef2f8]/55 to-[#f8fafc]/35">
+        <div className="pointer-events-none absolute -left-32 top-0 h-64 w-64 rounded-full bg-brand-accent/5 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -right-24 bottom-0 h-48 w-48 rounded-full bg-brand-primary/5 blur-3xl" aria-hidden />
+        <div className="store-container relative">
+          <div className="mb-5 flex flex-col items-start justify-between gap-4 md:mb-7 md:flex-row md:items-end">
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-accent">Browse</p>
+              <h2 className="font-heading text-[1.75rem] font-bold tracking-tight text-brand-primary md:text-[2.25rem]">
+                Shop by Category
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-base">
+                Pick a category. We help you import it.
+              </p>
+            </div>
+            {hasCategories ? (
               <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
                 <div className="hidden gap-3 md:flex lg:hidden">
                   <button
@@ -238,7 +238,9 @@ export default function HomeClient({
                   View all categories
                 </Link>
               </div>
-            </div>
+            ) : null}
+          </div>
+          {hasCategories ? (
             <div
               ref={categorySliderRef}
               className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-1 scrollbar-hide sm:mx-0 sm:gap-4 sm:px-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0 xl:gap-5"
@@ -253,9 +255,16 @@ export default function HomeClient({
                 />
               ))}
             </div>
-          </div>
-        </section>
-      ) : null}
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white/70 px-6 py-12 text-center">
+              <p className="font-heading text-lg font-bold text-brand-primary">Categories coming soon</p>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">
+                We are setting up import categories. Message us on WhatsApp if you already know what you need.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Featured */}
       <section className="store-section relative overflow-hidden border-b border-white/30 bg-gradient-to-b from-[#f8fafc]/50 via-[#f1f5f9]/55 to-[#eef2f7]/40">
