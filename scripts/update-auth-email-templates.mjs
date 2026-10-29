@@ -34,7 +34,11 @@ function loadEnvFile(filePath) {
 loadEnvFile(resolve(process.cwd(), '.env.local'));
 loadEnvFile(resolve(process.cwd(), '.env'));
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.gizmoztrades.com').replace(/\/+$/, '');
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'https://www.gizmozimports.com'
+).replace(/\/+$/, '');
 const token = process.env.SUPABASE_ACCESS_TOKEN || '';
 const resendKey = process.env.RESEND_API_KEY || '';
 const emailFrom = process.env.EMAIL_FROM || process.env.ADMIN_EMAIL || '';
@@ -120,7 +124,16 @@ console.log('Updating auth URL config…');
 const urlsOk = await patchAuth(
   {
     site_url: SITE_URL,
-    uri_allow_list: `${SITE_URL}/**,${SITE_URL}/auth/callback,http://localhost:3000/**,http://localhost:3000/auth/callback`,
+    uri_allow_list: [
+      `${SITE_URL}/**`,
+      `${SITE_URL}/auth/callback`,
+      'https://www.gizmozimports.com/**',
+      'https://www.gizmozimports.com/auth/callback',
+      'https://gizmozimports.com/**',
+      'https://gizmozimports.com/auth/callback',
+      'http://localhost:3000/**',
+      'http://localhost:3000/auth/callback',
+    ].join(','),
   },
   'Site URL + redirect allow list',
 );

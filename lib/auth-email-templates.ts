@@ -9,12 +9,14 @@
  *   https://supabase.com/dashboard/project/mnzbrazmcbwcnfjqhtsd/auth/templates
  *
  * Also set URL config (required so links leave localhost):
- *   Site URL: https://gizmoztrades.com
- *   Redirect URLs: https://gizmoztrades.com/**
- *                https://gizmoztrades.com/auth/callback
- *                https://gizmoztrades.com/auth/callback?next=/auth/reset-password
+ *   Site URL: https://www.gizmozimports.com
+ *   Redirect URLs: https://www.gizmozimports.com/**
+ *                https://www.gizmozimports.com/auth/callback
+ *                https://www.gizmozimports.com/auth/callback?next=/auth/reset-password
+ *                https://gizmozimports.com/**
  *
- * Auth emails (confirm, reset, etc.) are sent via Resend SMTP on free tier:
+ * Auth emails (confirm, reset, etc.) need custom SMTP (Resend) + custom templates:
+ *   set SUPABASE_ACCESS_TOKEN=sbp_... in .env.local
  *   node scripts/update-auth-email-templates.mjs
  */
 
@@ -63,7 +65,7 @@ export const AUTH_EMAIL_TEMPLATES = {
 };
 
 export const AUTH_URL_CONFIG = {
-  siteUrl: 'https://gizmoztrades.com',
+  siteUrl: 'https://www.gizmozimports.com',
   uriAllowList:
-    'https://gizmoztrades.com/**,https://gizmoztrades.com/auth/callback,http://localhost:3000/**,http://localhost:3000/auth/callback',
+    'https://www.gizmozimports.com/**,https://www.gizmozimports.com/auth/callback,https://gizmozimports.com/**,https://gizmozimports.com/auth/callback,http://localhost:3000/**,http://localhost:3000/auth/callback',
 };
