@@ -17,7 +17,6 @@ import {
     parseVariantBasePriceRmb,
     rmbToGhsPrice,
 } from '@/lib/product-pricing';
-import { formatCorridorBuyRate } from '@/lib/exchange-corridors';
 
 interface ProductFormProps {
     initialData?: any;
@@ -35,8 +34,10 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
     const initialComparePriceRmb = parseComparePriceRmb(initialData?.metadata);
     const [priceRmb, setPriceRmb] = useState(initialBasePriceRmb != null ? String(initialBasePriceRmb) : '');
     const [price, setPrice] = useState(initialData?.price || '');
-    const [buyRmbRate, setBuyRmbRate] = useState<number | null>(null);
-    const [buyRateLoading, setBuyRateLoading] = useState(true);
+    const [catalogRmbRate, setCatalogRmbRate] = useState<number | null>(null);
+    const [catalogRateLoading, setCatalogRateLoading] = useState(true);
+    const [catalogRateDraft, setCatalogRateDraft] = useState('');
+    const [savingCatalogRate, setSavingCatalogRate] = useState(false);
     const [comparePriceRmb, setComparePriceRmb] = useState(
         initialComparePriceRmb != null ? String(initialComparePriceRmb) : '',
     );
@@ -69,12 +70,24 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
         let cancelled = false;
         (async () => {
             try {
-                const res = await fetch('/api/exchange/rate?country=GH');
+                const {
+                    data: { session },
+                } = await supabase.auth.getSession();
+                const res = await fetch('/api/admin/products/catalog-rate', {
+                    headers: {
+                        ...(session?.access_token
+                            ? { Authorization: `Bearer ${session.access_token}` }
+                            : {}),
+                    },
+                });
                 const data = await res.json();
-                const rate = Number(data.board?.buy_rmb_rate);
-                if (!cancelled && rate > 0) setBuyRmbRate(rate);
+                const rate = Number(data.catalog_rmb_rate);
+                if (!cancelled && rate > 0) {
+                    setCatalogRmbRate(rate);
+                    setCatalogRateDraft(String(rate));
+                }
             } finally {
-                if (!cancelled) setBuyRateLoading(false);
+                if (!cancelled) setCatalogRateLoading(false);
             }
         })();
         return () => {
@@ -83,25 +96,59 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
     }, []);
 
     useEffect(() => {
-        if (!(buyRmbRate != null && buyRmbRate > 0)) return;
+        if (!(catalogRmbRate != null && catalogRmbRate > 0)) return;
         const rmb = parseFloat(priceRmb);
         if (!(rmb > 0)) return;
-        setPrice(String(rmbToGhsPrice(rmb, buyRmbRate)));
-    }, [priceRmb, buyRmbRate]);
+        setPrice(String(rmbToGhsPrice(rmb, catalogRmbRate)));
+    }, [priceRmb, catalogRmbRate]);
 
     const comparePriceGhs = useMemo(() => {
-        if (!(buyRmbRate != null && buyRmbRate > 0)) return 0;
+        if (!(catalogRmbRate != null && catalogRmbRate > 0)) return 0;
         const rmb = parseFloat(comparePriceRmb);
         if (!(rmb > 0)) return 0;
-        return rmbToGhsPrice(rmb, buyRmbRate);
-    }, [comparePriceRmb, buyRmbRate]);
+        return rmbToGhsPrice(rmb, catalogRmbRate);
+    }, [comparePriceRmb, catalogRmbRate]);
 
     const previewGhsFromRmb = (rmbValue: string, fallbackRmb = priceRmb) => {
-        if (!(buyRmbRate != null && buyRmbRate > 0)) return 0;
+        if (!(catalogRmbRate != null && catalogRmbRate > 0)) return 0;
         const source = rmbValue.trim() || fallbackRmb.trim();
         const rmb = parseFloat(source);
         if (!(rmb > 0)) return 0;
-        return rmbToGhsPrice(rmb, buyRmbRate);
+        return rmbToGhsPrice(rmb, catalogRmbRate);
+    };
+
+    const saveCatalogRateInline = async () => {
+        const next = Number(catalogRateDraft);
+        if (!(next > 0)) {
+            alert('Enter a valid catalog rate, e.g. 0.54 (RMB per 1 GH¢).');
+            return;
+        }
+        setSavingCatalogRate(true);
+        try {
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+            const res = await fetch('/api/admin/products/catalog-rate', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(session?.access_token
+                        ? { Authorization: `Bearer ${session.access_token}` }
+                        : {}),
+                },
+                body: JSON.stringify({ catalog_rmb_rate: next }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || 'Could not save catalog rate.');
+                return;
+            }
+            const saved = Number(data.catalog_rmb_rate);
+            setCatalogRmbRate(saved);
+            setCatalogRateDraft(String(saved));
+        } finally {
+            setSavingCatalogRate(false);
+        }
     };
 
     // Auto-generate SKU function
@@ -386,17 +433,17 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                 setActiveTab('pricing');
                 return;
             }
-            if (!(buyRmbRate != null && buyRmbRate > 0)) {
-                alert('Buy RMB rate is not available. Set the Ghana rate on the Buy RMB desk first.');
+            if (!(catalogRmbRate != null && catalogRmbRate > 0)) {
+                alert('Set your catalog RMB rate first (Products page or the field below).');
                 setActiveTab('pricing');
                 return;
             }
 
-            const computedGhsPrice = rmbToGhsPrice(rmbValue, buyRmbRate);
+            const computedGhsPrice = rmbToGhsPrice(rmbValue, catalogRmbRate);
             const compareRmbValue = comparePriceRmb.trim() ? parseFloat(comparePriceRmb) : null;
             const computedCompareGhs =
                 compareRmbValue != null && compareRmbValue > 0
-                    ? rmbToGhsPrice(compareRmbValue, buyRmbRate)
+                    ? rmbToGhsPrice(compareRmbValue, catalogRmbRate)
                     : null;
 
             if (compareRmbValue != null && compareRmbValue > 0 && computedCompareGhs != null && computedCompareGhs <= computedGhsPrice) {
@@ -434,7 +481,8 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                     import_notes: importNotes.trim() || null,
                     base_price_rmb: rmbValue,
                     compare_at_price_rmb: compareRmbValue,
-                    last_buy_rmb_rate: buyRmbRate,
+                    last_catalog_rmb_rate: catalogRmbRate,
+                    last_buy_rmb_rate: catalogRmbRate,
                 }
             };
 
@@ -501,7 +549,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                             setActiveTab('variants');
                             throw new Error('variant-rmb-required');
                         }
-                        const variantGhsPrice = rmbToGhsPrice(variantRmbValue, buyRmbRate);
+                        const variantGhsPrice = rmbToGhsPrice(variantRmbValue, catalogRmbRate);
 
                         const row = {
                             product_id: productId,
@@ -746,18 +794,49 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                             <div className="rounded-xl border border-brand-primary/15 bg-brand-primary/5 p-4">
                                 <p className="text-sm font-semibold text-brand-primary">RMB to cedis pricing</p>
                                 <p className="mt-1 text-sm text-slate-600">
-                                    Enter all prices in RMB. Customer prices in cedis are calculated from today&apos;s Buy RMB rate and rounded to the nearest GH¢10.
+                                    Enter supplier prices in RMB. Customer prices in cedis use your catalog rate
+                                    (set under Products) and round to the nearest GH¢10. This is separate from Buy RMB.
                                 </p>
-                                {buyRmbRate != null && buyRmbRate > 0 ? (
+                                {catalogRmbRate != null && catalogRmbRate > 0 ? (
                                     <p className="mt-2 text-xs font-medium text-slate-500">
-                                        Using Buy RMB rate: {formatCorridorBuyRate(buyRmbRate, 'GH', 3)}
+                                        Catalog rate: 1 GH¢ = {catalogRmbRate} RMB
+                                        {' · '}
+                                        <Link href="/admin/products" className="admin-link">
+                                            Change on Products
+                                        </Link>
                                     </p>
-                                ) : buyRateLoading ? (
-                                    <p className="mt-2 text-xs text-slate-500">Loading Buy RMB rate…</p>
+                                ) : catalogRateLoading ? (
+                                    <p className="mt-2 text-xs text-slate-500">Loading catalog rate…</p>
                                 ) : (
-                                    <p className="mt-2 text-xs font-medium text-amber-700">
-                                        Set the Ghana Buy RMB rate before adding products.
-                                    </p>
+                                    <div className="mt-3 space-y-2">
+                                        <p className="text-xs font-medium text-amber-700">
+                                            No catalog rate yet. Set RMB per 1 GH¢ so cedis prices can be calculated.
+                                        </p>
+                                        <div className="flex flex-wrap items-end gap-2">
+                                            <div className="min-w-[9rem] flex-1">
+                                                <label className="mb-1 block text-[11px] font-semibold text-slate-600">
+                                                    1 GH¢ = ? RMB
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.001"
+                                                    min="0.001"
+                                                    value={catalogRateDraft}
+                                                    onChange={(e) => setCatalogRateDraft(e.target.value)}
+                                                    placeholder="e.g. 0.54"
+                                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold"
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={saveCatalogRateInline}
+                                                disabled={savingCatalogRate}
+                                                className="admin-btn-primary text-xs disabled:opacity-60"
+                                            >
+                                                {savingCatalogRate ? 'Saving…' : 'Save rate'}
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
 
@@ -798,9 +877,9 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                             placeholder="Auto"
                                         />
                                     </div>
-                                    {priceRmb && price && parseFloat(priceRmb) > 0 && buyRmbRate != null && buyRmbRate > 0 ? (
+                                    {priceRmb && price && parseFloat(priceRmb) > 0 && catalogRmbRate != null && catalogRmbRate > 0 ? (
                                         <p className="text-sm text-gray-500 mt-2">
-                                            ¥{formatRmbAmount(parseFloat(priceRmb))} ÷ {buyRmbRate} = GH¢{formatGhsAmount(parseFloat(price))}
+                                            ¥{formatRmbAmount(parseFloat(priceRmb))} ÷ {catalogRmbRate} = GH¢{formatGhsAmount(parseFloat(price))}
                                         </p>
                                     ) : null}
                                 </div>

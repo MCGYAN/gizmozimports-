@@ -9,7 +9,7 @@ import {
   type ProductRepriceRow,
 } from '@/lib/product-pricing';
 
-function parseBuyRate(raw: string | null): number | null {
+function parseCatalogRate(raw: string | null): number | null {
   if (!raw) return null;
   const rate = Number(raw);
   return Number.isFinite(rate) && rate > 0 ? rate : null;
@@ -25,32 +25,36 @@ async function loadProductsForReprice(): Promise<ProductRepriceInput[]> {
   return (data || []) as ProductRepriceInput[];
 }
 
-async function loadRepricePreview(buyRmbRate: number): Promise<ProductRepriceRow[]> {
+async function loadRepricePreview(catalogRmbRate: number): Promise<ProductRepriceRow[]> {
   const products = await loadProductsForReprice();
 
   return products
-    .filter((product) => productHasRepriceChanges(product, buyRmbRate))
-    .map((product) => buildProductRepriceRow(product, buyRmbRate))
+    .filter((product) => productHasRepriceChanges(product, catalogRmbRate))
+    .map((product) => buildProductRepriceRow(product, catalogRmbRate))
     .filter((row): row is ProductRepriceRow => row != null);
 }
 
-/** GET ?buy_rmb_rate=0.558 — preview product price changes at a new Ghana buy rate */
+/** GET ?catalog_rmb_rate=0.558 — preview product price changes at a new catalog rate */
 export async function GET(req: Request) {
   const auth = await verifyAuth(req, { requireModule: 'products' });
   if (!auth.authenticated) {
     return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: 401 });
   }
 
-  const buyRmbRate = parseBuyRate(new URL(req.url).searchParams.get('buy_rmb_rate'));
-  if (buyRmbRate == null) {
-    return NextResponse.json({ error: 'Valid buy_rmb_rate is required.' }, { status: 400 });
+  const params = new URL(req.url).searchParams;
+  const catalogRmbRate =
+    parseCatalogRate(params.get('catalog_rmb_rate')) ??
+    parseCatalogRate(params.get('buy_rmb_rate'));
+  if (catalogRmbRate == null) {
+    return NextResponse.json({ error: 'Valid catalog_rmb_rate is required.' }, { status: 400 });
   }
 
   try {
-    const changes = await loadRepricePreview(buyRmbRate);
+    const changes = await loadRepricePreview(catalogRmbRate);
     return NextResponse.json({
       success: true,
-      buy_rmb_rate: buyRmbRate,
+      catalog_rmb_rate: catalogRmbRate,
+      buy_rmb_rate: catalogRmbRate,
       count: changes.length,
       changes,
     });
@@ -60,24 +64,25 @@ export async function GET(req: Request) {
   }
 }
 
-/** POST { buy_rmb_rate, product_ids? } — apply repricing (all changed products or selected ids) */
+/** POST { catalog_rmb_rate, product_ids? } — apply repricing (all changed products or selected ids) */
 export async function POST(req: Request) {
   const auth = await verifyAuth(req, { requireModule: 'products' });
   if (!auth.authenticated) {
     return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: 401 });
   }
 
-  let body: { buy_rmb_rate?: number; product_ids?: string[] };
+  let body: { catalog_rmb_rate?: number; buy_rmb_rate?: number; product_ids?: string[] };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
 
-  const buyRmbRate = Number(body.buy_rmb_rate);
-  if (!(buyRmbRate > 0)) {
-    return NextResponse.json({ error: 'Valid buy_rmb_rate is required.' }, { status: 400 });
+  const catalogRmbRate = Number(body.catalog_rmb_rate ?? body.buy_rmb_rate);
+  if (!(catalogRmbRate > 0)) {
+    return NextResponse.json({ error: 'Valid catalog_rmb_rate is required.' }, { status: 400 });
   }
+  const buyRmbRate = catalogRmbRate;
 
   const selectedIds = Array.isArray(body.product_ids)
     ? body.product_ids.filter((id): id is string => typeof id === 'string' && id.length > 0)
@@ -118,6 +123,7 @@ export async function POST(req: Request) {
           compare_at_price: applied.compare_at_price,
           metadata: {
             ...existingMetadata,
+            last_catalog_rmb_rate: buyRmbRate,
             last_buy_rmb_rate: buyRmbRate,
           },
           updated_at: new Date().toISOString(),
@@ -153,6 +159,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       applied: appliedChanges.length,
+      catalog_rmb_rate: buyRmbRate,
       buy_rmb_rate: buyRmbRate,
       changes: appliedChanges,
     });

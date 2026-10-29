@@ -51,7 +51,7 @@ export default function ProductRepriceModal({
         <div className="border-b border-slate-200 px-5 py-4">
           <h2 className="text-lg font-bold text-brand-primary">Update product prices?</h2>
           <p className="mt-1 text-sm text-slate-600">
-            {changes.length} product{changes.length === 1 ? '' : 's'} would change at buy rate{' '}
+            {changes.length} product{changes.length === 1 ? '' : 's'} would change at catalog rate{' '}
             <span className="font-semibold">{buyRmbRate}</span> RMB per GH¢.
           </p>
         </div>

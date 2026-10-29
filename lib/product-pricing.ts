@@ -1,6 +1,6 @@
 /**
- * Product pricing from supplier RMB using the Ghana Buy RMB rate.
- * buy_rmb_rate = RMB per 1 GH¢ (same as exchange desk).
+ * Product pricing from supplier RMB using the catalog RMB rate
+ * (RMB per 1 GH¢). Independent of the Buy RMB exchange desk.
  */
 
 export function roundGhsToNearestTen(ghs: number): number {
@@ -9,9 +9,9 @@ export function roundGhsToNearestTen(ghs: number): number {
 }
 
 /** Convert supplier RMB to customer GH¢, rounded to nearest 10. */
-export function rmbToGhsPrice(rmb: number, buyRmbRate: number): number {
+export function rmbToGhsPrice(rmb: number, catalogRmbRate: number): number {
   const rmbAmount = Number(rmb);
-  const rate = Number(buyRmbRate);
+  const rate = Number(catalogRmbRate);
   if (!(rmbAmount > 0) || !(rate > 0)) return 0;
   return roundGhsToNearestTen(rmbAmount / rate);
 }
@@ -38,7 +38,8 @@ export function parseVariantBasePriceRmb(metadata: unknown): number | null {
 
 export function parseProductLastBuyRate(metadata: unknown): number | null {
   if (!metadata || typeof metadata !== 'object') return null;
-  const raw = (metadata as Record<string, unknown>).last_buy_rmb_rate;
+  const meta = metadata as Record<string, unknown>;
+  const raw = meta.last_catalog_rmb_rate ?? meta.last_buy_rmb_rate;
   const rate = typeof raw === 'number' ? raw : Number(raw);
   return Number.isFinite(rate) && rate > 0 ? rate : null;
 }

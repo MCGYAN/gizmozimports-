@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import CatalogRmbRateCard from '@/components/admin/CatalogRmbRateCard';
 
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -195,6 +196,8 @@ export default function ProductsPage() {
           </Link>
         </div>
       </div>
+
+      <CatalogRmbRateCard />
 
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-4">
         <div className="admin-card p-3 md:p-4">
