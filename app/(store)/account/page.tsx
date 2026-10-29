@@ -287,18 +287,11 @@ function AccountContent() {
   const securityOptions = [
     {
       icon: 'ri-mail-check-line',
-      title: 'Verify Email',
+      title: 'Email',
       description: user?.email,
       status: user?.email_confirmed_at ? 'verified' : 'unverified',
-      link: '#' // email verified via signup link
+      link: null as string | null,
     },
-    {
-      icon: 'ri-phone-line',
-      title: 'Verify Phone',
-      description: user?.phone || 'No phone added',
-      status: user?.phone_confirmed_at ? 'verified' : 'unverified',
-      link: '/account/verify-phone',
-    }
   ];
 
   return (
@@ -553,36 +546,56 @@ function AccountContent() {
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Security Settings</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {securityOptions.map((option, index) => (
-                        <Link
-                          key={index}
-                          href={option.link}
-                          className="flex items-center justify-between p-5 border border-gray-200 rounded-2xl hover:border-brand-accent hover:shadow-md transition-all group bg-white"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center group-hover:bg-brand-light group-hover:text-brand-primary transition-colors flex-shrink-0">
-                              <i className={`${option.icon} text-xl`}></i>
+                      {securityOptions.map((option, index) => {
+                        const inner = (
+                          <>
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gray-50">
+                                <i className={`${option.icon} text-xl`}></i>
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="truncate font-bold text-gray-900">{option.title}</h3>
+                                <p className="truncate text-sm text-gray-500">{option.description}</p>
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <h3 className="font-bold text-gray-900 truncate">{option.title}</h3>
-                              <p className="text-sm text-gray-500 truncate">{option.description}</p>
+                            <div className="flex flex-shrink-0 items-center gap-3">
+                              {option.status === 'verified' && (
+                                <span className="flex items-center gap-1 rounded-full bg-brand-light px-2 py-1 text-[10px] font-bold text-brand-primary sm:px-3 sm:text-xs">
+                                  <i className="ri-verified-badge-fill"></i>{' '}
+                                  <span className="hidden sm:inline">Verified</span>
+                                </span>
+                              )}
+                              {option.status === 'unverified' && (
+                                <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-700 sm:px-3 sm:text-xs">
+                                  <i className="ri-error-warning-fill"></i>{' '}
+                                  <span className="hidden sm:inline">Unverified</span>
+                                </span>
+                              )}
                             </div>
+                          </>
+                        );
+
+                        if (option.link) {
+                          return (
+                            <Link
+                              key={index}
+                              href={option.link}
+                              className="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:border-brand-accent hover:shadow-md"
+                            >
+                              {inner}
+                            </Link>
+                          );
+                        }
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5"
+                          >
+                            {inner}
                           </div>
-                          <div className="flex items-center gap-3 flex-shrink-0">
-                            {option.status === 'verified' && (
-                              <span className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 bg-brand-light text-brand-primary rounded-full flex items-center gap-1">
-                                <i className="ri-verified-badge-fill"></i> <span className="hidden sm:inline">Verified</span>
-                              </span>
-                            )}
-                            {option.status === 'unverified' && (
-                              <span className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 bg-amber-100 text-amber-700 rounded-full flex items-center gap-1">
-                                <i className="ri-error-warning-fill"></i> <span className="hidden sm:inline">Verify</span>
-                              </span>
-                            )}
-                            <i className="ri-arrow-right-line text-gray-300 group-hover:text-blue-500 transition-colors"></i>
-                          </div>
-                        </Link>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -26,23 +26,6 @@ export function isValidGhPhone(raw: string): boolean {
   return false;
 }
 
-/** Normalize Ghana mobile to E.164 (+233XXXXXXXXX). */
-export function normalizeGhPhoneE164(raw: string): string | null {
-  const digits = String(raw || '').replace(/\D/g, '');
-  if (/^0\d{9}$/.test(digits)) return `+233${digits.slice(1)}`;
-  if (/^233\d{9}$/.test(digits)) return `+${digits}`;
-  if (/^\d{9}$/.test(digits) && digits.startsWith('5')) return `+233${digits}`;
-  const withPlus = String(raw || '').replace(/[\s\-().]/g, '');
-  if (/^\+233\d{9}$/.test(withPlus)) return withPlus;
-  return null;
-}
-
-export function maskPhoneDisplay(phone: string): string {
-  const normalized = normalizeGhPhoneE164(phone) || phone;
-  if (normalized.length < 8) return '***';
-  return `${normalized.slice(0, 5)}****${normalized.slice(-2)}`;
-}
-
 /** Strong password: 8+ chars, upper, lower, number, symbol. */
 export function getPasswordIssues(password: string): string[] {
   const issues: string[] = [];
