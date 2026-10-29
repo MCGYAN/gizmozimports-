@@ -3,11 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import LazyImage from './LazyImage';
-import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCMS } from '@/context/CMSContext';
 import { getImportProductMode, type ImportProductMode } from '@/lib/store-config';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 const COLOR_MAP: Record<string, string> = {
   black: '#000000', white: '#FFFFFF', red: '#EF4444', blue: '#3B82F6',
@@ -74,7 +73,6 @@ export default function ProductCard({
   categorySlug,
   compact = false,
 }: ProductCardProps) {
-  const { addToCart } = useCart();
   const wishlist = useWishlist();
   const { getSetting } = useCMS();
   const [activeColor, setActiveColor] = useState<string | null>(null);
@@ -101,17 +99,9 @@ export default function ProductCard({
     else wishlist?.addToWishlist({ id, name, price, originalPrice, image, rating, reviewCount, badge, inStock, slug });
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq });
-  };
-
   const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-white font-bold transition-colors hover:bg-orange-600 disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
     compact ? 'h-8 rounded-lg px-3 text-[10px] lg:h-9 lg:rounded-xl lg:px-4 lg:text-xs' : 'h-9 rounded-xl px-3 text-[11px] sm:h-10 sm:px-5 sm:text-xs'
   }`;
-  const openProductForOptions =
-    mode === 'vehicles' || mode === 'equipment' || hasVariants;
 
   return (
     <div className={`group flex h-full flex-col overflow-hidden border border-slate-200 bg-white transition-colors hover:border-brand-primary/25 ${compact ? 'max-lg:rounded-xl rounded-2xl' : 'rounded-2xl'}`}>
@@ -232,27 +222,16 @@ export default function ProductCard({
           </div>
 
           <div className="sm:mt-0.5 sm:shrink-0">
-            {openProductForOptions ? (
+            {inStock ? (
               <Link
                 href={`/product/${slug}`}
                 className={cartButtonClass}
-                aria-label="View product options to order"
+                aria-label="Choose quantity and options, then order"
               >
                 Order now
               </Link>
             ) : (
-              <button
-                onClick={(e) => {
-                  // Direct Buy Now functionality
-                  e.preventDefault();
-                  e.stopPropagation();
-                  addToCart({ id, name, price, image, quantity: moq, slug, maxStock, moq }, { openCart: false });
-                  window.location.href = '/checkout';
-                }}
-                disabled={!inStock}
-                className={cartButtonClass}
-                aria-label={moq > 1 ? `Order ${moq} now` : 'Order now'}
-              >
+              <button type="button" disabled className={cartButtonClass} aria-label="Out of stock">
                 Order now
               </button>
             )}
