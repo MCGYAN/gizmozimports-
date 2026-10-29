@@ -28,6 +28,26 @@ interface FraudAnalysis {
   reasons: string[];
 }
 
+function money(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(2) : '0.00';
+}
+
+function formatOrderDate(value: unknown) {
+  if (!value) return '—';
+  const d = new Date(String(value));
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+}
+
+/** Prefer snapshot saved on the line item; fall back to live product gallery. */
+function orderItemImageUrl(item: any): string | null {
+  const fromMeta = item?.metadata?.image || item?.metadata?.image_url;
+  if (typeof fromMeta === 'string' && fromMeta.trim()) return fromMeta.trim();
+  const fromProduct = item?.products?.product_images?.[0]?.url;
+  if (typeof fromProduct === 'string' && fromProduct.trim()) return fromProduct.trim();
+  return null;
+}
+
 export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
   const [order, setOrder] = useState<any>(null);
   const [packages, setPackages] = useState<AccountOrderPackageSummary[]>([]);
@@ -531,7 +551,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
             </div>
             <div className="text-right">
               <p className="font-bold text-lg">{order?.order_number}</p>
-              <p className="text-sm">{order ? new Date(order.created_at).toLocaleDateString() : ''}</p>
+              <p className="text-sm">{order ? formatOrderDate(order.created_at) : ''}</p>
             </div>
           </div>
 
@@ -572,7 +592,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                         : '—'}
                     </td>
                     <td className="py-2 px-2 text-center font-bold">{item.quantity}</td>
-                    <td className="py-2 px-2 text-right">GH¢{item.unit_price?.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right">GH¢{money(item.unit_price)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -592,9 +612,9 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
               {trackingNumber && <p><span className="font-semibold">Tracking #:</span> {trackingNumber}</p>}
             </div>
             <div className="text-right">
-              <p>Subtotal: GH¢{order?.subtotal?.toFixed(2)}</p>
-              <p>Shipping: GH¢{order?.shipping_total?.toFixed(2)}</p>
-              <p className="font-bold text-lg border-t border-gray-400 pt-1 mt-1">Total: GH¢{order?.total?.toFixed(2)}</p>
+              <p>Subtotal: GH¢{money(order?.subtotal)}</p>
+              <p>Shipping: GH¢{money(order?.shipping_total)}</p>
+              <p className="font-bold text-lg border-t border-gray-400 pt-1 mt-1">Total: GH¢{money(order?.total)}</p>
             </div>
           </div>
 
@@ -615,7 +635,9 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
             </Link>
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold text-gray-900 sm:text-2xl">{order?.order_number}</h1>
-              <p className="text-sm text-gray-600">Order placed on {order ? new Date(order.created_at).toLocaleDateString() : ''}</p>
+              <p className="text-sm text-gray-600">
+                Order placed on {order ? formatOrderDate(order.created_at) : ''}
+              </p>
             </div>
           </div>
           <button
@@ -632,7 +654,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
         {order.payment_status === 'awaiting_confirmation' && (
           <div className="lg:hidden mb-6 rounded-2xl border border-amber-300 bg-amber-50 p-4">
             <p className="text-sm font-bold text-amber-900">
-              Customer says they paid GH¢{order.total?.toFixed(2)}.
+              Customer says they paid GH¢{money(order.total)}.
             </p>
             <p className="mt-1 text-sm text-amber-700">
               Check your bank or MoMo, then confirm below.
@@ -686,12 +708,14 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
               </div>
 
               <div className="space-y-4">
-                {order.order_items?.map((item: any) => (
+                {order.order_items?.map((item: any) => {
+                  const imageUrl = orderItemImageUrl(item);
+                  return (
                   <div key={item.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
                     <div className="w-20 h-20 bg-white rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center relative">
-                      {item.products?.product_images?.[0]?.url ? (
+                      {imageUrl ? (
                         <img
-                          src={item.products.product_images[0].url}
+                          src={imageUrl}
                           alt={item.product_name}
                           className="w-full h-full object-cover"
                         />
@@ -725,30 +749,31 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                         )}
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-900 mb-1">GH¢{item.unit_price?.toFixed(2)}</p>
+                      <p className="font-semibold text-gray-900 mb-1">GH¢{money(item.unit_price)}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal</span>
-                  <span>GH¢{order.subtotal?.toFixed(2)}</span>
+                  <span>GH¢{money(order.subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Shipping</span>
-                  <span>GH¢{order.shipping_total?.toFixed(2)}</span>
+                  <span>GH¢{money(order.shipping_total)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Tax</span>
-                  <span>GH¢{order.tax_total?.toFixed(2)}</span>
+                  <span>GH¢{money(order.tax_total)}</span>
                 </div>
-                {order.discount_total > 0 && (
+                {Number(order.discount_total) > 0 && (
                   <div className="flex justify-between text-brand-primary font-semibold">
                     <span>Discount</span>
-                    <span>-GH¢{order.discount_total?.toFixed(2)}</span>
+                    <span>-GH¢{money(order.discount_total)}</span>
                   </div>
                 )}
                 {(order.metadata?.balance_due > 0 || order.metadata?.credit_due > 0) && (
@@ -763,7 +788,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                 )}
                 <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-200">
                   <span>Total</span>
-                  <span>GH¢{order.total?.toFixed(2)}</span>
+                  <span>GH¢{money(order.total)}</span>
                 </div>
               </div>
 
