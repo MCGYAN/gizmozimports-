@@ -18,6 +18,7 @@ import {
   buildAvailabilityWhatsAppText,
   buildProductInquiryWhatsAppText,
   getProductShareUrl,
+  getPublicStoreUrl,
   parseProductCommerce,
   resolveDirectPayment,
 } from '@/lib/product-commerce';
@@ -343,7 +344,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
     category: product.category
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = getPublicStoreUrl();
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: baseUrl },
     { name: 'Shop', url: `${baseUrl}/shop` },

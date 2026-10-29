@@ -57,9 +57,21 @@ export function resolveDirectPayment(
   return importMode === 'gadgets' || importMode === 'default';
 }
 
+const LIVE_SITE_URL = 'https://www.gizmozimports.com';
+
+/** Live storefront origin for shares / schema — never localhost. */
+export function getPublicStoreUrl(): string {
+  const raw = (process.env.NEXT_PUBLIC_APP_URL || LIVE_SITE_URL).replace(/\/$/, '');
+  if (!raw || /localhost|127\.0\.0\.1/i.test(raw)) return LIVE_SITE_URL;
+  return raw;
+}
+
+/** Public product link for WhatsApp / social share — never localhost. */
 export function getProductShareUrl(slug: string): string {
-  const base = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
-  return `${base}/product/${slug}`;
+  const cleanSlug = String(slug || '')
+    .replace(/^\/+/, '')
+    .replace(/^product\//, '');
+  return `${getPublicStoreUrl()}/product/${cleanSlug}`;
 }
 
 export function getImportTypeLabel(value: string): string {
