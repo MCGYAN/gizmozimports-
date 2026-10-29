@@ -267,28 +267,28 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      title: 'Add Product',
-      icon: 'ri-add-line',
-      tone: 'accent' as AdminStatTone,
-      link: '/admin/products/new',
+      title: 'Manage orders',
+      icon: 'ri-file-list-line',
+      tone: 'primary' as AdminStatTone,
+      link: '/admin/orders',
     },
     {
-      title: 'Open POS',
-      icon: 'ri-computer-line',
-      tone: 'primary' as AdminStatTone,
-      link: '/admin/pos',
+      title: 'Invoices',
+      icon: 'ri-bill-line',
+      tone: 'accent' as AdminStatTone,
+      link: '/admin/invoices',
     },
     {
       title: 'Buy RMB desk',
       icon: 'ri-exchange-dollar-line',
-      tone: 'accent' as AdminStatTone,
+      tone: 'primary' as AdminStatTone,
       link: '/admin/exchange',
     },
     {
-      title: 'Manage Orders',
-      icon: 'ri-file-list-line',
-      tone: 'primary' as AdminStatTone,
-      link: '/admin/orders',
+      title: 'Delivery requests',
+      icon: 'ri-truck-line',
+      tone: 'accent' as AdminStatTone,
+      link: '/admin/deliveries',
     },
   ];
 
@@ -317,244 +317,348 @@ export default function AdminDashboard() {
     );
   }
 
+  const chartHasRevenue = chartData.some((d) => Number(d.revenue) > 0);
+
   return (
-    <div className="mx-auto max-w-7xl">
-        <div className="mb-5 md:mb-8">
-          <h1 className="font-heading text-2xl font-bold text-brand-primary md:text-3xl">Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-600 md:text-base">
-            Shop sales stay separate from Buy RMB desk volume.
+    <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-brand-primary md:text-3xl">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Shop sales overview. Buy RMB stays separate below.
           </p>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/products/new" className="admin-btn-primary text-xs md:text-sm">
+            <i className="ri-add-line mr-1.5" />
+            Add product
+          </Link>
+          <Link href="/admin/pos" className="admin-btn-secondary text-xs md:text-sm">
+            Open POS
+          </Link>
+        </div>
+      </header>
 
-        <div className="mb-5 grid grid-cols-2 gap-3 md:mb-8 md:gap-6 lg:grid-cols-4">
+      {/* Shop KPIs */}
+      <section>
+        <p className="admin-section-label">Shop</p>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           {stats.map((stat) => (
-            <div key={stat.title} className="admin-card">
-              <div className="mb-2 flex items-center justify-between md:mb-4">
+            <div key={stat.title} className="admin-kpi">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-xs font-medium text-slate-500 md:text-sm">{stat.title}</p>
                 <div className={stat.tone === 'accent' ? 'admin-stat-icon-accent' : 'admin-stat-icon-primary'}>
-                  <i className={`${stat.icon} text-2xl`} />
+                  <i className={`${stat.icon} text-lg`} />
                 </div>
-                <span className="text-[11px] font-semibold text-brand-accent md:text-sm">
-                  {stat.change}
-                </span>
               </div>
-              <h3 className="mb-0.5 font-heading text-lg font-bold leading-tight text-brand-primary md:mb-1 md:text-2xl">{stat.value}</h3>
-              <p className="text-[11px] leading-snug text-slate-600 md:text-sm">{stat.title}</p>
+              <div>
+                <p className="font-heading text-xl font-bold leading-none text-brand-primary md:text-2xl">
+                  {stat.value}
+                </p>
+                <p className="mt-1.5 text-[11px] text-slate-400 md:text-xs">{stat.change}</p>
+              </div>
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="admin-card mb-5 md:mb-8">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="font-heading text-lg font-bold text-brand-primary md:text-xl">Buy RMB desk</h2>
-              <p className="text-sm text-slate-500">
-                Exchange volume only. Not counted in shop revenue.
-              </p>
+      {/* Buy RMB — secondary strip */}
+      <section className="overflow-hidden rounded-2xl border border-brand-primary/10 bg-brand-primary/[0.03]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-primary/10 px-4 py-3 md:px-5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
+                <i className="ri-exchange-dollar-line text-sm" />
+              </span>
+              <h2 className="font-heading text-sm font-bold text-brand-primary md:text-base">Buy RMB desk</h2>
             </div>
-            <Link href="/admin/exchange" className="admin-link text-sm font-semibold whitespace-nowrap">
-              Open desk
-            </Link>
+            <p className="mt-0.5 pl-9 text-[11px] text-slate-500 md:text-xs">
+              Exchange only · not in shop revenue
+            </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <div className="rounded-xl bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Open deals</p>
-              <p className="mt-1 font-heading text-xl font-bold text-brand-primary">{rmbDesk.openDeals}</p>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Completed</p>
-              <p className="mt-1 font-heading text-xl font-bold text-brand-primary">{rmbDesk.completedDeals}</p>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cedis volume</p>
-              <p className="mt-1 font-heading text-xl font-bold text-brand-primary">
-                GH¢{rmbDesk.volumeGhs.toFixed(2)}
-              </p>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">RMB sent / locked</p>
-              <p className="mt-1 font-heading text-xl font-bold text-brand-primary">
-                {rmbDesk.volumeRmb.toFixed(2)} RMB
-              </p>
-            </div>
-          </div>
+          <Link
+            href="/admin/exchange"
+            className="inline-flex items-center gap-1 rounded-lg bg-white/70 px-3 py-1.5 text-xs font-semibold text-brand-primary shadow-sm transition-colors hover:text-brand-accent"
+          >
+            Open desk
+            <i className="ri-arrow-right-line" />
+          </Link>
         </div>
-
-        {/* Shop revenue chart & Quick Actions */}
-        <div className="mb-5 grid gap-4 md:mb-8 md:gap-6 lg:grid-cols-3">
-          <div className="admin-card lg:col-span-2">
-            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between md:mb-4">
-              <h2 className="font-heading text-lg font-bold text-brand-primary md:text-xl">Shop revenue trend</h2>
-              <span className="text-sm font-medium text-slate-500">Last 7 days</span>
+        <div className="grid grid-cols-2 divide-x divide-y divide-brand-primary/10 lg:grid-cols-4 lg:divide-y-0">
+          {[
+            { label: 'Open deals', value: String(rmbDesk.openDeals) },
+            { label: 'Completed', value: String(rmbDesk.completedDeals) },
+            { label: 'Cedis volume', value: `GH¢${rmbDesk.volumeGhs.toFixed(2)}` },
+            { label: 'RMB sent / locked', value: `${rmbDesk.volumeRmb.toFixed(2)} RMB` },
+          ].map((cell) => (
+            <div key={cell.label} className="px-4 py-3.5 md:px-5">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{cell.label}</p>
+              <p className="mt-1 font-heading text-base font-bold text-brand-primary md:text-lg">{cell.value}</p>
             </div>
-            <ChartContainer>
-              <AreaChart data={chartData} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
+          ))}
+        </div>
+      </section>
+
+      {/* Chart + Actions */}
+      <section className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+        <div className="admin-card lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <h2 className="font-heading text-base font-bold text-brand-primary md:text-lg">Shop revenue</h2>
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+              Last 7 days
+            </span>
+          </div>
+          {chartHasRevenue ? (
+            <ChartContainer className="h-48 w-full min-w-0 md:h-64">
+              <AreaChart data={chartData} margin={{ top: 8, right: 4, left: -12, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={BRAND_ACCENT} stopOpacity={0.2} />
+                    <stop offset="5%" stopColor={BRAND_ACCENT} stopOpacity={0.22} />
                     <stop offset="95%" stopColor={BRAND_ACCENT} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(30,58,138,0.06)" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={8} interval="preserveStartEnd" />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(value) => `GH¢${value}`} width={42} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(30,58,138,0.08)', backdropFilter: 'blur(12px)' }}
-                  formatter={(value) => [`GH¢${(value as number)?.toFixed(2) ?? '0.00'}`, 'Shop revenue']}
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  dy={8}
+                  interval="preserveStartEnd"
                 />
-                <Area type="monotone" dataKey="revenue" stroke={BRAND_ACCENT} strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tickFormatter={(value) => `GH¢${value}`}
+                  width={48}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(255,255,255,0.96)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(30,58,138,0.08)',
+                    boxShadow: '0 8px 24px rgba(30,58,138,0.08)',
+                  }}
+                  formatter={(value) => [`GH¢${(value as number)?.toFixed(2) ?? '0.00'}`, 'Revenue']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke={BRAND_ACCENT}
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorRevenue)"
+                />
               </AreaChart>
             </ChartContainer>
-          </div>
-
-          <div className="admin-card">
-            <h2 className="mb-3 font-heading text-lg font-bold text-brand-primary md:mb-4 md:text-xl">Quick Actions</h2>
-            <div className="grid grid-cols-1 gap-2 md:space-y-3 md:gap-0">
-              {quickActions.map((action) => (
-                <Link key={action.link} href={action.link} className="admin-quick-action group min-h-[44px]">
-                  <div className="flex min-w-0 items-center font-medium">
-                    <span className={`mr-2.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors md:mr-3 ${action.tone === 'accent' ? 'bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent group-hover:text-white' : 'bg-brand-primary/10 text-brand-primary group-hover:bg-brand-primary group-hover:text-white'}`}>
-                      <i className={action.icon} />
-                    </span>
-                    <span className="truncate text-sm md:text-base">{action.title}</span>
-                  </div>
-                  <i className="ri-arrow-right-s-line shrink-0 text-brand-accent md:hidden" />
-                  <i className="ri-arrow-right-line hidden shrink-0 text-brand-accent md:inline" />
-                </Link>
-              ))}
+          ) : (
+            <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 md:h-64">
+              <i className="ri-line-chart-line mb-2 text-2xl text-slate-300" />
+              <p className="text-sm font-medium text-slate-500">No paid shop sales yet</p>
+              <p className="mt-0.5 text-xs text-slate-400">Trend appears once orders are marked paid</p>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="mb-5 grid gap-4 md:mb-8 md:gap-6 lg:grid-cols-3">
-          <div className="admin-card overflow-hidden lg:col-span-2">
-            <div className="mb-4 flex items-center justify-between md:mb-6">
-              <h2 className="font-heading text-lg font-bold text-brand-primary md:text-xl">Recent Orders</h2>
-              <Link href="/admin/orders" className="admin-link text-xs whitespace-nowrap md:text-sm">
-                View All <i className="ri-arrow-right-line ml-0.5 md:ml-1" />
+        <div className="admin-card">
+          <h2 className="mb-3 font-heading text-base font-bold text-brand-primary md:text-lg">Quick actions</h2>
+          <div className="divide-y divide-slate-100">
+            {quickActions.map((action) => (
+              <Link key={action.link} href={action.link} className="admin-quick-action group">
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                    action.tone === 'accent'
+                      ? 'bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent group-hover:text-white'
+                      : 'bg-brand-primary/10 text-brand-primary group-hover:bg-brand-primary group-hover:text-white'
+                  }`}
+                >
+                  <i className={action.icon} />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{action.title}</span>
+                <i className="ri-arrow-right-s-line text-slate-300 transition-colors group-hover:text-brand-accent" />
               </Link>
-            </div>
-
-            {recentOrders.length === 0 ? (
-              <p className="py-4 text-center text-sm text-slate-500">No recent orders.</p>
-            ) : (
-              <>
-                {/* Mobile — compact cards */}
-                <div className="space-y-2.5 md:hidden">
-                  {recentOrders.map((order) => (
-                    <Link
-                      key={order.id}
-                      href={`/admin/orders/${order.id}`}
-                      className="block rounded-xl liquid-glass-well p-3 active:scale-[0.99]"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-brand-primary">{order.displayId}</p>
-                          <p className="mt-0.5 truncate text-xs font-medium text-slate-700">{order.customer}</p>
-                          <p className="text-[11px] text-slate-500">{order.date}</p>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className="text-sm font-bold text-brand-primary">GH¢{order.total.toFixed(2)}</p>
-                          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}>
-                            {order.status === 'shipped' ? 'Packaged' : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Desktop — table */}
-                <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full">
-                    <thead className="border-b border-white/50 bg-brand-primary/[0.04]">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-brand-primary">Order ID</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-brand-primary">Customer</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-brand-primary">Date</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-brand-primary">Total</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-brand-primary">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentOrders.map((order) => (
-                        <tr key={order.id} className="border-b border-white/40 transition-colors hover:bg-brand-primary/[0.03]">
-                          <td className="px-4 py-4">
-                            <Link href={`/admin/orders/${order.id}`} className="admin-link whitespace-nowrap font-medium">
-                              {order.displayId}
-                            </Link>
-                          </td>
-                          <td className="px-4 py-4">
-                            <p className="whitespace-nowrap font-medium text-brand-primary">{order.customer}</p>
-                            <p className="text-sm text-slate-500">{order.email}</p>
-                          </td>
-                          <td className="whitespace-nowrap px-4 py-4 text-slate-700">{order.date}</td>
-                          <td className="whitespace-nowrap px-4 py-4 font-semibold text-brand-primary">GH¢{order.total.toFixed(2)}</td>
-                          <td className="px-4 py-4">
-                            <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}>
-                              {order.status === 'shipped' ? 'Packaged' : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="space-y-4 md:space-y-6">
-            <div className="admin-card">
-              <h2 className="mb-3 font-heading text-lg font-bold text-brand-primary md:mb-4 md:text-xl">Low Stock Alert</h2>
-              {lowStockProducts.length === 0 ? (
-                <p className="text-sm text-slate-500">Inventory looks good!</p>
-              ) : (
-                <div className="space-y-2 md:space-y-3">
-                  {lowStockProducts.map((product, index) => (
-                    <div key={index} className="flex items-center justify-between gap-2 rounded-xl liquid-glass-well p-2.5 md:p-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-brand-primary md:text-sm">{product.name}</p>
-                        <p className="mt-0.5 text-[11px] text-slate-600 md:text-xs">Stock: {product.stock}</p>
-                      </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold md:text-xs ${product.status === 'critical' ? 'bg-red-100 text-red-700' : 'bg-brand-accent/15 text-brand-accent'}`}>
-                        {product.status === 'critical' ? 'Critical' : 'Low'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <Link href="/admin/products?filter=low-stock" className="admin-link mt-3 block text-center text-xs whitespace-nowrap md:mt-4 md:text-sm">
-                View All Products <i className="ri-arrow-right-line ml-0.5 md:ml-1" />
-              </Link>
-            </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        <div className="admin-card overflow-hidden">
-          <div className="mb-4 flex items-center justify-between md:mb-6">
-            <h2 className="font-heading text-lg font-bold text-brand-primary md:text-xl">Products</h2>
-            <Link href="/admin/products" className="admin-link text-xs whitespace-nowrap md:text-sm">
-              View All <i className="ri-arrow-right-line ml-0.5 md:ml-1" />
+      {/* Orders + stock */}
+      <section className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+        <div className="admin-card overflow-hidden lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-brand-primary md:text-lg">Recent orders</h2>
+            <Link href="/admin/orders" className="admin-link text-xs md:text-sm">
+              View all <i className="ri-arrow-right-line ml-0.5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-2 md:gap-4 lg:grid-cols-4">
+          {recentOrders.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center">
+              <p className="text-sm text-slate-500">No paid orders yet</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2 md:hidden">
+                {recentOrders.map((order) => (
+                  <Link
+                    key={order.id}
+                    href={`/admin/orders/${order.id}`}
+                    className="block rounded-xl border border-slate-100 bg-white/60 p-3 active:scale-[0.99]"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-brand-primary">{order.displayId}</p>
+                        <p className="mt-0.5 truncate text-xs font-medium text-slate-700">{order.customer}</p>
+                        <p className="text-[11px] text-slate-400">{order.date}</p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-sm font-bold text-brand-primary">GH¢{order.total.toFixed(2)}</p>
+                        <span
+                          className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}
+                        >
+                          {order.status === 'shipped'
+                            ? 'Packaged'
+                            : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      <th className="pb-3 pr-4 font-semibold">Order</th>
+                      <th className="pb-3 pr-4 font-semibold">Customer</th>
+                      <th className="pb-3 pr-4 font-semibold">Date</th>
+                      <th className="pb-3 pr-4 font-semibold">Total</th>
+                      <th className="pb-3 font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr
+                        key={order.id}
+                        className="border-b border-slate-50 transition-colors last:border-0 hover:bg-brand-primary/[0.02]"
+                      >
+                        <td className="py-3.5 pr-4">
+                          <Link href={`/admin/orders/${order.id}`} className="admin-link whitespace-nowrap text-sm font-medium">
+                            {order.displayId}
+                          </Link>
+                        </td>
+                        <td className="py-3.5 pr-4">
+                          <p className="whitespace-nowrap text-sm font-medium text-brand-primary">{order.customer}</p>
+                          <p className="text-xs text-slate-400">{order.email}</p>
+                        </td>
+                        <td className="whitespace-nowrap py-3.5 pr-4 text-sm text-slate-600">{order.date}</td>
+                        <td className="whitespace-nowrap py-3.5 pr-4 text-sm font-semibold text-brand-primary">
+                          GH¢{order.total.toFixed(2)}
+                        </td>
+                        <td className="py-3.5">
+                          <span
+                            className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}
+                          >
+                            {order.status === 'shipped'
+                              ? 'Packaged'
+                              : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="admin-card">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-brand-primary md:text-lg">Low stock</h2>
+            <Link href="/admin/products?filter=low-stock" className="admin-link text-xs">
+              All products
+            </Link>
+          </div>
+          {lowStockProducts.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-emerald-200/80 bg-emerald-50/40 px-3 py-8 text-center">
+              <i className="ri-checkbox-circle-line mb-1 text-xl text-emerald-500" />
+              <p className="text-sm text-emerald-800/80">Inventory looks good</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {lowStockProducts.map((product, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-100 bg-white/50 px-3 py-2.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-brand-primary">{product.name}</p>
+                    <p className="text-[11px] text-slate-400">Stock: {product.stock}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                      product.status === 'critical'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-brand-accent/15 text-brand-accent'
+                    }`}
+                  >
+                    {product.status === 'critical' ? 'Critical' : 'Low'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Product snapshot */}
+      <section className="admin-card overflow-hidden">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-heading text-base font-bold text-brand-primary md:text-lg">Products</h2>
+          <Link href="/admin/products" className="admin-link text-xs md:text-sm">
+            View all <i className="ri-arrow-right-line ml-0.5" />
+          </Link>
+        </div>
+
+        {topProducts.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center">
+            <p className="text-sm text-slate-500">No products yet</p>
+            <Link href="/admin/products/new" className="admin-link mt-2 inline-block text-sm">
+              Add your first product
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             {topProducts.map((product) => (
-              <div key={product.id} className="admin-product-tile liquid-glass-card overflow-hidden transition-shadow hover:shadow-[0_12px_32px_rgba(30,58,138,0.08)] md:p-4">
-                <div className="mb-2 aspect-square overflow-hidden rounded-lg liquid-glass-well md:mb-3">
+              <div
+                key={product.id}
+                className="admin-product-tile overflow-hidden rounded-xl border border-slate-100 bg-white/50 p-2.5 transition-shadow hover:shadow-[0_8px_24px_rgba(30,58,138,0.06)] md:p-3"
+              >
+                <div className="mb-2 aspect-square overflow-hidden rounded-lg bg-slate-100">
                   <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
                 </div>
-                <h3 className="line-clamp-2 text-[11px] font-semibold leading-snug text-brand-primary md:mb-2 md:text-base">{product.name}</h3>
-                <div className="mt-2 flex items-center justify-between gap-1 border-t border-white/50 pt-2 md:mt-3 md:pt-3">
-                  <span className="text-[10px] text-slate-600 md:text-sm">Stock: {product.stock}</span>
-                  <Link href={`/admin/products/${product.id}`} className="admin-link text-[10px] font-semibold whitespace-nowrap md:text-sm">
-                    Edit <i className="ri-arrow-right-line ml-0.5" />
+                <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-brand-primary md:text-sm">
+                  {product.name}
+                </h3>
+                <div className="mt-2 flex items-center justify-between gap-1 border-t border-slate-100 pt-2">
+                  <span className="text-[10px] text-slate-500 md:text-xs">Stock: {product.stock}</span>
+                  <Link
+                    href={`/admin/products/${product.id}`}
+                    className="admin-link text-[10px] font-semibold md:text-xs"
+                  >
+                    Edit
                   </Link>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
+      </section>
     </div>
   );
 }

@@ -1018,15 +1018,23 @@ img {
     }
 
     .admin-stat-icon-primary {
-      @apply flex h-12 w-12 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary;
+      @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary;
     }
 
     .admin-stat-icon-accent {
-      @apply flex h-12 w-12 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent;
+      @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-accent/10 text-brand-accent;
+    }
+
+    .admin-kpi {
+      @apply liquid-glass-card flex flex-col gap-3 p-4 transition-shadow duration-300 hover:shadow-[0_12px_40px_rgba(30,58,138,0.08)] md:p-5;
+    }
+
+    .admin-section-label {
+      @apply mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 md:mb-4;
     }
 
     .admin-quick-action {
-      @apply flex items-center justify-between rounded-xl liquid-glass-well p-4 text-brand-primary transition-all hover:border-brand-accent/25 hover:bg-brand-accent/5 hover:text-brand-accent;
+      @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-brand-primary transition-colors hover:bg-brand-primary/[0.04] hover:text-brand-accent;
     }
 
     .admin-nav-icon-idle {
@@ -1082,18 +1090,22 @@ img {
         @apply rounded-xl p-4;
       }
 
+      .admin-kpi {
+        @apply rounded-xl p-3.5;
+      }
+
       .admin-stat-icon-primary,
       .admin-stat-icon-accent {
-        @apply h-9 w-9 rounded-lg;
+        @apply h-8 w-8 rounded-md;
       }
 
       .admin-stat-icon-primary i,
       .admin-stat-icon-accent i {
-        @apply text-lg;
+        @apply text-base;
       }
 
       .admin-quick-action {
-        @apply p-3 text-sm;
+        @apply px-2 py-2.5 text-sm;
       }
 
       .admin-product-tile {
