@@ -290,14 +290,14 @@ function AccountContent() {
       title: 'Verify Email',
       description: user?.email,
       status: user?.email_confirmed_at ? 'verified' : 'unverified',
-      link: '#' // /account/verify-email
+      link: '#' // email verified via signup link
     },
     {
       icon: 'ri-phone-line',
       title: 'Verify Phone',
       description: user?.phone || 'No phone added',
       status: user?.phone_confirmed_at ? 'verified' : 'unverified',
-      link: '#' // /account/verify-phone
+      link: '/account/verify-phone',
     }
   ];
 
