@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { formatStoreMoney } from '@/lib/currency';
 import { downloadElementAsPdf, preloadPdfLibraries } from '@/lib/download-pdf';
@@ -431,15 +432,15 @@ export default function FinancialDocuments({
     {
       key: 'invoices',
       title: 'Bills to pay',
-      hint: 'Open View to see the bill. After you transfer, tap I\'ve paid on shipping bills.',
-      empty: 'Nothing to pay right now.',
+      hint: 'Shipping bills and special invoices from Gizmoz. Open View, pay, then tap I’ve paid on shipping bills.',
+      empty: 'No shipping or special bills yet. Product orders to pay are under Order status.',
       rows: invoices,
     },
     {
       key: 'receipts',
       title: 'Payment receipts',
-      hint: 'Proof that Gizmoz Trades received your money. Keep them safe.',
-      empty: 'No payments confirmed yet.',
+      hint: 'Proof that Gizmoz Trades received your money. These appear after payment is confirmed.',
+      empty: 'No receipts yet. After Gizmoz confirms your payment, it will show here.',
       rows: receipts,
     },
   ];
@@ -551,8 +552,15 @@ export default function FinancialDocuments({
       <div>
         <h2 className="text-2xl font-bold text-brand-primary">Invoices and receipts</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Every paper for your product orders, Buy RMB and shipping. Tap View to open a bill, then
-          I&apos;ve paid after you transfer shipping money.
+          Official bills and payment proof. Your product order to pay is under{' '}
+          <Link
+            href="/account?tab=status"
+            className="font-semibold text-brand-primary underline-offset-2 hover:underline"
+          >
+            Order status
+          </Link>
+          . Receipts show here after Gizmoz confirms your money. Shipping bills also land here when
+          they are ready.
         </p>
       </div>
 
