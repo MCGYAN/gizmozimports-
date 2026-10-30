@@ -77,13 +77,13 @@ export const SEO = {
     ],
   },
 
-  /** `/og/flyer.png` — Soft Ocean flyer (logo on top, copy below). New path busts share caches. */
-  defaultOgImagePath: `${SITE_URL}/og/flyer.png`,
+  /** `/og/flyer.jpg` — Soft Ocean flyer (logo on top, copy below). JPEG for WhatsApp large banner support. */
+  defaultOgImagePath: `${SITE_URL}/og/flyer.jpg`,
   ogImages: {
-    default: '/og/flyer.png',
-    twitter: '/og/twitter.png',
-    square: '/og/square.png',
-    buyRmb: '/og/buy-rmb.png',
+    default: '/og/flyer.jpg',
+    twitter: '/og/twitter.jpg',
+    square: '/og/square.jpg',
+    buyRmb: '/og/buy-rmb.jpg',
     dynamic: '/opengraph-image',
   },
   logoUrl: absoluteSiteLogoUrl(SITE_URL),

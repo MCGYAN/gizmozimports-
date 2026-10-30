@@ -98,7 +98,7 @@ async function composeFlyer(filename, opts) {
       { input: flyerSvg({ width, height, ...opts }), left: 0, top: 0 },
       { input: logo, left: logoLeft, top: logoTop },
     ])
-    .png({ compressionLevel: 9 })
+    .jpeg({ quality: 95, chromaSubsampling: '4:4:4' })
     .toBuffer();
 
   writeFileSync(join(OUT, filename), image);
@@ -121,7 +121,7 @@ async function composeSquare(filename, opts) {
       { input: flyerSvg({ width: size, height: size, ...opts }), left: 0, top: 0 },
       { input: logo, left: logoLeft, top: 80 },
     ])
-    .png({ compressionLevel: 9 })
+    .jpeg({ quality: 95, chromaSubsampling: '4:4:4' })
     .toBuffer();
 
   writeFileSync(join(OUT, filename), image);
@@ -137,20 +137,20 @@ const HOME = {
 async function main() {
   mkdirSync(OUT, { recursive: true });
 
-  await composeFlyer('flyer.png', HOME);
-  await composeFlyer('preview.png', HOME);
-  await composeFlyer('share.png', HOME);
-  await composeFlyer('twitter.png', HOME);
-  await composeFlyer('default.png', HOME);
+  await composeFlyer('flyer.jpg', HOME);
+  await composeFlyer('preview.jpg', HOME);
+  await composeFlyer('share.jpg', HOME);
+  await composeFlyer('twitter.jpg', HOME);
+  await composeFlyer('default.jpg', HOME);
 
-  await composeFlyer('buy-rmb.png', {
+  await composeFlyer('buy-rmb.jpg', {
     line1: 'Buy RMB',
     line2: 'with Ghana Cedis',
     subline: 'Pay China suppliers · Clear invoice · Secure payment',
     accentHeadline: true,
   });
 
-  await composeSquare('square.png', HOME);
+  await composeSquare('square.jpg', HOME);
 }
 
 main().catch((err) => {
