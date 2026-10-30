@@ -114,14 +114,14 @@ export const SEO = {
       description: DEFAULT_DESCRIPTION,
     },
     shop: {
-      title: 'Shop China goods for Ghana',
+      title: 'Shop from China',
       description:
-        'See phones, gadgets, home items, and more from China for Ghana. Check the price, order, and track with Gizmoz Trades.',
+        'See phones, gadgets, home items, and more from China. Check the price, order, and we bring it to Ghana with Gizmoz Trades.',
     },
     categories: {
       title: 'Shop by type',
       description:
-        'Pick a product group — phones, home items, tools, and more — then shop China goods for Ghana with Gizmoz Trades.',
+        'Pick a product group — phones, home items, tools, and more — then shop from China with Gizmoz Trades.',
     },
     about: {
       title: 'About Gizmoz Trades',

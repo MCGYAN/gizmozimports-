@@ -207,7 +207,7 @@ function ShopContent({
   return (
     <main className="store-page">
       <PageHero
-        title="Shop China goods for Ghana"
+        title="Shop from China"
         subtitle="See the price. Order what you want. We bring it to Ghana."
       />
 
