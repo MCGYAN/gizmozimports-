@@ -5,7 +5,6 @@ import Link from 'next/link';
 import LazyImage from './LazyImage';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCMS } from '@/context/CMSContext';
-import { getImportProductMode, type ImportProductMode } from '@/lib/store-config';
 import { Heart } from 'lucide-react';
 
 const COLOR_MAP: Record<string, string> = {
@@ -85,12 +84,9 @@ export default function ProductCard({
   const discount = originalPrice ? Math.round((1 - displayPrice / originalPrice) * 100) : 0;
   const isWishlisted = wishlist?.isInWishlist(id) ?? false;
   const MAX_SWATCHES = 4;
-  const mode: ImportProductMode = getImportProductMode(categoryName, categorySlug);
-
   const formatPrice = (val: number) => `${sym}${val.toFixed(2)}`;
 
   const priceLabel = () => {
-    if (mode === 'equipment') return 'Request quote';
     if (hasVariants && minVariantPrice) return formatPrice(minVariantPrice);
     return formatPrice(price);
   };

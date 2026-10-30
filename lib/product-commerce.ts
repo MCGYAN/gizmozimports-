@@ -54,7 +54,9 @@ export function resolveDirectPayment(
 ): boolean {
   if (directPayment === true) return true;
   if (directPayment === false) return false;
-  return importMode === 'gadgets' || importMode === 'default';
+  // Equipment (lab gear, tools, etc.) sells with a listed price like gadgets.
+  // Vehicles stay message-first unless a product opts into direct payment.
+  return importMode === 'gadgets' || importMode === 'equipment' || importMode === 'default';
 }
 
 const LIVE_SITE_URL = 'https://www.gizmozimports.com';

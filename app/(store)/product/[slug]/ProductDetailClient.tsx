@@ -806,9 +806,9 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   <div className="mb-8 rounded-xl border border-brand-accent/25 bg-brand-accent/10 px-4 py-3 text-sm text-brand-primary flex items-start gap-3">
                     <Info className="w-5 h-5 shrink-0 text-brand-accent mt-0.5" />
                     <p>
-                      {importMode === 'vehicles' && 'Want this vehicle? Message us to reserve it. We walk you through every step.'}
-                      {importMode === 'equipment' && 'Need a quote first? We confirm specs and full cost before you pay.'}
-                      {importMode !== 'vehicles' && importMode !== 'equipment' && 'Online checkout is not enabled for this item. Chat with us or request availability first.'}
+                      {importMode === 'vehicles'
+                        ? 'Want this vehicle? Message us to reserve it. We walk you through every step.'
+                        : 'Online checkout is not enabled for this item. Chat with us or request availability first.'}
                     </p>
                   </div>
                 )}

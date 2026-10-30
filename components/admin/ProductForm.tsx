@@ -1055,7 +1055,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     </span>
                                     {!isEditMode && !directPaymentEnabled && (
                                         <span className="mt-2 block text-xs text-gray-500">
-                                            Leave unchecked for high-value imports (vehicles, equipment) or quote-first items.
+                                            Leave unchecked for high-value imports (for example vehicles) that should stay message-first.
                                         </span>
                                     )}
                                 </div>
