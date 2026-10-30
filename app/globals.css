@@ -1175,8 +1175,7 @@ img {
 }
 
 .hero-mesh {
-  background:
-    linear-gradient(155deg, #0A5578 0%, #0C4A6E 42%, #0E5F8A 72%, #1270A0 100%);
+  background: #0C4A6E;
   position: relative;
   overflow: hidden;
 }
@@ -1184,30 +1183,11 @@ img {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 70% 55% at 92% 8%, rgba(140, 207, 255, 0.38), transparent 58%),
-    radial-gradient(ellipse 55% 45% at 8% 88%, rgba(234, 246, 255, 0.14), transparent 52%),
-    radial-gradient(ellipse 40% 35% at 48% 42%, rgba(140, 207, 255, 0.08), transparent 60%);
+  background: linear-gradient(120deg, rgba(140, 207, 255, 0.12) 0%, transparent 42%);
   pointer-events: none;
 }
 .hero-mesh::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none;
-  mix-blend-mode: soft-light;
-  opacity: 0.7;
-}
-
-.hero-glass-chip {
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow:
-    0 8px 28px -10px rgba(8, 58, 87, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  display: none;
 }
 
 .hero-glow {
