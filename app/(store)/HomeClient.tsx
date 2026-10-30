@@ -8,9 +8,6 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useCMS } from '@/context/CMSContext';
 import { buildWhatsAppHref } from '@/lib/store-config';
 
-const ImportJourneyTimeline = dynamic(() => import('@/components/store/ImportJourneyTimeline'), {
-  loading: () => null,
-});
 const ImportCta = dynamic(() => import('@/components/store/ImportCta'), { loading: () => null });
 
 export default function HomeClient({
@@ -267,7 +264,6 @@ export default function HomeClient({
         </div>
       </section>
 
-      <ImportJourneyTimeline />
       <ImportCta whatsAppHref={waHeroPrefilled || undefined} />
     </main>
   );
