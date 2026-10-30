@@ -18,10 +18,10 @@ export default function PageHero({ title, subtitle, size = 'compact' }: PageHero
         <div className={`${isLarge ? 'max-w-3xl' : 'max-w-2xl'}`}>
           <p className="mb-1.5 text-xs font-medium text-blue-100/90 sm:mb-2 sm:text-sm md:mb-3">Gizmoz Trades</p>
           <h1
-            className={`font-heading font-bold tracking-tight text-white ${
+            className={`font-heading font-bold tracking-tight text-white text-balance ${
               isLarge
                 ? 'text-[1.65rem] leading-tight sm:text-4xl md:text-5xl'
-                : 'text-[1.4rem] leading-tight sm:text-3xl md:text-4xl'
+                : 'text-[1.35rem] leading-tight sm:text-3xl md:text-4xl'
             }`}
           >
             {title}
