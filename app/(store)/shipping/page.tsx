@@ -7,7 +7,7 @@ export default function ShippingPage() {
         <div className="store-container relative z-10 text-center">
           <p className="store-eyebrow mb-3">Delivery</p>
           <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-            Your order comes to Ghana safe
+            Your order gets to Ghana safely
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/80">
             We move your goods from China to Ghana. You always know where they are.
