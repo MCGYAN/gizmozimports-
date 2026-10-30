@@ -1175,7 +1175,11 @@ img {
 }
 
 .hero-mesh {
-  background: linear-gradient(145deg, #0C4A6E 0%, #0A5578 55%, #0C4A6E 100%);
+  /* Soft Ocean depth: light at the copy, deeper toward the image edge */
+  background:
+    radial-gradient(ellipse 90% 70% at 8% 18%, rgba(140, 207, 255, 0.14), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 92% 88%, rgba(6, 40, 58, 0.35), transparent 58%),
+    linear-gradient(165deg, #106086 0%, #0C4A6E 48%, #093A56 100%);
   position: relative;
   overflow: hidden;
 }
@@ -1183,7 +1187,13 @@ img {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, rgba(140, 207, 255, 0.16) 0%, transparent 38%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    transparent 28%,
+    transparent 72%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
   pointer-events: none;
 }
 .hero-mesh::after {
