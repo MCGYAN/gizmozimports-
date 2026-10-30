@@ -369,7 +369,7 @@ export default function AdminInvoicesPage() {
               type="button"
               disabled={saving}
               onClick={() => void saveInvoice()}
-              className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-accent/90 disabled:opacity-60"
+              className="rounded-lg bg-brand-accent px-4 py-2.5 text-sm font-semibold text-brand-primary hover:bg-brand-accent/90 disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save invoice'}
             </button>

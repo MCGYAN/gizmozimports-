@@ -40,7 +40,7 @@ export default function HowItWorksPage() {
             </p>
           </article>
         </div>
-        <div className="mt-10 max-w-5xl mx-auto border border-slate-200 bg-[#172554] p-8 text-white">
+        <div className="mt-10 max-w-5xl mx-auto border border-slate-200 bg-[#111827] p-8 text-white">
           <h2 className="text-2xl font-bold">Start with the shop</h2>
           <p className="mt-2 text-blue-100">
             See listed products first. If you cannot find what you need, message us.
@@ -48,7 +48,7 @@ export default function HowItWorksPage() {
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-white"
+              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-brand-primary"
             >
               Shop products
             </Link>

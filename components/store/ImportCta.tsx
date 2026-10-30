@@ -22,7 +22,7 @@ export default function ImportCta({ whatsAppHref }: ImportCtaProps) {
           <div className="mt-4 flex flex-col gap-2">
             <Link
               href="/shop"
-              className="btn-interactive flex min-h-[48px] w-full items-center justify-center rounded-xl bg-brand-accent text-[14px] font-semibold text-white"
+              className="btn-interactive flex min-h-[48px] w-full items-center justify-center rounded-xl bg-brand-accent text-[14px] font-semibold text-brand-primary"
             >
               Shop products
             </Link>
@@ -60,7 +60,7 @@ export default function ImportCta({ whatsAppHref }: ImportCtaProps) {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex min-h-[50px] items-center justify-center rounded-xl bg-brand-accent px-6 py-3 text-[15px] font-semibold text-white"
+              className="btn-interactive inline-flex min-h-[50px] items-center justify-center rounded-xl bg-brand-accent px-6 py-3 text-[15px] font-semibold text-brand-primary"
             >
               Shop products
             </Link>

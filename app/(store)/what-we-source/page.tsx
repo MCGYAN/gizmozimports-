@@ -65,7 +65,7 @@ export default function WhatWeSourcePage() {
             />
           ))}
         </div>
-        <div className="mt-10 bg-[#172554] p-8 text-white">
+        <div className="mt-10 bg-[#111827] p-8 text-white">
           <h2 className="text-2xl font-bold">Cannot find it in the shop?</h2>
           <p className="mt-2 text-blue-100">
             Message us with a photo or short description. We will tell you if we can help.
@@ -73,7 +73,7 @@ export default function WhatWeSourcePage() {
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-white"
+              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-6 py-3 font-semibold text-brand-primary"
             >
               Shop products
             </Link>

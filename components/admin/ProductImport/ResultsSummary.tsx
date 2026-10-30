@@ -112,7 +112,7 @@ export default function ResultsSummary({ summary, errors, warnings, onImportMore
         <div className="flex flex-wrap gap-3 pt-2">
           <Link
             href="/admin/products"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-brand-primary rounded-lg hover:bg-brand-accent transition-colors"
           >
             <i className="ri-list-check-2" />
             View Products

@@ -17,7 +17,7 @@ const PRESET_COLOR_HEX: Record<string, string> = {
   yellow: '#EAB308',
   pink: '#EC4899',
   purple: '#A855F7',
-  orange: '#F97316',
+  orange: '#8CCFFF',
   gray: '#6B7280',
   brown: '#92400E',
   beige: '#D2B48C',

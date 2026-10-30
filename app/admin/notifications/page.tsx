@@ -156,7 +156,7 @@ export default function NotificationsPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-brand-primary text-white py-4 rounded-lg font-bold text-lg hover:bg-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="w-full bg-brand-primary text-brand-primary py-4 rounded-lg font-bold text-lg hover:bg-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                         {loading ? (
                             <span className="flex items-center justify-center">

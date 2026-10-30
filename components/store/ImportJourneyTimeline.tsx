@@ -23,7 +23,7 @@ const MOBILE_MILESTONES = [
 
 export default function ImportJourneyTimeline() {
   return (
-    <section className="relative overflow-hidden bg-[#172554] py-8 md:py-20">
+    <section className="relative overflow-hidden bg-[#111827] py-8 md:py-20">
       <div className="store-container relative">
         <div className="md:max-w-2xl">
           <h2 className="font-heading text-[1.35rem] font-bold leading-tight tracking-tight text-white md:text-[1.75rem] lg:text-[2.25rem]">
@@ -47,7 +47,7 @@ export default function ImportJourneyTimeline() {
                 className="relative z-10 flex flex-col items-center"
                 style={{ width: `${100 / MOBILE_MILESTONES.length}%` }}
               >
-                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-white ring-2 ring-[#172554]">
+                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-brand-primary ring-2 ring-[#111827]">
                   {i + 1}
                 </span>
                 <span className="mt-2 max-w-[4.5rem] text-center text-[9px] font-semibold leading-tight text-white/90">
@@ -66,7 +66,7 @@ export default function ImportJourneyTimeline() {
             {STAGES.map((label, i) => (
               <div key={label} className="flex items-center gap-2">
                 <div className="flex items-center gap-2 rounded-md border border-white/15 bg-white/5 px-3 py-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-brand-accent text-[10px] font-bold text-white">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-brand-accent text-[10px] font-bold text-brand-primary">
                     {i + 1}
                   </span>
                   <span className="whitespace-nowrap text-sm font-medium text-white/90">

@@ -158,7 +158,7 @@ export default function OrderHistory() {
         </p>
         <Link
           href="/account?tab=status"
-          className="inline-block rounded-lg bg-brand-primary px-6 py-2 font-medium text-white hover:bg-[#172554]"
+          className="inline-block rounded-lg bg-brand-primary px-6 py-2 font-medium text-white hover:bg-[#111827]"
         >
           Open Order status
         </Link>

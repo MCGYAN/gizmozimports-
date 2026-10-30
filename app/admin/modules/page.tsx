@@ -201,7 +201,7 @@ export default function ModulesPage() {
             )}
             <button
               type="submit"
-              className="w-full bg-brand-primary hover:bg-brand-accent text-white font-bold py-4 rounded-xl transition-colors text-lg"
+              className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-bold py-4 rounded-xl transition-colors text-lg"
             >
               Unlock Dashboard
             </button>

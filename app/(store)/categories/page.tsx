@@ -55,7 +55,7 @@ export default async function CategoriesPage() {
         )}
       </div>
 
-      <div className="bg-[#172554] py-10 md:py-20">
+      <div className="bg-[#111827] py-10 md:py-20">
         <div className="store-container max-w-3xl text-center">
           <h2 className="font-heading text-xl font-bold text-white md:text-3xl">
             Not sure where to start?
@@ -66,7 +66,7 @@ export default async function CategoriesPage() {
           <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 text-sm font-bold text-white md:px-8 md:py-4 md:text-base"
+              className="btn-interactive inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 text-sm font-bold text-brand-primary md:px-8 md:py-4 md:text-base"
             >
               <Search className="h-5 w-5" />
               Browse products

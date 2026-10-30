@@ -309,7 +309,7 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
           <p className="text-gray-600 mb-8">Add some items to start the checkout process.</p>
-          <Link href="/shop" className="inline-block bg-brand-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#172554] transition-colors">
+          <Link href="/shop" className="inline-block bg-brand-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#111827] transition-colors">
             Return to Shop
           </Link>
         </div>
@@ -433,7 +433,7 @@ export default function CheckoutPage() {
                 type="button"
                 onClick={handlePlaceOrder}
                 disabled={isLoading}
-                className="mt-3 flex w-full items-center justify-center rounded-xl bg-brand-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#172554] disabled:opacity-70 sm:mt-4 sm:py-4 sm:text-base"
+                className="mt-3 flex w-full items-center justify-center rounded-xl bg-brand-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#111827] disabled:opacity-70 sm:mt-4 sm:py-4 sm:text-base"
               >
                 {isLoading ? (
                   <>

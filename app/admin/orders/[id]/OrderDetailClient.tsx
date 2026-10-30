@@ -958,7 +958,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
                           type="button"
                           onClick={handleConfirmManualPayment}
                           disabled={confirmingPayment}
-                          className="w-full bg-brand-primary hover:bg-[#172554] text-white py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                          className="w-full bg-brand-primary hover:bg-[#111827] text-white py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
                         >
                           {confirmingPayment ? 'Confirming…' : 'Confirm payment received'}
                         </button>
@@ -1003,7 +1003,7 @@ export default function OrderDetailClient({ orderId }: OrderDetailClientProps) {
               <button
                 onClick={handleResendNotification}
                 disabled={resendingNotification}
-                className="w-full bg-brand-primary hover:bg-brand-accent text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
+                className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
               >
                 {resendingNotification ? (
                   <>

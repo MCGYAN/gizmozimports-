@@ -259,7 +259,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span className="inline-block bg-brand-accent text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <span className="inline-block bg-brand-accent text-brand-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
               {post.category}
             </span>
             <h1 className="text-5xl font-bold text-white mb-6">{post.title}</h1>
@@ -356,7 +356,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
 
-        <div className="mt-16 bg-[#172554] p-12 text-center text-white">
+        <div className="mt-16 bg-[#111827] p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Enjoyed This Article?</h2>
           <p className="text-white/80 mb-8 text-lg">
             Subscribe to our newsletter for more shopping tips and exclusive offers

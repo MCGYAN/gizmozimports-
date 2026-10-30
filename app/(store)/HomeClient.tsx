@@ -109,7 +109,7 @@ export default function HomeClient({
                 <Link
                   href="/shop"
                   prefetch
-                  className="btn-premium inline-flex items-center rounded-xl bg-brand-accent px-4 py-2 text-xs font-semibold text-white hover:bg-orange-600 sm:px-6 sm:py-3 sm:text-base"
+                  className="btn-premium inline-flex items-center rounded-xl bg-brand-accent px-4 py-2 text-xs font-semibold text-brand-primary hover:brightness-95 sm:px-6 sm:py-3 sm:text-base"
                 >
                   Shop products
                 </Link>
@@ -136,7 +136,7 @@ export default function HomeClient({
                 <div className="absolute inset-0 bg-brand-dark/20" />
               </div>
 
-              <div className="absolute -bottom-3 -left-3 rounded-lg border border-white/20 bg-[#172554]/95 px-2.5 py-2 sm:-bottom-5 sm:px-3 sm:py-2.5 lg:-bottom-6 lg:-left-6 lg:px-4 lg:py-3">
+              <div className="absolute -bottom-3 -left-3 rounded-lg border border-white/20 bg-[#111827]/95 px-2.5 py-2 sm:-bottom-5 sm:px-3 sm:py-2.5 lg:-bottom-6 lg:-left-6 lg:px-4 lg:py-3">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <i className="ri-ship-line text-base text-white/90 sm:text-lg lg:text-xl" aria-hidden />
                   <div>
@@ -148,7 +148,7 @@ export default function HomeClient({
                 </div>
               </div>
 
-              <div className="absolute -top-3 right-1 rounded-lg border border-white/20 bg-[#172554]/95 px-2 py-1.5 sm:-top-5 sm:right-2 sm:px-3 sm:py-2 lg:-top-6 lg:right-6">
+              <div className="absolute -top-3 right-1 rounded-lg border border-white/20 bg-[#111827]/95 px-2 py-1.5 sm:-top-5 sm:right-2 sm:px-3 sm:py-2 lg:-top-6 lg:right-6">
                 <div className="flex items-center gap-2">
                   <i className="ri-shield-check-line text-sm text-white/90 sm:text-base" aria-hidden />
                   <p className="text-[10px] font-semibold text-white sm:text-xs lg:text-sm">
@@ -247,7 +247,7 @@ export default function HomeClient({
                 <Link
                   href="/shop"
                   prefetch
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-sm font-bold text-white"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-sm font-bold text-brand-primary"
                 >
                   Browse shop
                 </Link>

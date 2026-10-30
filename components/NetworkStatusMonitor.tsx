@@ -45,7 +45,7 @@ export default function NetworkStatusMonitor() {
       </span>
       <button 
         onClick={() => setIsSlowConnection(false)}
-        className="w-6 h-6 flex items-center justify-center hover:bg-orange-600 rounded-full transition-colors"
+        className="w-6 h-6 flex items-center justify-center hover:brightness-95 rounded-full transition-colors"
       >
         <i className="ri-close-line"></i>
       </button>

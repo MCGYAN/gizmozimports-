@@ -63,7 +63,7 @@ export default function TestSmsPage() {
                             disabled={isPending}
                             className={`w-full py-2 px-4 rounded-md text-white font-medium transition-colors ${isPending
                                     ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-brand-primary hover:bg-brand-accent'
+                                    : 'bg-brand-primary hover:bg-brand-primary/90'
                                 }`}
                         >
                             {isPending ? 'Sending...' : 'Send SMS'}

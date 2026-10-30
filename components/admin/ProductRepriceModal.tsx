@@ -94,7 +94,7 @@ export default function ProductRepriceModal({
             type="button"
             onClick={() => void applyAll()}
             disabled={applying || changes.length === 0}
-            className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+            className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-brand-primary hover:opacity-90 disabled:opacity-60"
           >
             {applying ? 'Applying…' : 'Apply all'}
           </button>

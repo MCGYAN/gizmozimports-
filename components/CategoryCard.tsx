@@ -30,7 +30,7 @@ export default function CategoryCard({ slug, name, image }: CategoryCardProps) {
             className="object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="absolute inset-0 bg-[#172554]" aria-hidden />
+          <div className="absolute inset-0 bg-[#111827]" aria-hidden />
         )}
       </div>
       <div className="flex min-h-[2.75rem] items-center justify-between gap-2 px-3 py-2.5 sm:min-h-[3.25rem] sm:px-3.5 sm:py-3">

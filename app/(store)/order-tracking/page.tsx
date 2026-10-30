@@ -129,7 +129,7 @@ function FindMyOrderContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-brand-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-brand-accent disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-primary py-3.5 text-sm font-bold text-brand-primary transition-colors hover:bg-brand-accent disabled:opacity-60"
           >
             {loading ? 'Opening…' : 'Open my order'}
           </button>

@@ -78,7 +78,7 @@ export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
             <Link
               href="/shop"
               onClick={onClose}
-              className="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-accent"
+              className="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold text-brand-primary transition-colors hover:bg-brand-accent"
             >
               Start shopping
             </Link>
@@ -186,7 +186,7 @@ export default function MiniCart({ isOpen, onClose }: MiniCartProps) {
                 <Link
                   href="/checkout"
                   onClick={onClose}
-                  className="block w-full rounded-xl bg-brand-primary py-3.5 text-center text-sm font-bold text-white transition-colors hover:bg-brand-accent"
+                  className="block w-full rounded-xl bg-brand-primary py-3.5 text-center text-sm font-bold text-brand-primary transition-colors hover:bg-brand-accent"
                 >
                   Checkout
                 </Link>

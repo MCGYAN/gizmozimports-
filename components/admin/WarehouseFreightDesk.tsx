@@ -694,7 +694,7 @@ export default function WarehouseFreightDesk() {
             <div className="flex flex-wrap gap-2 sm:col-span-2">
               <button
                 disabled={savingPackage}
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand-accent px-5 text-sm font-bold text-white disabled:opacity-60"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand-accent px-5 text-sm font-bold text-brand-primary disabled:opacity-60"
               >
                 <Save size={17} />
                 {savingPackage ? 'Saving…' : packageForm.id ? 'Save changes' : 'Create package'}
@@ -898,7 +898,7 @@ export default function WarehouseFreightDesk() {
               type="button"
               onClick={() => void sendWorkbook('apply')}
               disabled={uploading || preview.summary.ready === 0 || preview.summary.imported != null}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand-accent px-5 font-bold text-white disabled:opacity-50"
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand-accent px-5 font-bold text-brand-primary disabled:opacity-50"
             >
               <CheckCircle2 size={18} />
               {uploading ? 'Applying…' : `Apply ${preview.summary.ready} package rows`}

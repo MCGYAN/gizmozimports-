@@ -83,7 +83,7 @@ export default function CustomerDetailsPage() {
                         <i className="ri-mail-send-line mr-2"></i>
                         Send Email
                     </button>
-                    <button className="px-4 py-2 bg-brand-primary text-white rounded-lg font-bold hover:bg-brand-accent cursor-pointer">
+                    <button className="px-4 py-2 bg-brand-primary text-brand-primary rounded-lg font-bold hover:bg-brand-accent cursor-pointer">
                         Edit Customer
                     </button>
                 </div>

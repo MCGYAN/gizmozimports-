@@ -376,7 +376,7 @@ export default function AdminCustomersPage() {
         <button
           type="button"
           onClick={handleExportAll}
-          className="bg-brand-primary hover:bg-brand-accent text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
+          className="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
         >
           <i className="ri-download-line mr-2"></i>
           Export Customers
@@ -453,12 +453,12 @@ export default function AdminCustomersPage() {
               <button
                 type="button"
                 onClick={openEmailForSelected}
-                className="px-4 py-2 bg-brand-primary hover:bg-brand-accent text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
+                className="px-4 py-2 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-mail-line mr-2"></i>
                 Send Email
               </button>
-              <button className="px-4 py-2 bg-brand-primary hover:bg-brand-accent text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer">
+              <button className="px-4 py-2 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer">
                 <i className="ri-vip-crown-line mr-2"></i>
                 Mark as VIP
               </button>

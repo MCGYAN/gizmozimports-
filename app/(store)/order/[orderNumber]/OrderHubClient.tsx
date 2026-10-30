@@ -380,7 +380,7 @@ export default function OrderHubPage() {
                       void handleDownloadPdf();
                     }}
                     disabled={downloading}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-accent px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-accent px-4 py-2 text-sm font-bold text-brand-primary disabled:opacity-60"
                   >
                     <Download className="h-4 w-4" />
                     {downloading ? 'Preparing PDF…' : 'Download PDF'}

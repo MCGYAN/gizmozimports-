@@ -421,7 +421,7 @@ export default function POSPage() {
                                         <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-auto">{product.name}</h3>
                                         <div className="flex items-center justify-between mt-2 pt-2">
                                             <span className="text-brand-primary font-bold">GH¢{product.price.toFixed(2)}</span>
-                                            <button className="w-8 h-8 rounded-full bg-brand-primary/5 text-brand-primary flex items-center justify-center group-hover:bg-brand-accent group-hover:text-white transition-colors">
+                                            <button className="w-8 h-8 rounded-full bg-brand-primary/5 text-brand-primary flex items-center justify-center group-hover:bg-brand-accent group-hover:text-brand-primary transition-colors">
                                                 <i className="ri-add-line"></i>
                                             </button>
                                         </div>
@@ -536,7 +536,7 @@ export default function POSPage() {
                         <button
                             onClick={() => { setShowCheckoutModal(true); setCheckoutError(null); }}
                             disabled={cart.length === 0}
-                            className="px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-accent font-bold text-sm shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-3 bg-brand-primary text-brand-primary rounded-lg hover:bg-brand-accent font-bold text-sm shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Charge GH¢{grandTotal.toFixed(2)}
                         </button>
@@ -602,7 +602,7 @@ export default function POSPage() {
                                         <i className="ri-printer-line mr-2"></i>
                                         Print Receipt
                                     </button>
-                                    <button onClick={resetCheckout} className="py-3 px-4 bg-brand-primary text-white rounded-xl font-semibold hover:bg-brand-accent transition-colors">
+                                    <button onClick={resetCheckout} className="py-3 px-4 bg-brand-primary text-brand-primary rounded-xl font-semibold hover:bg-brand-accent transition-colors">
                                         New Order
                                     </button>
                                 </div>

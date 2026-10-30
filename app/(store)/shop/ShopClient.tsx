@@ -371,7 +371,7 @@ function ShopContent({
                         // Re-fetch handled by effect dependencies
                         setIsFilterOpen(false);
                       }}
-                      className="btn-primary w-full whitespace-nowrap rounded-xl bg-brand-primary py-3 font-bold text-white hover:bg-brand-accent"
+                      className="btn-primary w-full whitespace-nowrap rounded-xl bg-brand-primary py-3 font-bold text-brand-primary hover:bg-brand-accent"
                     >
                       Show Results
                     </button>
@@ -434,7 +434,7 @@ function ShopContent({
                           setSelectedRating(0);
                           setPage(1);
                         }}
-                        className="btn-primary inline-flex items-center whitespace-nowrap rounded-xl bg-brand-primary px-8 py-3.5 font-bold text-white hover:bg-brand-accent"
+                        className="btn-primary inline-flex items-center whitespace-nowrap rounded-xl bg-brand-primary px-8 py-3.5 font-bold text-brand-primary hover:bg-brand-accent"
                       >
                         Clear All Filters
                       </button>

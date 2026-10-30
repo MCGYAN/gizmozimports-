@@ -139,7 +139,7 @@ export default function ShareBuyRmbRate({ buyRate, validUntil }: ShareBuyRmbRate
                 type="button"
                 disabled={!rateReady || busy !== 'idle'}
                 onClick={() => setOpen(true)}
-                className="rounded-xl bg-brand-accent px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+                className="rounded-xl bg-brand-accent px-4 py-2.5 text-sm font-bold text-brand-primary transition hover:brightness-110 disabled:opacity-50"
               >
                 Open rate studio
               </button>

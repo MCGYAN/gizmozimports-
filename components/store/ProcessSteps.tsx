@@ -51,7 +51,7 @@ export default function ProcessSteps() {
                   aria-hidden
                 />
               ) : null}
-              <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-accent text-[11px] font-bold text-white">
+              <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-accent text-[11px] font-bold text-brand-primary">
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1 border border-slate-200 bg-slate-50 p-3 pb-4">
@@ -72,7 +72,7 @@ export default function ProcessSteps() {
                 className="border border-slate-200 bg-white p-5"
               >
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-accent text-sm font-bold text-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-accent text-sm font-bold text-brand-primary">
                     {i + 1}
                   </span>
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">

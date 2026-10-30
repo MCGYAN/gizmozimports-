@@ -58,7 +58,7 @@ export default function CartPage() {
               </div>
               <h2 className="font-heading text-xl font-bold text-brand-primary sm:mb-4 sm:text-3xl">Your basket is empty</h2>
               <p className="mt-2 mb-6 text-sm font-medium text-slate-600 sm:mb-8 sm:text-base">Find something to import. Add it here when you are ready.</p>
-              <Link href="/shop" className="btn-primary inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-primary px-8 text-sm font-bold text-white hover:bg-brand-accent sm:w-auto sm:text-base">
+              <Link href="/shop" className="btn-primary inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-primary px-8 text-sm font-bold text-brand-primary hover:bg-brand-accent sm:w-auto sm:text-base">
                 Start an Order
               </Link>
             </div>
@@ -195,7 +195,7 @@ export default function CartPage() {
 
                   <Link
                     href="/checkout"
-                    className="btn-primary mt-6 mb-4 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-brand-accent py-4 text-lg font-bold text-white hover:bg-brand-accent/92"
+                    className="btn-primary mt-6 mb-4 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-brand-accent py-4 text-lg font-bold text-brand-primary hover:bg-brand-accent/92"
                   >
                     <ShieldCheck className="w-5 h-5" /> Checkout
                   </Link>
@@ -241,7 +241,7 @@ export default function CartPage() {
             </div>
 
             {/* Mobile: total + checkout pinned above the bottom nav */}
-            <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(30,58,138,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(17, 24, 39,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <div className="flex items-center gap-3">
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Total</p>
@@ -249,7 +249,7 @@ export default function CartPage() {
                 </div>
                 <Link
                   href="/checkout"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-accent py-3.5 text-base font-bold text-white active:bg-brand-accent/90"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-accent py-3.5 text-base font-bold text-brand-primary active:bg-brand-accent/90"
                 >
                   <ShieldCheck className="h-5 w-5" /> Checkout
                 </Link>

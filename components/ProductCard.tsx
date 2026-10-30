@@ -99,7 +99,7 @@ export default function ProductCard({
     else wishlist?.addToWishlist({ id, name, price, originalPrice, image, rating, reviewCount, badge, inStock, slug });
   };
 
-  const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-white font-bold transition-colors hover:bg-orange-600 disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
+  const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-brand-primary font-bold transition-colors hover:brightness-95 disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
     compact ? 'h-8 rounded-lg px-3 text-[10px] lg:h-9 lg:rounded-xl lg:px-4 lg:text-xs' : 'h-9 rounded-xl px-3 text-[11px] sm:h-10 sm:px-5 sm:text-xs'
   }`;
 
@@ -129,7 +129,7 @@ export default function ProductCard({
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[9px] font-semibold text-white">
+            <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[9px] font-semibold text-brand-primary">
               -{discount}%
             </span>
           )}

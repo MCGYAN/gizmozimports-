@@ -303,7 +303,7 @@ export default function ChinaWarehouse({ accessToken }: ChinaWarehouseProps) {
           <div className="sm:col-span-2">
             <button
               disabled={saving}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-5 font-bold text-white disabled:opacity-60 sm:w-auto"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-5 font-bold text-brand-primary disabled:opacity-60 sm:w-auto"
             >
               {saving ? <RefreshCw className="animate-spin" size={17} /> : <PackagePlus size={17} />}
               {saving ? 'Registering…' : 'Register package'}

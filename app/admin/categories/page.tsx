@@ -167,7 +167,7 @@ export default function AdminCategoriesPage() {
             setFormData({ name: '', slug: '', description: '', image_url: '', parent_id: '', featured: false, status: 'active' });
             setShowAddModal(true);
           }}
-          className="bg-brand-primary hover:bg-brand-accent text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
+          className="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
         >
           <i className="ri-add-line mr-2"></i>
           Add Category
@@ -421,7 +421,7 @@ export default function AdminCategoriesPage() {
               <button
                 onClick={handleSubmit}
                 disabled={saving || uploading}
-                className={`px-6 py-3 bg-brand-primary hover:bg-brand-accent text-white rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer flex items-center ${saving ? 'opacity-70' : ''}`}
+                className={`px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer flex items-center ${saving ? 'opacity-70' : ''}`}
               >
                 {saving && <i className="ri-loader-4-line animate-spin mr-2"></i>}
                 {showAddModal ? 'Add Category' : 'Save Changes'}

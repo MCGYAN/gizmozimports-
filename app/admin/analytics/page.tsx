@@ -228,8 +228,8 @@ export default function ShopAnalyticsPage() {
               <AreaChart data={daily.length ? daily : [{ label: '', revenue: 0 }]}>
                 <defs>
                   <linearGradient id="shopRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F97316" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#8CCFFF" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#8CCFFF" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -239,7 +239,7 @@ export default function ShopAnalyticsPage() {
                   formatter={(value) => [formatMoney(Number(value)), 'Revenue']}
                   contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#F97316" strokeWidth={2} fill="url(#shopRevenue)" />
+                <Area type="monotone" dataKey="revenue" stroke="#8CCFFF" strokeWidth={2} fill="url(#shopRevenue)" />
               </AreaChart>
             </ChartContainer>
           </Panel>

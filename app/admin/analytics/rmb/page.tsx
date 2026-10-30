@@ -206,7 +206,7 @@ export default function RmbAnalyticsPage() {
                   formatter={(value) => [formatRmb(Number(value)), 'RMB']}
                   contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
                 />
-                <Bar dataKey="rmb" fill="#1E3A8A" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="rmb" fill="#111827" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ChartContainer>
           </Panel>

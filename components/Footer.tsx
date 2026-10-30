@@ -7,7 +7,7 @@ import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
 
 const linkClass =
-  'text-blue-100/65 transition-colors active:text-white max-lg:text-[13px] lg:hover:text-white';
+  'text-white/65 transition-colors active:text-white max-lg:text-[13px] lg:hover:text-brand-accent'
 
 const mobileHeadingClass =
   'mb-2 text-[11px] font-semibold text-brand-accent lg:mb-4 lg:text-base lg:font-bold lg:text-white';
@@ -38,19 +38,19 @@ export default function Footer() {
 
   return (
     <footer className="relative z-0 mt-8 text-white lg:mt-16">
-      <div className="absolute inset-0 -z-10 overflow-hidden bg-blue-950" aria-hidden />
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-brand-primary" aria-hidden />
 
       <div className="store-container pb-[calc(4.75rem+env(safe-area-inset-bottom))] pt-8 lg:pb-10 lg:pt-16">
         <div className="lg:grid lg:grid-cols-4 lg:gap-12">
           {/* Brand block */}
-          <div className="flex items-start justify-between gap-4 border-b border-blue-800/50 pb-5 lg:col-span-1 lg:block lg:border-0 lg:pb-0">
+          <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5 lg:col-span-1 lg:block lg:border-0 lg:pb-0">
             <div className="min-w-0 flex-1 space-y-3 lg:space-y-5">
               <StoreLogo size="sm" tone="dark" />
-              <p className="max-w-sm text-xs leading-snug text-blue-200/60 lg:text-sm lg:leading-relaxed">
+              <p className="max-w-sm text-xs leading-snug text-white/55 lg:text-sm lg:leading-relaxed">
                 {siteTagline}
               </p>
               {(contactWhatsapp || contactAddress) && (
-                <div className="space-y-1 text-xs text-blue-200/70 lg:text-sm">
+                <div className="space-y-1 text-xs text-white/65 lg:text-sm">
                   {contactWhatsapp ? <p>WhatsApp: {contactWhatsapp}</p> : null}
                   {contactAddress ? <p className="line-clamp-2">{contactAddress}</p> : null}
                 </div>
@@ -66,7 +66,7 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.label}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-white/85 active:border-brand-accent active:text-brand-accent lg:h-9 lg:w-9 lg:hover:border-brand-accent lg:hover:bg-brand-accent lg:hover:text-white"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-brand-primary/85 active:border-brand-accent active:text-brand-accent lg:h-9 lg:w-9 lg:hover:border-brand-accent lg:hover:bg-brand-accent lg:hover:text-brand-primary"
                   >
                     {social.icon}
                   </a>

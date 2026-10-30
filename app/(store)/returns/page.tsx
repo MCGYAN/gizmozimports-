@@ -49,7 +49,7 @@ export default function ReturnsPage() {
             ) : null}
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 font-bold text-white hover:bg-[#172554]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 font-bold text-white hover:bg-[#111827]"
             >
               Contact us
             </Link>

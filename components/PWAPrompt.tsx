@@ -90,7 +90,7 @@ export default function PWAPrompt() {
             {/* CTA */}
             <button
               onClick={handleInstall}
-              className="btn-primary flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-primary px-6 py-4 text-base font-semibold text-white hover:bg-brand-accent active:scale-[0.98]"
+              className="btn-primary flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-primary px-6 py-4 text-base font-semibold text-brand-primary hover:bg-brand-accent active:scale-[0.98]"
             >
               <i className="ri-download-2-line text-xl" />
               Add to Home Screen

@@ -660,7 +660,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className={`px-6 py-3 bg-brand-primary hover:bg-brand-accent text-white rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer flex items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer flex items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                         {loading ? (
                             <>
@@ -1160,7 +1160,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <button
                                         onClick={addCustomColor}
                                         disabled={!customColorName.trim()}
-                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-brand-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        className="px-4 py-2 bg-gray-800 text-brand-primary rounded-lg text-sm font-medium hover:bg-brand-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                     >
                                         Add Color
                                     </button>
@@ -1229,7 +1229,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                     <button
                                         onClick={addCustomSize}
                                         disabled={!customSize.trim()}
-                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-brand-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        className="px-4 py-2 bg-gray-800 text-brand-primary rounded-lg text-sm font-medium hover:bg-brand-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                     >
                                         Add Size
                                     </button>

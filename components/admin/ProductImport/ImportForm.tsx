@@ -288,7 +288,7 @@ export default function ImportForm() {
                 type="button"
                 onClick={() => setConfirmOpen(true)}
                 disabled={!canSubmit || loading}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-brand-primary rounded-lg hover:bg-brand-accent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Processing...' : 'Upload & Process'}
               </button>
@@ -317,7 +317,7 @@ export default function ImportForm() {
                   setConfirmOpen(false);
                   startImport();
                 }}
-                className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent"
+                className="px-4 py-2 bg-brand-primary text-brand-primary rounded-lg hover:bg-brand-accent"
               >
                 Continue
               </button>

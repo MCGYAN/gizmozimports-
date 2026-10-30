@@ -141,7 +141,7 @@ export default function AboutPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-semibold text-white sm:w-auto"
+              className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-semibold text-brand-primary sm:w-auto"
             >
               See products
               <ArrowRight className="h-4 w-4" />

@@ -57,7 +57,7 @@ export default function PricingGuidePage() {
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/shop"
-              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white"
+              className="btn-interactive inline-flex rounded-xl bg-brand-accent px-5 py-2.5 text-sm font-semibold text-brand-primary"
             >
               Shop products
             </Link>

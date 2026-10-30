@@ -308,7 +308,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="btn-primary rounded-xl bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-accent"
+            className="btn-primary rounded-xl bg-brand-primary px-4 py-2 text-sm font-medium text-brand-primary hover:bg-brand-accent"
           >
             Retry
           </button>
@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                     <stop offset="95%" stopColor={BRAND_ACCENT} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(30,58,138,0.06)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(17, 24, 39,0.06)" />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
@@ -439,8 +439,8 @@ export default function AdminDashboard() {
                   contentStyle={{
                     backgroundColor: 'rgba(255,255,255,0.96)',
                     borderRadius: '10px',
-                    border: '1px solid rgba(30,58,138,0.08)',
-                    boxShadow: '0 8px 24px rgba(30,58,138,0.08)',
+                    border: '1px solid rgba(17, 24, 39,0.08)',
+                    boxShadow: '0 8px 24px rgba(17, 24, 39,0.08)',
                   }}
                   formatter={(value) => [`GH¢${(value as number)?.toFixed(2) ?? '0.00'}`, 'Revenue']}
                 />
@@ -471,7 +471,7 @@ export default function AdminDashboard() {
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
                     action.tone === 'accent'
-                      ? 'bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent group-hover:text-white'
+                      ? 'bg-brand-accent/10 text-brand-accent group-hover:bg-brand-accent group-hover:text-brand-primary'
                       : 'bg-brand-primary/10 text-brand-primary group-hover:bg-brand-primary group-hover:text-white'
                   }`}
                 >
@@ -637,7 +637,7 @@ export default function AdminDashboard() {
             {topProducts.map((product) => (
               <div
                 key={product.id}
-                className="admin-product-tile overflow-hidden rounded-xl border border-slate-100 bg-white/50 p-2.5 transition-shadow hover:shadow-[0_8px_24px_rgba(30,58,138,0.06)] md:p-3"
+                className="admin-product-tile overflow-hidden rounded-xl border border-slate-100 bg-white/50 p-2.5 transition-shadow hover:shadow-[0_8px_24px_rgba(17, 24, 39,0.06)] md:p-3"
               >
                 <div className="mb-2 aspect-square overflow-hidden rounded-lg bg-slate-100">
                   <img src={product.image} alt={product.name} className="h-full w-full object-cover" />

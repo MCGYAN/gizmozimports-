@@ -92,7 +92,7 @@ export default function FAQsPage() {
         )}
       </div>
 
-      <div className="bg-[#172554] py-16">
+      <div className="bg-[#111827] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Still have questions?</h2>
           <p className="text-xl text-white/80 mb-8 leading-relaxed">
@@ -108,7 +108,7 @@ export default function FAQsPage() {
             </Link>
             <Link
               href="/contact"
-              className="btn-interactive inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-4 rounded-xl font-medium whitespace-nowrap"
+              className="btn-interactive inline-flex items-center gap-2 bg-brand-accent text-brand-primary px-8 py-4 rounded-xl font-medium whitespace-nowrap"
             >
               <i className="ri-customer-service-2-line text-lg"></i>
               More help

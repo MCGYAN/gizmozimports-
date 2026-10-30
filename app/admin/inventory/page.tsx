@@ -211,7 +211,7 @@ export default function InventoryManagementPage() {
           </div>
           <Link
             href="/admin"
-            className="bg-brand-primary hover:bg-brand-accent text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap text-center"
+            className="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap text-center"
           >
             Back to Dashboard
           </Link>
@@ -307,7 +307,7 @@ export default function InventoryManagementPage() {
                   setImportResult(null);
                   setShowImportModal(true);
                 }}
-                className="bg-brand-primary hover:bg-brand-accent text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 whitespace-nowrap cursor-pointer"
+                className="bg-brand-primary hover:bg-brand-primary/90 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-upload-line"></i>
                 <span>Import CSV</span>
@@ -332,7 +332,7 @@ export default function InventoryManagementPage() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={handleBulkRestock}
-                  className="bg-brand-primary hover:bg-brand-accent text-white px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  className="bg-brand-primary hover:bg-brand-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Bulk Restock
                 </button>
@@ -487,7 +487,7 @@ export default function InventoryManagementPage() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-accent disabled:opacity-60"
+                className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-accent disabled:opacity-60"
               >
                 {importing ? 'Importing…' : 'Choose CSV file'}
               </button>

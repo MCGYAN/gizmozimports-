@@ -144,8 +144,8 @@ export default function Header() {
                       href={link.href}
                       className={`btn-premium inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-3 text-[11px] font-semibold transition lg:h-9 lg:px-4 lg:text-xs ${
                         link.primary
-                          ? 'bg-brand-accent text-white hover:bg-orange-600'
-                          : 'border border-brand/20 bg-white text-brand hover:bg-blue-50'
+                          ? 'bg-brand-accent text-brand-primary hover:brightness-95'
+                          : 'border border-brand-accent/40 bg-white text-brand-primary hover:bg-brand-ice'
                       }`}
                     >
                       <span className="xl:hidden">{link.shortLabel}</span>
@@ -201,7 +201,7 @@ export default function Header() {
                   >
                     <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" strokeWidth={1.75} />
                     {cartCount > 0 && (
-                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-[10px] font-bold text-white shadow-sm sm:-right-1 sm:-top-1">
+                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-[10px] font-bold text-brand-primary shadow-sm sm:-right-1 sm:-top-1">
                         {cartCount}
                       </span>
                     )}

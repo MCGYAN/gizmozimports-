@@ -26,7 +26,7 @@ export default function ProductExampleCard({ title, moq, estimate, note }: Produ
         href={leadConfig.whatsappUrl(message)}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-5 inline-flex items-center rounded-pill bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
+        className="mt-5 inline-flex items-center rounded-pill bg-brand-accent px-4 py-2 text-sm font-semibold text-brand-primary transition hover:brightness-95"
       >
         Request Quote
       </a>

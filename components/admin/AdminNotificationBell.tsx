@@ -230,7 +230,7 @@ export default function AdminNotificationBell({ userId }: { userId: string }) {
       >
         <i className="ri-notification-3-line text-xl" />
         {unread > 0 ? (
-          <span className="absolute right-0.5 top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-brand-accent px-1 text-[9px] font-bold leading-none text-white ring-2 ring-white">
+          <span className="absolute right-0.5 top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-brand-accent px-1 text-[9px] font-bold leading-none text-brand-primary ring-2 ring-white">
             {unread > 9 ? '9+' : unread}
           </span>
         ) : null}

@@ -71,7 +71,7 @@ export default function OfflinePage() {
           <button
             onClick={handleRetry}
             disabled={retrying}
-            className="w-full bg-brand-primary hover:bg-[#172554] disabled:bg-brand-primary/50 text-white py-4 px-6 rounded-2xl font-semibold transition-all active:scale-[0.98] shadow-lg shadow-brand-primary/20 flex items-center justify-center gap-2"
+            className="w-full bg-brand-primary hover:bg-[#111827] disabled:bg-brand-primary/50 text-white py-4 px-6 rounded-2xl font-semibold transition-all active:scale-[0.98] shadow-lg shadow-brand-primary/20 flex items-center justify-center gap-2"
           >
             {retrying ? (
               <>

@@ -22,7 +22,7 @@ export default async function Image() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '56px 64px',
-          background: 'linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 55%, #172554 100%)',
+          background: 'linear-gradient(135deg, #111827 0%, #0B1220 50%, #152033 100%)',
           color: '#fff',
           fontFamily: 'system-ui, sans-serif',
         }}
@@ -44,7 +44,7 @@ export default async function Image() {
               display: 'flex',
               width: 72,
               height: 6,
-              background: '#F97316',
+              background: '#8CCFFF',
               borderRadius: 4,
             }}
           />
@@ -83,7 +83,7 @@ export default async function Image() {
           }}
         >
           <span>{SEO.brandName}</span>
-          <span style={{ color: '#F97316', fontWeight: 600 }}>China to Ghana imports</span>
+          <span style={{ color: '#8CCFFF', fontWeight: 600 }}>China to Ghana imports</span>
         </div>
       </div>
     ),

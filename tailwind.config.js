@@ -10,33 +10,37 @@ module.exports = {
         serif: ['"Playfair Display"', 'serif'],
       },
       colors: {
-        // Gizmoz Trades brand identity
+        // Gizmoz Trades — White / Light Blue / Deep Navy
         brand: {
-          DEFAULT: '#1D4ED8', // Royal blue — primary buttons, links
-          primary: '#1E3A8A', // Deep blue — trust, dark surfaces, headings
-          accent: '#F97316', // Orange — action / CTA
+          DEFAULT: '#8CCFFF', // Light Blue — signature
+          primary: '#111827', // Deep Navy — type, headers, dark surfaces
+          accent: '#8CCFFF', // Light Blue — highlights & signature CTAs
+          ice: '#EAF6FF', // Ice Blue — soft section washes
+          slate: '#64748B', // Supporting text / borders / icons
           surface: '#FFFFFF',
-          light: '#F5F7FA', // Light surfaces
-          foreground: '#1F2937', // Body text
-          dark: '#1E3A8A',
-          muted: '#F5F7FA',
-          black: '#1F2937',
+          light: '#EAF6FF',
+          foreground: '#111827',
+          dark: '#111827',
+          muted: '#EAF6FF',
+          black: '#111827',
           white: '#FFFFFF',
-          text: '#1F2937',
+          text: '#111827',
           background: '#FFFFFF',
-          purple: '#1D4ED8',
-          'purple-light': '#93C5FD',
-          'purple-dark': '#1E3A8A',
+          // Legacy aliases → new palette (keep old class names working)
+          purple: '#8CCFFF',
+          'purple-light': '#EAF6FF',
+          'purple-dark': '#111827',
         },
       },
       maxWidth: {
         store: '1440px',
       },
       boxShadow: {
-        store: '0 4px 24px -4px rgba(30, 58, 138, 0.08)',
-        'store-lg': '0 12px 40px -8px rgba(30, 58, 138, 0.12)',
-        'store-card': '0 2px 12px rgba(30, 58, 138, 0.06)',
-        'store-card-hover': '0 20px 48px -12px rgba(249, 115, 22, 0.18)',
+        store: '0 4px 24px -4px rgba(17, 24, 39, 0.08)',
+        'store-lg': '0 12px 40px -8px rgba(17, 24, 39, 0.12)',
+        'store-card': '0 2px 12px rgba(17, 24, 39, 0.06)',
+        'store-card-hover': '0 20px 48px -12px rgba(140, 207, 255, 0.35)',
+        glass: '0 8px 32px -12px rgba(17, 24, 39, 0.12)',
       },
       borderRadius: {
         pill: '9999px',

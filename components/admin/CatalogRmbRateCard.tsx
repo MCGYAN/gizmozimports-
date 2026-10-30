@@ -154,7 +154,7 @@ export default function CatalogRmbRateCard() {
             ) : null}
           </div>
 
-          <div className="w-full rounded-2xl border border-white/80 bg-white/80 p-4 shadow-[0_10px_30px_rgba(30,58,138,0.06)] backdrop-blur-sm md:w-[min(100%,22rem)]">
+          <div className="w-full rounded-2xl border border-white/80 bg-white/80 p-4 shadow-[0_10px_30px_rgba(17, 24, 39,0.06)] backdrop-blur-sm md:w-[min(100%,22rem)]">
             <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
               Conversion
             </p>
@@ -199,7 +199,7 @@ export default function CatalogRmbRateCard() {
               type="button"
               onClick={save}
               disabled={saving || loading}
-              className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-primary transition-colors hover:bg-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
                 'Saving…'

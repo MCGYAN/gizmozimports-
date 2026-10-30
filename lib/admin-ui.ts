@@ -1,7 +1,7 @@
 /** Shared Tailwind class strings for admin UI — navy + orange brand only */
 
 export const adminBtnPrimary =
-  'bg-brand-primary text-white hover:bg-brand-accent rounded-xl font-semibold transition-colors';
+  'bg-brand-primary text-brand-primary hover:bg-brand-accent rounded-xl font-semibold transition-colors';
 
 export const adminBtnSecondary =
   'border border-white/55 liquid-glass text-brand-primary hover:border-brand-accent/30 hover:text-brand-accent rounded-xl font-semibold transition-colors';

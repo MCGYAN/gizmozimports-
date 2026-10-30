@@ -230,7 +230,7 @@ export function AnalyticsToolbar({
           type="button"
           onClick={onExport}
           disabled={exporting || Boolean(query.rangeError)}
-          className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-accent disabled:opacity-50"
+          className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-primary transition-colors hover:bg-brand-accent disabled:opacity-50"
         >
           <i className="ri-file-excel-2-line" />
           {exporting ? 'Preparing…' : 'Export spreadsheet'}

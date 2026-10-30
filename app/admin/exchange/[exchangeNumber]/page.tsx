@@ -279,7 +279,7 @@ export default function AdminExchangeDetailPage() {
                       if (!confirm(`Confirm you sent ${rmbToSend} RMB via Alipay?`)) return;
                       void act('complete');
                     }}
-                    className="w-full rounded-xl bg-brand-accent py-3 text-sm font-bold text-white disabled:opacity-40"
+                    className="w-full rounded-xl bg-brand-accent py-3 text-sm font-bold text-brand-primary disabled:opacity-40"
                   >
                     {acting ? 'Working…' : 'Mark RMB sent'}
                   </button>

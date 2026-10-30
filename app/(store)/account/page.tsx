@@ -450,7 +450,7 @@ function AccountContent() {
                         <button
                           type="submit"
                           disabled={profileLoading}
-                          className="px-8 py-3 bg-brand-primary hover:bg-brand-accent hover:text-white text-white rounded-xl font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:shadow-none"
+                          className="px-8 py-3 bg-brand-primary hover:bg-brand-primary/90 hover:text-white text-white rounded-xl font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:shadow-none"
                         >
                           {profileLoading ? 'Saving Info...' : 'Save Profile Information'}
                         </button>

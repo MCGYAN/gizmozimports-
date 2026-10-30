@@ -299,8 +299,8 @@ export default function AdminLayout({
                   href={item.path}
                   onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}
                   className={`group flex min-h-11 cursor-pointer items-center justify-between rounded-xl px-4 py-3 transition-all duration-300 ${isActive
-                    ? 'border-l-4 border-brand-accent bg-brand-primary/5 font-semibold text-brand-accent'
-                    : 'text-brand-primary/70 hover:-translate-y-[1px] hover:bg-brand-primary/5 hover:text-brand-primary hover:shadow-sm'
+                    ? 'border-l-4 border-brand-accent bg-brand-ice font-semibold text-brand-primary'
+                    : 'text-brand-primary/70 hover:-translate-y-[1px] hover:bg-brand-ice/70 hover:text-brand-primary hover:shadow-sm'
                     }`}
                 >
                   <div className="flex items-center space-x-3">

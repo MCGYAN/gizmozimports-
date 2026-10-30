@@ -915,7 +915,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
         {/* Mobile: price + add to basket always within thumb reach (sits above MobileBottomNav on phones) */}
         {allowOnlineCheckout && (
-          <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(30,58,138,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(17, 24, 39,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center gap-2.5">
               <div className="min-w-0">
                 <p className="text-lg font-extrabold leading-tight text-brand-primary">{money(displayPrice)}</p>
