@@ -859,7 +859,7 @@ img {
 
   /* Interactive buttons — colour shift only, no lift/glow theatre */
   .btn-interactive {
-    @apply transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(12, 74, 110,0.1)] active:translate-y-0 active:shadow-sm;
+    @apply transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-store active:translate-y-0 active:shadow-sm;
   }
 
   /* Signature CTA — light blue fill, navy type (accent is too light for white text) */
@@ -873,7 +873,7 @@ img {
   }
 
   .glass-panel-dark {
-    @apply border border-white/10 bg-brand-primary/80 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-2xl;
+    @apply border border-white/10 bg-brand-primary/80 shadow-store-lg backdrop-blur-2xl;
   }
 
   /* Calm card surfaces — frosted glass */
@@ -890,7 +890,7 @@ img {
   }
 
   .liquid-glass-card-interactive {
-    @apply liquid-glass-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/40 hover:bg-white/90 hover:shadow-[0_12px_32px_-12px_rgba(140,207,255,0.35)];
+    @apply liquid-glass-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/40 hover:bg-white/90 hover:shadow-store-card-hover;
   }
 
   .liquid-glass-well {
