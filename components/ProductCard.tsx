@@ -71,7 +71,6 @@ export default function ProductCard({
   colorVariants = [],
   shortDescription,
   categoryName,
-  categorySlug,
   compact = false,
   priority = false,
 }: ProductCardProps) {
