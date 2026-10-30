@@ -90,7 +90,7 @@ export default function HomeClient({
 
   return (
     <main className="min-h-screen">
-      {/* Hero — brand first, one message, one image. No floating badges. */}
+      {/* Hero — brand first; two small status tags on the image only */}
       <section className="hero-mesh relative text-white">
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-20 lg:px-8 lg:py-24">
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
@@ -129,6 +129,20 @@ export default function HomeClient({
                   alt="Warehouse goods ready for China to Ghana shipping"
                   className="h-full w-full object-cover"
                 />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+
+                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-white/95 px-2.5 py-1.5 text-brand-primary shadow-sm sm:left-4 sm:top-4 sm:px-3 sm:py-2">
+                  <i className="ri-shield-check-line text-sm text-brand-primary sm:text-base" aria-hidden />
+                  <span className="text-[11px] font-semibold sm:text-xs">Verified supplier</span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5 rounded-md bg-brand-primary/90 px-3 py-2 text-white sm:bottom-4 sm:left-4 sm:right-auto sm:min-w-[11.5rem]">
+                  <i className="ri-ship-line text-base text-brand-accent" aria-hidden />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-brand-accent">Live status</p>
+                    <p className="truncate text-xs font-semibold sm:text-sm">In transit to Accra</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
