@@ -6,6 +6,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import type { ParsedProductRow } from './csv-parser';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { HOMEPAGE_FEATURED_PRODUCT_LIMIT } from '@/lib/homepage-featured';
 
 const PRESET_COLOR_HEX: Record<string, string> = {
   black: '#000000',
@@ -139,6 +140,12 @@ export async function createProductsFromRows(
   let errors = 0;
   let skipped = 0;
 
+  const { count: featuredCount } = await supabaseAdmin
+    .from('products')
+    .select('id', { count: 'exact', head: true })
+    .eq('featured', true);
+  let featuredSlotsLeft = Math.max(0, HOMEPAGE_FEATURED_PRODUCT_LIMIT - (featuredCount || 0));
+
   for (const group of groups) {
     const first = group[0];
     const nameKey = first.name.trim().toLowerCase();
@@ -174,6 +181,26 @@ export async function createProductsFromRows(
       ? group.reduce((sum, r) => sum + (r.variant_stock ?? 0), 0)
       : (first.quantity ?? 0);
 
+    const wantsFeatured = Boolean(first.featured);
+    let featured = wantsFeatured;
+    if (wantsFeatured) {
+      const existingId =
+        exists && updateExisting ? existingIdsByName.get(nameKey) : undefined;
+      let alreadyFeatured = false;
+      if (existingId) {
+        const { data: existingRow } = await supabaseAdmin
+          .from('products')
+          .select('featured')
+          .eq('id', existingId)
+          .maybeSingle();
+        alreadyFeatured = Boolean(existingRow?.featured);
+      }
+      if (!alreadyFeatured) {
+        if (featuredSlotsLeft <= 0) featured = false;
+        else featuredSlotsLeft -= 1;
+      }
+    }
+
     const productPayload = {
       name: first.name,
       slug,
@@ -184,7 +211,7 @@ export async function createProductsFromRows(
       quantity: totalQuantity,
       moq: Math.max(1, first.moq ?? 1),
       status: first.status ?? 'draft',
-      featured: first.featured ?? false,
+      featured,
       seo_title: first.seo_title || null,
       seo_description: first.seo_description || null,
       tags,

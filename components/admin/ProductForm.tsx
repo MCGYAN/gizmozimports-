@@ -17,6 +17,11 @@ import {
     parseVariantBasePriceRmb,
     rmbToGhsPrice,
 } from '@/lib/product-pricing';
+import {
+    featuredHomepageFullMessage,
+    getFeaturedProductSlotStatus,
+    type FeaturedSlotStatus,
+} from '@/lib/homepage-featured';
 
 interface ProductFormProps {
     initialData?: any;
@@ -53,6 +58,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
         return 'active';
     });
     const [featured, setFeatured] = useState(Boolean(initialData?.featured));
+    const [featuredSlots, setFeaturedSlots] = useState<FeaturedSlotStatus | null>(null);
     const [preorderShipping, setPreorderShipping] = useState(initialData?.metadata?.preorder_shipping || '');
     const initialCommerce = parseProductCommerce(initialData?.metadata);
     const initialImportMode = getImportProductMode(
@@ -65,6 +71,17 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
     const [importType, setImportType] = useState(initialData?.metadata?.import_type || '');
     const [importNotes, setImportNotes] = useState(initialData?.metadata?.import_notes || '');
     const [activeTab, setActiveTab] = useState('general');
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const slots = await getFeaturedProductSlotStatus(initialData?.id || null);
+            if (!cancelled) setFeaturedSlots(slots);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [initialData?.id]);
 
     useEffect(() => {
         let cancelled = false;
@@ -458,6 +475,19 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                 ? variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0)
                 : parseInt(stock) || 0;
 
+            let featuredToSave = Boolean(featured);
+            if (featuredToSave && !initialData?.featured) {
+                const slots = await getFeaturedProductSlotStatus(initialData?.id || null);
+                setFeaturedSlots(slots);
+                if (slots.full) {
+                    alert(featuredHomepageFullMessage(slots));
+                    setFeatured(false);
+                    featuredToSave = false;
+                    setActiveTab('general');
+                    return;
+                }
+            }
+
             const productData = {
                 name: productName,
                 slug: urlSlug || productName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
@@ -469,7 +499,7 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                 quantity: hasVariants ? variantStockTotal : (parseInt(stock) || 0),
                 moq: parseInt(moq) || 1,
                 status: String(status || 'active').toLowerCase(),
-                featured: Boolean(featured),
+                featured: featuredToSave,
                 seo_title: seoTitle,
                 seo_description: metaDescription,
                 tags: (keywords as string).split(',').map((k: string) => k.trim()).filter(Boolean),
@@ -761,16 +791,44 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
                                 </div>
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <input
-                                    type="checkbox"
-                                    checked={featured}
-                                    onChange={(e) => setFeatured(e.target.checked)}
-                                    className="w-5 h-5 text-brand-primary border-gray-300 rounded focus:ring-brand-accent/25 cursor-pointer"
-                                />
-                                <label className="text-gray-900 font-medium">
-                                    Feature this product on homepage
-                                </label>
+                            <div className="space-y-2">
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={featured}
+                                        disabled={Boolean(
+                                            !featured && featuredSlots?.full,
+                                        )}
+                                        onChange={(e) => {
+                                            const next = e.target.checked;
+                                            if (next && featuredSlots?.full) {
+                                                alert(featuredHomepageFullMessage(featuredSlots));
+                                                return;
+                                            }
+                                            setFeatured(next);
+                                        }}
+                                        className="mt-0.5 h-5 w-5 cursor-pointer rounded border-gray-300 text-brand-primary focus:ring-brand-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
+                                    />
+                                    <div>
+                                        <label className="font-medium text-gray-900">
+                                            Feature this product on homepage
+                                        </label>
+                                        <p className="mt-0.5 text-xs text-slate-500">
+                                            {featuredSlots
+                                                ? `Homepage slots: ${featuredSlots.count}/${featuredSlots.limit}${
+                                                      featured && initialData?.featured
+                                                          ? ' (this product is one of them)'
+                                                          : ''
+                                                  }`
+                                                : 'Homepage shows up to 4 featured products.'}
+                                        </p>
+                                        {!featured && featuredSlots?.full ? (
+                                            <p className="mt-1 text-xs font-medium text-amber-700">
+                                                {featuredHomepageFullMessage(featuredSlots)}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </div>
                             </div>
 
                             <div>

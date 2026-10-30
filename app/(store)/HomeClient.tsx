@@ -7,6 +7,7 @@ import ProductCard, { type ColorVariant, getColorHex } from '@/components/Produc
 import CategoryCard from '@/components/CategoryCard';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useCMS } from '@/context/CMSContext';
+import { HOMEPAGE_CATEGORY_LIMIT } from '@/lib/homepage-featured';
 import { buildWhatsAppHref } from '@/lib/store-config';
 
 const ImportCta = dynamic(() => import('@/components/store/ImportCta'), { loading: () => null });
@@ -29,11 +30,10 @@ export default function HomeClient({
     ? `${waHero}${waHero.includes('?') ? '&' : '?'}text=${encodeURIComponent('Hi Gizmoz Trades, I need help with an order on the website.')}`
     : '';
 
-  // Always even count on the home grid so the last row is never half-empty (e.g. 5 → 4)
-  const rawCategories = categories.filter((c: any) => !c.parent_id);
-  const capped = rawCategories.slice(0, 8);
-  const displayCategories =
-    capped.length > 1 && capped.length % 2 === 1 ? capped.slice(0, -1) : capped;
+  // Homepage shows a short “top picks” set — full lists live on /categories and /shop
+  const displayCategories = categories
+    .filter((c: any) => !c.parent_id)
+    .slice(0, HOMEPAGE_CATEGORY_LIMIT);
   const hasCategories = displayCategories.length > 0;
   const hasFeaturedProducts = featuredProducts.length > 0;
 
