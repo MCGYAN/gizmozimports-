@@ -114,9 +114,9 @@ export const SEO = {
       description: DEFAULT_DESCRIPTION,
     },
     shop: {
-      title: 'See the price. Buy from China.',
+      title: 'Shop clear China prices',
       description:
-        'See the price. Buy from China. Pay a clear bill and track it to Ghana with Gizmoz Trades.',
+        'Clear prices. Real China goods. Order online, pay a clear bill, and track it from China to Ghana with Gizmoz Trades.',
     },
     categories: {
       title: 'Shop by type',
