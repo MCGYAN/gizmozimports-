@@ -105,7 +105,7 @@ export default function HomeClient({
                 Pick what you want. Get a clear bill. Pay. Then watch it travel all the way to
                 Ghana.
               </p>
-              <div className="hero-cta-group mt-7 sm:mt-8">
+              <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center sm:gap-3">
                 <Link href="/shop" prefetch className="hero-cta-primary">
                   Start shopping
                 </Link>
