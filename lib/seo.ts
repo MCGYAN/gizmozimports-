@@ -77,9 +77,10 @@ export const SEO = {
     ],
   },
 
-  defaultOgImagePath: `${SITE_URL}/og/default.png`,
+  /** `/og/share.png` — Soft Ocean card; new filename so WhatsApp/Facebook re-fetch. */
+  defaultOgImagePath: `${SITE_URL}/og/share.png`,
   ogImages: {
-    default: '/og/default.png',
+    default: '/og/share.png',
     twitter: '/og/twitter.png',
     square: '/og/square.png',
     buyRmb: '/og/buy-rmb.png',

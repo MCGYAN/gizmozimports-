@@ -22,23 +22,48 @@ export default async function Image() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '56px 64px',
-          background: 'linear-gradient(135deg, #0C4A6E 0%, #083A57 50%, #0A5578 100%)',
+          background: 'linear-gradient(135deg, #0C4A6E 0%, #083A57 48%, #0A5578 100%)',
           color: '#fff',
           fontFamily: 'system-ui, sans-serif',
+          position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        {/* Soft Light Blue wash — brand mesh feel (Satori-safe, no filters) */}
+        <div
+          style={{
+            position: 'absolute',
+            top: -120,
+            left: -80,
+            width: 480,
+            height: 480,
+            borderRadius: 999,
+            background: 'rgba(140, 207, 255, 0.2)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -140,
+            right: -60,
+            width: 420,
+            height: 420,
+            borderRadius: 999,
+            background: 'rgba(234, 246, 255, 0.1)',
+          }}
+        />
+
+        <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={logoSrc}
             width={280}
-            height={127}
+            height={101}
             style={{ objectFit: 'contain' }}
             alt=""
           />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, position: 'relative' }}>
           <div
             style={{
               display: 'flex',
@@ -51,25 +76,26 @@ export default async function Image() {
           <div
             style={{
               display: 'flex',
-              fontSize: 54,
+              fontSize: 52,
               fontWeight: 700,
               letterSpacing: '-0.03em',
               lineHeight: 1.1,
-              maxWidth: 900,
+              maxWidth: 960,
             }}
           >
-            Import from China to Ghana
+            Buy from China the easy way
           </div>
           <div
             style={{
               display: 'flex',
               fontSize: 26,
-              color: '#cbd5e1',
-              maxWidth: 860,
+              color: '#EAF6FF',
+              maxWidth: 900,
               lineHeight: 1.35,
+              opacity: 0.92,
             }}
           >
-            Gadgets, electronics and everyday goods. Clear prices. Real updates. Buy RMB with cedis.
+            Gadgets, electronics &amp; everyday goods · Clear prices · Real updates
           </div>
         </div>
 
@@ -79,11 +105,11 @@ export default async function Image() {
             justifyContent: 'space-between',
             alignItems: 'center',
             fontSize: 22,
-            color: '#94a3b8',
+            position: 'relative',
           }}
         >
-          <span>{SEO.brandName}</span>
-          <span style={{ color: '#8CCFFF', fontWeight: 600 }}>China to Ghana imports</span>
+          <span style={{ color: '#8CCFFF', fontWeight: 600 }}>gizmozimports.com</span>
+          <span style={{ color: 'rgba(255,255,255,0.72)', fontWeight: 500 }}>China to Ghana</span>
         </div>
       </div>
     ),
