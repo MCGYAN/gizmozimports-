@@ -43,7 +43,7 @@ import { ChevronRight, Heart, Star, Minus, Plus, ShoppingCart, ShieldCheck, Refr
 function colorNameToHex(name: string): string {
   const map: Record<string, string> = {
     red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308',
-    orange: '#f97316', purple: '#a855f7', pink: '#ec4899', black: '#0C4A6E',
+    orange: '#f97316', purple: '#a855f7', pink: '#ec4899', black: '#000000',
     white: '#ffffff', gray: '#6b7280', grey: '#6b7280', brown: '#92400e',
     navy: '#1e3a5f', gold: '#d4a017', silver: '#c0c0c0', beige: '#f5f5dc',
     maroon: '#800000', teal: '#14b8a6', coral: '#ff7f50', ivory: '#fffff0',
