@@ -415,8 +415,8 @@ function ShopContent({
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5" data-product-shop>
-                    {products.map(product => (
-                      <ProductCard key={product.id} {...product} compact />
+                    {products.map((product, index) => (
+                      <ProductCard key={product.id} {...product} compact priority={index < 4} />
                     ))}
                   </div>
 
