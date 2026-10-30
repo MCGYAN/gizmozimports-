@@ -10,34 +10,34 @@ import { buildWhatsAppHref } from '@/lib/store-config';
 const STEPS = [
   {
     title: 'You shop',
-    text: 'Browse listed products on the site and choose what you want.',
+    text: 'Look at products on the site and pick what you want.',
   },
   {
-    title: 'You get an invoice',
-    text: 'Checkout and receive a clear invoice for your order.',
+    title: 'You get a bill',
+    text: 'Checkout and get a clear invoice for your order.',
   },
   {
     title: 'You pay',
-    text: 'Pay by MoMo or bank using the details on your invoice, then confirm payment.',
+    text: 'Pay by MoMo or bank using the details on your bill, then tap that you paid.',
   },
   {
     title: 'You track',
-    text: 'Follow your order from China to Ghana until it is ready for you.',
+    text: 'Follow the order from China until it is ready for you in Ghana.',
   },
 ];
 
 const CATEGORIES = [
-  { title: 'Gadgets & Electronic Products', text: 'Phones, accessories, computers, and smart devices.', icon: 'ri-smartphone-line' },
-  { title: 'Construction Equipment', text: 'Tools, machinery, and site equipment for building projects.', icon: 'ri-building-2-line' },
-  { title: 'Auto & Auto Parts', text: 'Vehicle parts, accessories, and automotive supplies.', icon: 'ri-car-line' },
-  { title: 'Stationery', text: 'Office, school, and business stationery supplies.', icon: 'ri-pencil-ruler-2-line' },
-  { title: 'Laboratory Experiment Equipment', text: 'Lab instruments, glassware, and experiment supplies.', icon: 'ri-flask-line' },
-  { title: 'Home Appliances', text: 'Kitchen, laundry, and utility appliances.', icon: 'ri-home-gear-line' },
+  { title: 'Gadgets & phones', text: 'Phones, accessories, computers, and smart devices.', icon: 'ri-smartphone-line' },
+  { title: 'Building tools', text: 'Tools and gear for building and site work.', icon: 'ri-building-2-line' },
+  { title: 'Cars & parts', text: 'Car parts and car supplies.', icon: 'ri-car-line' },
+  { title: 'Stationery', text: 'Office, school, and business supplies.', icon: 'ri-pencil-ruler-2-line' },
+  { title: 'Lab gear', text: 'Lab tools and experiment supplies.', icon: 'ri-flask-line' },
+  { title: 'Home appliances', text: 'Kitchen, laundry, and home machines.', icon: 'ri-home-gear-line' },
 ];
 
 const VALUES = [
-  ['Clear invoice', 'You see what to pay before money moves.'],
-  ['Simple payment', 'MoMo or bank. Details are on your invoice.'],
+  ['Clear bill', 'You see what to pay before money moves.'],
+  ['Easy pay', 'MoMo or bank. The details are on your bill.'],
   ['Real tracking', 'Follow every step from China to Ghana.'],
 ];
 
@@ -51,45 +51,43 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#f7f8fa]">
       <PageHero
         size="large"
-        title="Buy from China the clear way."
-        subtitle="Shop listed products. Get your invoice. Pay. Track your order from China to Ghana."
+        title="We help Ghana buy from China."
+        subtitle="Shop the list. Get a clear bill. Pay. Track your order until it reaches Ghana."
       />
 
-      {/* Story */}
       <section className="border-b border-slate-200/80 bg-white">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="mx-auto max-w-2xl">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              Built for Ghana buyers who want control
+              Made for people who want a clear path
             </h2>
             <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-slate-600 sm:text-base md:text-lg">
               <p>
-                <span className="font-semibold text-brand-primary">Gizmoz Trades</span> helps people
-                and businesses in Ghana buy goods from China without living in WhatsApp chats.
+                <span className="font-semibold text-brand-primary">Gizmoz Trades</span> helps
+                people and shops in Ghana buy goods from China without getting lost in long chat
+                threads.
               </p>
               <p>
-                You shop what is listed: gadgets, electronics, construction equipment, auto parts,
-                stationery, lab equipment, and home appliances. You get an invoice, you pay, and you
-                track the journey to Ghana.
+                You shop what is listed: phones, home items, tools, car parts, and more. You get a
+                bill. You pay. Then you track the trip to Ghana.
               </p>
               <p>
-                Need a question answered? Message us on WhatsApp. Ready to buy what you see? Order
-                on the site.
+                Need a quick answer? Message us on WhatsApp. Ready to buy what you see? Order on
+                the site.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Process */}
       <section className="border-b border-slate-200/80 bg-[#eef2f7]">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              Shop, invoice, pay, track
+              Shop, bill, pay, track
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              A clear path from the product list to Ghana, so you always know what to do next.
+              Four easy steps. You always know what to do next.
             </p>
           </div>
 
@@ -113,7 +111,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* What we source */}
       <section className="border-b border-slate-200/80 bg-[#eef2f7]">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="max-w-2xl">
@@ -121,7 +118,7 @@ export default function AboutPage() {
               What you can buy with us
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              Start in the shop. If an item is not listed yet, ask us and we will help.
+              Start in the shop. If you cannot find it, ask us and we will help.
             </p>
           </div>
 
@@ -143,7 +140,7 @@ export default function AboutPage() {
               href="/shop"
               className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-semibold text-brand-primary sm:w-auto"
             >
-              See products
+              Open the shop
               <ArrowRight className="h-4 w-4" />
             </Link>
             {whatsApp ? (
@@ -154,23 +151,22 @@ export default function AboutPage() {
                 className="btn-interactive inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-brand-primary sm:w-auto"
               >
                 <MessageCircle className="h-4 w-4" />
-                Need help? WhatsApp us
+                Ask us on WhatsApp
               </a>
             ) : null}
           </div>
         </div>
       </section>
 
-      {/* Why us */}
       <section className="border-b border-slate-200/80 bg-white">
         <div className="store-container py-10 sm:py-14 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="font-heading text-[1.625rem] font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl md:text-4xl">
-              You stay in charge of your order
+              You stay in charge
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-slate-600 sm:text-base md:text-lg">
-              We are based in {address} and serve customers across Ghana. You order on the site.
-              We handle China. You see the status as your goods move.
+              We are based in {address} and serve people across Ghana. You order on the site. We
+              handle China. You see the status as your goods move.
             </p>
           </div>
 
@@ -185,7 +181,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="bg-[#eef2f7]">
         <div className="store-container py-10 sm:py-14 md:py-16">
           <div className="mx-auto max-w-xl text-center">
@@ -193,14 +188,14 @@ export default function AboutPage() {
               Ready to order?
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
-              Start in the shop. Get your invoice. Pay. Track your order to Ghana.
+              Open the shop. Get your bill. Pay. Track it to Ghana.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/shop"
                 className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-[15px] font-semibold text-white hover:bg-brand-dark sm:w-auto"
               >
-                Shop products
+                Start shopping
                 <ArrowRight className="h-4 w-4" />
               </Link>
               {whatsApp ? (
@@ -211,7 +206,7 @@ export default function AboutPage() {
                   className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-brand-accent" />
-                  Need help? WhatsApp us
+                  Ask us on WhatsApp
                 </a>
               ) : (
                 <Link
@@ -219,7 +214,7 @@ export default function AboutPage() {
                   className="btn-premium inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-[15px] font-semibold text-brand-primary sm:w-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-brand-accent" />
-                  Need help? Contact us
+                  Contact us
                 </Link>
               )}
             </div>

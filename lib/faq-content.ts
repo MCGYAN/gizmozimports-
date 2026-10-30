@@ -7,7 +7,7 @@ export type FaqItem = {
 };
 
 export const FAQ_CATEGORIES = [
-  { id: 'all', name: 'All Questions', icon: 'ri-question-line' },
+  { id: 'all', name: 'All questions', icon: 'ri-question-line' },
   { id: 'orders', name: 'Orders', icon: 'ri-shopping-bag-line' },
   { id: 'shipping', name: 'Shipping', icon: 'ri-truck-line' },
   { id: 'returns', name: 'Returns', icon: 'ri-arrow-go-back-line' },
@@ -20,43 +20,43 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'orders',
     question: 'How do I place an order?',
     answer:
-      'Browse products, add them to your cart, and check out with your name, email, and phone. Gizmoz Trades currently serves Ghana only. You choose pickup or delivery later, when your package is ready in Ghana.',
+      'Look at the products, add what you want, and checkout with your name, email, and phone. We serve Ghana only. Later, when your package is ready in Ghana, you choose pickup or delivery.',
   },
   {
     category: 'orders',
-    question: 'I ordered as a guest. How do I see my invoice again?',
+    question: 'I ordered as a guest. How do I see my bill again?',
     answer:
-      'Create an account or sign in with the same email you used at checkout. Your guest invoices and orders show in Order history. You can also use Find my order in the footer with your order number and email.',
+      'Make an account or sign in with the same email you used at checkout. Your guest bills and orders show in Order history. You can also use Track my order with your order number and email.',
   },
   {
     category: 'orders',
     question: 'Where is my order?',
     answer:
-      'Sign in and open the order from your account. You will see the import journey from payment through sourcing, shipping to Ghana, and ready or delivered. If you have no account yet, use Find my order in the footer.',
+      'Sign in and open the order from your account. You will see each step from payment, through buying in China, shipping to Ghana, and ready or delivered. If you have no account yet, use Track my order.',
   },
   {
     category: 'orders',
     question: 'Can I change or cancel my order?',
     answer:
-      'Message us on WhatsApp or the contact page as soon as you can, with your order number. If payment is confirmed and sourcing has started, changes may not be possible.',
+      'Message us on WhatsApp or the contact page as soon as you can, with your order number. If payment is confirmed and we have started buying, changes may not be possible.',
   },
   {
     category: 'shipping',
-    question: 'How long does an import take?',
+    question: 'How long does shipping take?',
     answer:
-      'It depends on the product and shipping method. We update your order status as goods move from China to Ghana. Ask us before you pay if you need a clearer estimate.',
+      'It depends on the product and how it ships. We update your order as goods move from China to Ghana. Ask us before you pay if you want a clearer time.',
   },
   {
     category: 'shipping',
     question: 'Do you deliver to my door?',
     answer:
-      'Yes, within Ghana. When your package is ready, open Deliveries in your account and choose pickup or delivery. Submit your preferred day and address, then we call to confirm the arrangement and delivery cost.',
+      'Yes, within Ghana. When your package is ready, open Deliveries in your account and choose pickup or delivery. Tell us your day and address, then we call to confirm and share any delivery cost.',
   },
   {
     category: 'shipping',
     question: 'Where do goods arrive in Ghana?',
     answer:
-      'Imports come into Ghana for clearing, then become ready for pickup or delivery. Your order page shows when that stage is reached.',
+      'Goods come into Ghana for clearing, then become ready for pickup or delivery. Your order page shows when that stage is reached.',
   },
   {
     category: 'shipping',
@@ -68,31 +68,31 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'payment',
     question: 'How can I pay?',
     answer:
-      'Every order gets an invoice with bank or MoMo transfer details. Pay the invoice, then tap I’ve paid on your order page so we can confirm and process your order.',
+      'Every order gets a clear bill with bank or MoMo details. Pay the bill, then tap I’ve paid on your order page so we can confirm and keep going.',
   },
   {
     category: 'payment',
-    question: 'I paid the invoice. What next?',
+    question: 'I paid the bill. What next?',
     answer:
-      'Open your order and tap I’ve paid. That tells us to confirm the transfer. After we confirm, your import journey moves forward.',
+      'Open your order and tap I’ve paid. That tells us to confirm the transfer. After we confirm, your order moves forward.',
   },
   {
     category: 'payment',
     question: 'Do you accept cash on delivery?',
     answer:
-      'No. Pay using the bank or MoMo details on your invoice before we source and ship.',
+      'No. Pay using the bank or MoMo details on your bill before we buy and ship.',
   },
   {
     category: 'payment',
     question: 'Can I pay in parts?',
     answer:
-      'For some larger imports we may agree a plan. Message us on WhatsApp before you checkout so we can confirm what is possible.',
+      'For some bigger orders we may agree a plan. Message us on WhatsApp before you checkout so we can confirm what is possible.',
   },
   {
     category: 'returns',
     question: 'Can I return an item?',
     answer:
-      'Import orders are handled case by case. Contact us with your order number and photos if something is wrong, damaged, or not what you ordered. We will tell you the next step clearly.',
+      'We handle each order case by case. Contact us with your order number and photos if something is wrong, damaged, or not what you ordered. We will tell you the next step clearly.',
   },
   {
     category: 'returns',
@@ -104,7 +104,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'account',
     question: 'Do I need an account to buy?',
     answer:
-      'No. You can checkout as a guest. Creating an account with the same email later lets you reopen invoices, tap I’ve paid, and track orders in one place.',
+      'No. You can checkout as a guest. Making an account with the same email later lets you reopen bills, tap I’ve paid, and track orders in one place.',
   },
   {
     category: 'account',
@@ -117,11 +117,5 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: 'I forgot my password. What do I do?',
     answer:
       'On the sign-in page, use Forgot password. We email a reset link. You can also contact us on WhatsApp with the email on the order.',
-  },
-  {
-    category: 'payment',
-    question: 'What is Buy RMB on Gizmoz Trades?',
-    answer:
-      'Buy RMB lets you pay Ghana Cedis and receive RMB for paying Chinese suppliers. Open Buy RMB, lock the rate, get an invoice, and pay. It is for China payment needs, not a bank account product.',
   },
 ];

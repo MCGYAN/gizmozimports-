@@ -207,8 +207,8 @@ function ShopContent({
   return (
     <main className="store-page">
       <PageHero
-        title="Shop imports"
-        subtitle="Find what you need. Filter by category and price. No guesswork."
+        title="Shop China goods for Ghana"
+        subtitle="See the price. Order what you want. We bring it to Ghana."
       />
 
       {/* Mobile Filter Toggle */}

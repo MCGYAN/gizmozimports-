@@ -1,32 +1,29 @@
 export default function ProcessSteps() {
   const steps = [
     {
-      title: 'Shop the products',
-      description: 'Browse what is listed on the site and add what you want to your cart.',
+      title: '1. Shop',
+      description: 'Look at the products on the site and add what you want.',
     },
     {
-      title: 'Get your invoice',
-      description: 'Checkout and receive a clear invoice for your order.',
+      title: '2. Get your bill',
+      description: 'Checkout and get a clear invoice for your order.',
     },
     {
-      title: 'Pay',
-      description: 'Pay by bank or MoMo using the details on your invoice. Then mark that you have paid.',
+      title: '3. Pay',
+      description: 'Pay by bank or MoMo using the details on your bill. Then tap that you paid.',
     },
     {
-      title: 'Track to Ghana',
-      description: 'Follow your order step by step from China until it is ready in Ghana.',
+      title: '4. Track to Ghana',
+      description: 'Follow the order from China until it is ready for you in Ghana.',
     },
   ];
 
   return (
     <section>
-      <h2 className="text-2xl md:text-3xl font-bold text-brand-black">How buying works</h2>
+      <h2 className="text-2xl font-bold text-brand-black md:text-3xl">Four easy steps</h2>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {steps.map((step, index) => (
+        {steps.map((step) => (
           <article key={step.title} className="rounded-card border border-gray-200 bg-white p-5">
-            <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
-              {index + 1}
-            </div>
             <h3 className="font-semibold text-brand-black">{step.title}</h3>
             <p className="mt-2 text-sm text-gray-600">{step.description}</p>
           </article>

@@ -307,10 +307,10 @@ export default function CheckoutPage() {
           <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
             <ShoppingCart className="w-10 h-10 text-gray-300" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
-          <p className="text-gray-600 mb-8">Add some items to start the checkout process.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Your basket is empty</h1>
+          <p className="text-gray-600 mb-8">Add something from the shop, then come back to pay.</p>
           <Link href="/shop" className="inline-block bg-brand-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#0C4A6E] transition-colors">
-            Return to Shop
+            Open the shop
           </Link>
         </div>
       </main>
@@ -332,7 +332,7 @@ export default function CheckoutPage() {
         </Link>
 
         <h1 className="font-heading text-xl font-bold text-brand-primary sm:text-3xl">Checkout</h1>
-        <p className="mt-1 text-sm text-slate-500">Your details → invoice → pay.</p>
+        <p className="mt-1 text-sm text-slate-500">Your details → clear bill → pay.</p>
 
         {user && (
           <p className="mt-3 inline-flex max-w-full items-center gap-2 truncate rounded-lg bg-brand-light px-3 py-1.5 text-xs font-medium text-brand-primary sm:text-sm">
@@ -425,7 +425,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mt-4 rounded-xl border border-brand-accent/20 bg-brand-accent/5 px-3.5 py-3 text-xs leading-relaxed text-brand-primary sm:mt-5 sm:text-sm">
-                You get an invoice with bank and MoMo details. Pay by transfer, then tap “I’ve paid”
+                You get a clear bill with bank and MoMo details. Pay by transfer, then tap “I’ve paid”
                 on your order page.
               </div>
 

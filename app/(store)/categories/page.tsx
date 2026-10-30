@@ -29,8 +29,8 @@ export default async function CategoriesPage() {
   return (
     <div className="min-h-screen bg-brand-surface">
       <PageHero
-        title="Shop by Category"
-        subtitle="Gadgets, appliances, furniture, and more. Pick a category and we help you import it."
+        title="Shop by type"
+        subtitle="Phones, home items, tools, and more. Tap a group and pick what you need."
       />
 
       <div className="store-container py-8 sm:py-12 md:py-16">
@@ -58,10 +58,10 @@ export default async function CategoriesPage() {
       <div className="bg-[#0C4A6E] py-10 md:py-20">
         <div className="store-container max-w-3xl text-center">
           <h2 className="font-heading text-xl font-bold text-white md:text-3xl">
-            Not sure where to start?
+            Not sure what to pick?
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/75 md:mt-4 md:text-lg">
-            Tell us what you want to bring in. We walk you through cost and timing.
+            Open the shop, or ask us. We will help you choose.
           </p>
           <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
             <Link
@@ -69,14 +69,14 @@ export default async function CategoriesPage() {
               className="btn-interactive inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-accent px-6 text-sm font-bold text-brand-primary md:px-8 md:py-4 md:text-base"
             >
               <Search className="h-5 w-5" />
-              Browse products
+              Open the shop
             </Link>
             <Link
               href="/contact"
               className="btn-interactive inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/30 bg-transparent px-6 text-sm font-bold text-white md:px-8 md:py-4 md:text-base"
             >
               <HeadphonesIcon className="h-5 w-5" />
-              Talk to Gizmoz Trades
+              Ask Gizmoz Trades
             </Link>
           </div>
         </div>

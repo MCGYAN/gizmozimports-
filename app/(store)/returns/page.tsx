@@ -16,7 +16,7 @@ export default function ReturnsPage() {
             Returns and issues
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/80">
-            Import orders are handled case by case. Message us and we will tell you the next step.
+            Every order is different. Message us and we will tell you the next step.
           </p>
         </div>
       </div>
@@ -31,7 +31,7 @@ export default function ReturnsPage() {
               <li>Contact us on WhatsApp or the contact page. We review it with you.</li>
             </ol>
             <p className="text-sm text-gray-500">
-              There is no self-serve returns portal. We handle each import personally.
+              There is no self-serve returns page. We handle each order with you personally.
             </p>
           </div>
 

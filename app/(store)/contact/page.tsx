@@ -114,9 +114,9 @@ export default function ContactPage() {
   const socialInstagram = getSetting('social_instagram') || '';
   const socialTikTok = getSetting('social_tiktok') || '';
 
-  const heroTitle = pageContent?.title || 'Get In Touch';
-  const heroSubtitle = pageContent?.subtitle || 'Have a question or need assistance?';
-  const heroContent = pageContent?.content || 'Our friendly team is here to help. Reach out through any of our contact channels.';
+  const heroTitle = pageContent?.title || 'Talk to us';
+  const heroSubtitle = pageContent?.subtitle || 'Got a question about an order or a product?';
+  const heroContent = pageContent?.content || 'We are here to help. Message us on WhatsApp, email, or use the form below.';
 
   const waLink = buildWhatsAppHref(contactWhatsapp);
 
@@ -131,16 +131,16 @@ export default function ContactPage() {
             title: 'WhatsApp',
             value: contactWhatsapp,
             link: waLink,
-            description: 'Chat with us instantly',
+            description: 'Chat with us now',
           },
         ]
       : []),
     {
       icon: 'ri-mail-line',
-      title: 'Email Us',
+      title: 'Email',
       value: contactEmail,
       link: `mailto:${contactEmail}`,
-      description: 'We respond within 24 hours',
+      description: 'We reply within one day',
     },
     ...(socialFacebook
       ? [
@@ -149,7 +149,7 @@ export default function ContactPage() {
             title: 'Facebook',
             value: 'Facebook',
             link: socialFacebook,
-            description: 'Follow us for updates',
+            description: 'Follow for news',
           },
         ]
       : []),
@@ -180,15 +180,15 @@ export default function ContactPage() {
   const faqs = [
     {
       question: 'How do I place an order?',
-      answer: 'Shop the products on the site, checkout, get your invoice, and pay. Then track your order from China to Ghana. WhatsApp us only if you need help.'
+      answer: 'Shop on the site, checkout, get your bill, and pay. Then track the order from China to Ghana. Message us only if you need help.'
     },
     {
       question: 'How long does shipping take?',
-      answer: 'It depends on what you buy and how it ships. We share a clear estimate for your order and update you if anything changes.'
+      answer: 'It depends on what you buy and how it ships. We give you a clear time for your order and tell you if anything changes.'
     },
     {
       question: 'How do I pay?',
-      answer: 'Your invoice shows MoMo or bank details. Pay using those details, then confirm so we can process the order.'
+      answer: 'Your bill shows MoMo or bank details. Pay with those details, then tap that you paid so we can keep going.'
     }
   ];
 

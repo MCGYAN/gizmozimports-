@@ -7,10 +7,10 @@ export default function ShippingPage() {
         <div className="store-container relative z-10 text-center">
           <p className="store-eyebrow mb-3">Delivery</p>
           <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-            Your order gets home safe
+            Your order comes to Ghana safe
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/80">
-            We move your import from China to Ghana. You always know where it is.
+            We move your goods from China to Ghana. You always know where they are.
           </p>
         </div>
       </div>
@@ -23,11 +23,11 @@ export default function ShippingPage() {
                 Already buying in China?
               </p>
               <h2 className="mt-2 font-heading text-2xl font-bold sm:text-3xl">
-                Send your supplier packages through Gizmoz Trades
+                Send supplier packages through Gizmoz Trades
               </h2>
               <p className="mt-3 max-w-2xl leading-relaxed text-white/75">
-                Create an account to receive your personal shipping mark and our China warehouse
-                address. Register the supplier tracking number, then follow your shipment to Ghana.
+                Make an account to get your shipping mark and our China warehouse address. Add the
+                supplier tracking number, then follow the shipment to Ghana.
               </p>
             </div>
             <Link
@@ -50,8 +50,8 @@ export default function ShippingPage() {
                 <div>
                   <h3 className="mb-2 font-bold text-gray-900">You pay and we confirm</h3>
                   <p className="leading-relaxed text-gray-600">
-                    Pay by Mobile Money for smaller carts, or by invoice transfer for bigger ones.
-                    When payment is confirmed, we start your import.
+                    Pay by MoMo or bank using your bill. When we see the payment, we start your
+                    order.
                   </p>
                 </div>
               </div>
@@ -61,9 +61,9 @@ export default function ShippingPage() {
                   <span className="font-bold text-brand-primary">2</span>
                 </div>
                 <div>
-                  <h3 className="mb-2 font-bold text-gray-900">We source and ship</h3>
+                  <h3 className="mb-2 font-bold text-gray-900">We buy and ship</h3>
                   <p className="leading-relaxed text-gray-600">
-                    We buy from trusted suppliers in China and move your goods toward Ghana.
+                    We buy from trusted sellers in China and move your goods toward Ghana.
                   </p>
                 </div>
               </div>
@@ -75,8 +75,8 @@ export default function ShippingPage() {
                 <div>
                   <h3 className="mb-2 font-bold text-gray-900">You stay updated</h3>
                   <p className="leading-relaxed text-gray-600">
-                    Sign in with the same email you used at checkout to see your order journey,
-                    or use Find my order in the footer.
+                    Sign in with the same email you used at checkout to see your order, or use
+                    Track my order.
                   </p>
                 </div>
               </div>
@@ -88,7 +88,8 @@ export default function ShippingPage() {
                 <div>
                   <h3 className="mb-2 font-bold text-gray-900">It arrives in Ghana</h3>
                   <p className="leading-relaxed text-gray-600">
-                    Your import clears and becomes ready for pickup or delivery. We handle the hard part.
+                    Your goods clear and become ready for pickup or delivery. We handle the hard
+                    part.
                   </p>
                 </div>
               </div>
@@ -104,8 +105,8 @@ export default function ShippingPage() {
                   Timelines vary
                 </h3>
                 <p className="text-sm leading-relaxed text-gray-600">
-                  Import timing depends on the product and how it ships. We update your order as
-                  it moves. Ask us if you need a clearer estimate before you pay.
+                  Timing depends on the product and how it ships. We update your order as it
+                  moves. Ask us if you want a clearer time before you pay.
                 </p>
               </div>
 
@@ -155,9 +156,9 @@ export default function ShippingPage() {
         </div>
 
         <div className="mb-16 rounded-2xl border border-gray-200 bg-white p-8">
-          <h2 className="mb-6 text-3xl font-bold text-gray-900">Never wonder where your order is</h2>
+          <h2 className="mb-6 text-3xl font-bold text-gray-900">Always know where your order is</h2>
           <p className="mb-6 leading-relaxed text-gray-600">
-            Your account shows the real import journey. Typical steps look like this:
+            Your account shows real status. Typical steps look like this:
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="text-center">
@@ -170,7 +171,7 @@ export default function ShippingPage() {
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
                 <i className="ri-shopping-bag-3-line text-2xl text-amber-700"></i>
               </div>
-              <p className="font-medium text-gray-900">Sourcing in China</p>
+              <p className="font-medium text-gray-900">Buying in China</p>
             </div>
             <div className="text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sky-100">
@@ -205,14 +206,14 @@ export default function ShippingPage() {
         <div className="bg-[#0C4A6E] p-8 text-center text-white">
           <h2 className="mb-4 text-3xl font-bold">Questions about delivery?</h2>
           <p className="mb-6 leading-relaxed text-white/80">
-            Ask about timing, pickup, or where your order stands.
+            Ask about timing, pickup, or where your order is.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/contact"
               className="btn-interactive inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 font-medium text-brand-primary"
             >
-              Contact Support
+              Contact us
             </Link>
             <Link
               href="/faqs"

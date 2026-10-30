@@ -29,7 +29,7 @@ export default function FAQsPage() {
               Quick answers
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-white/80">
-              Orders, payments, imports to Ghana, and your account. Plain answers.
+              Orders, pay, shipping to Ghana, and your account — said simply.
             </p>
 
             <div className="relative mt-8">
@@ -84,9 +84,9 @@ export default function FAQsPage() {
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="ri-search-line text-4xl text-gray-400"></i>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No results found</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Nothing matched</h3>
             <p className="text-gray-600">
-              Try adjusting your search or browse different categories
+              Try a different search, or tap another group above.
             </p>
           </div>
         )}
@@ -96,7 +96,7 @@ export default function FAQsPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Still have questions?</h2>
           <p className="text-xl text-white/80 mb-8 leading-relaxed">
-            Talk to us. We reply within 24 hours.
+            Talk to us. We reply within one day.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
@@ -104,14 +104,14 @@ export default function FAQsPage() {
               className="btn-interactive inline-flex items-center gap-2 bg-white text-brand-primary px-8 py-4 rounded-xl font-medium whitespace-nowrap"
             >
               <i className="ri-mail-line text-lg"></i>
-              Contact Support
+              Contact us
             </Link>
             <Link
               href="/contact"
               className="btn-interactive inline-flex items-center gap-2 bg-brand-accent text-brand-primary px-8 py-4 rounded-xl font-medium whitespace-nowrap"
             >
               <i className="ri-customer-service-2-line text-lg"></i>
-              More help
+              Ask for help
             </Link>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function FAQsPage() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Shipping</h3>
             <p className="text-gray-600 leading-relaxed">
-              How your import travels from China to your door
+              How your order moves from China to Ghana
             </p>
           </Link>
 

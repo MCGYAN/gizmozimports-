@@ -25,12 +25,12 @@ function resolveSiteUrl(raw: string | undefined): string {
 const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_APP_URL);
 const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || 'Gizmoz Trades').trim() || 'Gizmoz Trades';
 
-const TAGLINE = 'Import from China to Ghana without the stress';
+const TAGLINE = 'China goods for Ghana — clear price, real tracking';
 const TAGLINE_LONG =
-  'Gizmoz Trades helps you source gadgets, electronics, appliances, and everyday goods from China to Ghana. Clear prices, real updates, WhatsApp support, and Buy RMB for China payments.';
+  'Gizmoz Trades is the simple way to buy goods from China for Ghana. See the price, get a clear bill, pay by MoMo or bank, and track your order to Ghana. WhatsApp help when you need it, plus Buy RMB for China payments.';
 
 const DEFAULT_DESCRIPTION =
-  'Import gadgets, electronics, appliances, and everyday goods from China to Ghana with Gizmoz Trades. Clear pricing, order tracking, shipping support, and Buy RMB with Ghana Cedis.';
+  'Buy gadgets, phones, home items, and more from China for Ghana with Gizmoz Trades. Clear prices, easy pay, order tracking, and Buy RMB with Ghana Cedis.';
 
 export const SEO = {
   siteUrl: SITE_URL,
@@ -59,21 +59,21 @@ export const SEO = {
   /** Facts AI systems and crawlers should trust (also mirrored in /llms.txt). */
   aiSummary: {
     whatWeAre:
-      'Gizmoz Trades is a China-to-Ghana import and ecommerce company that helps customers buy gadgets, electronics, appliances, furniture, and bulk goods from China with clear prices and shipment updates.',
+      'Gizmoz Trades is an online store that helps people in Ghana buy goods from China. You shop, get a clear bill, pay, and track the order to Ghana.',
     services: [
-      'Product sourcing and importing from China to Ghana (gadgets, electronics, appliances, furniture, fashion, tools, bulk goods)',
-      'Online storefront with checkout and order tracking',
-      'Buy RMB: pay Ghana Cedis and receive RMB for paying Chinese suppliers',
-      'WhatsApp and phone customer support for quotes and order help',
+      'Shop China goods for Ghana (phones, gadgets, home items, tools, and more)',
+      'Online checkout with a clear invoice and order tracking',
+      'Buy RMB: pay Ghana Cedis and get RMB to pay China suppliers',
+      'WhatsApp and phone help when you need it',
     ],
     whoFor:
-      'People and businesses in Ghana who want to import from China without dealing with unreliable sellers alone.',
-    locations: 'Serves customers across Ghana. Imports move from China into Ghana for clearing, pickup, or delivery.',
+      'People and shops in Ghana who want China goods with a clear price and real updates.',
+    locations: 'Serves customers across Ghana. Goods move from China into Ghana for clearing, pickup, or delivery.',
     differentiators: [
-      'Clear pricing before you pay',
-      'Real status updates on your import journey',
-      'Human support on WhatsApp and phone',
-      'Official-style Buy RMB desk with invoice for China payments',
+      'Clear price before you pay',
+      'Real status updates from China to Ghana',
+      'Help on WhatsApp and phone',
+      'Buy RMB with a clear invoice for China payments',
     ],
   },
 
@@ -110,48 +110,48 @@ export const SEO = {
   /** Per-page meta (override CMS; use with pageMetadata()). */
   pages: {
     home: {
-      title: 'China to Ghana Imports',
+      title: 'China goods for Ghana',
       description: DEFAULT_DESCRIPTION,
     },
     shop: {
-      title: 'Shop imports from China',
+      title: 'Shop China goods for Ghana',
       description:
-        'Browse gadgets, electronics, appliances, and everyday goods ready to import from China to Ghana. Filter by category and price with Gizmoz Trades.',
+        'See phones, gadgets, home items, and more from China for Ghana. Check the price, order, and track with Gizmoz Trades.',
     },
     categories: {
-      title: 'Shop by category',
+      title: 'Shop by type',
       description:
-        'Browse import categories for China to Ghana. Electronics, appliances, furniture, fashion, and more from Gizmoz Trades.',
+        'Pick a product group — phones, home items, tools, and more — then shop China goods for Ghana with Gizmoz Trades.',
     },
     about: {
       title: 'About Gizmoz Trades',
       description:
-        'We sit between you and China. Gizmoz Trades helps Ghanaian buyers import with clear prices, real updates, and people you can talk to.',
+        'Gizmoz Trades helps Ghana buy from China. Clear prices, easy pay, real tracking, and people you can talk to.',
     },
     contact: {
       title: 'Contact us',
       description:
-        'Talk to Gizmoz Trades about quotes, orders, shipping, or Buy RMB. WhatsApp, phone, or the contact form. Real people in Ghana.',
+        'Ask Gizmoz Trades about an order, a product, shipping, or Buy RMB. WhatsApp, phone, or the form. Real people in Ghana.',
     },
     exchange: {
       title: 'Buy RMB with Ghana Cedis',
       description:
-        'Pay Ghana Cedis and get RMB for China suppliers with Gizmoz Trades. Lock today’s official buy rate, get an invoice, and pay securely.',
+        'Pay Ghana Cedis and get RMB for China suppliers with Gizmoz Trades. Lock today’s buy rate, get a bill, and pay safely.',
     },
     blog: {
-      title: 'Import tips and updates',
+      title: 'Tips and updates',
       description:
-        'Practical tips for importing from China to Ghana. Shipping, sourcing, payments, and updates from Gizmoz Trades.',
+        'Simple tips for buying from China to Ghana. Shipping, payments, and updates from Gizmoz Trades.',
     },
     faqs: {
-      title: 'Frequently asked questions',
+      title: 'Common questions',
       description:
         'Answers about orders, payments, shipping from China to Ghana, delivery, accounts, and Buy RMB at Gizmoz Trades.',
     },
     help: {
       title: 'Help center',
       description:
-        'Get help with orders, tracking, payments, and imports from China to Ghana. Gizmoz Trades support guides.',
+        'Get help with orders, tracking, payments, and buying from China to Ghana. Gizmoz Trades guides.',
     },
     privacy: {
       title: 'Privacy policy',
@@ -164,28 +164,28 @@ export const SEO = {
     shipping: {
       title: 'Shipping and delivery',
       description:
-        'How your import moves from China to Ghana. Clearing, ready for pickup or delivery, and status updates you can follow.',
+        'How your order moves from China to Ghana. Clearing, pickup or delivery, and status you can follow.',
     },
     returns: {
       title: 'Returns and refunds',
-      description: `Returns and refund policy for ${SITE_NAME} orders and imports.`,
+      description: `How returns and refunds work for ${SITE_NAME} orders.`,
     },
     'order-tracking': {
       title: 'Track your order',
       description:
-        'Track your Gizmoz Trades order from payment through shipping to Ghana and delivery.',
+        'Track your Gizmoz Trades order from payment, through shipping, to Ghana.',
     },
     cart: {
-      title: 'Shopping cart',
-      description: 'Your Gizmoz Trades shopping cart.',
+      title: 'Your basket',
+      description: 'Your Gizmoz Trades basket.',
     },
     wishlist: {
-      title: 'Wishlist',
-      description: 'Your saved products on Gizmoz Trades.',
+      title: 'Saved items',
+      description: 'Products you saved on Gizmoz Trades.',
     },
     account: {
       title: 'My account',
-      description: 'Manage your Gizmoz Trades account, orders, and profile.',
+      description: 'Your Gizmoz Trades account, orders, and profile.',
     },
   } as Record<string, { title: string; description: string }>,
 };

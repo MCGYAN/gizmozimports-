@@ -17,15 +17,15 @@ export const IMPORT_TYPE_OPTIONS: { value: ImportTypeValue; label: string }[] = 
 
 export const IMPORT_TYPE_DESCRIPTIONS: Record<string, string> = {
   cif_tema:
-    'Cost, Insurance & Freight to Tema port. The listed price typically includes shipping to Ghana and insurance; local clearing and delivery may be extra.',
+    'Price usually covers sea shipping to Tema and insurance. Local clearing and delivery in Ghana may be extra.',
   fob_china:
-    'Free On Board China. The price is for the goods at the origin port; shipping, insurance, and Ghana clearance are usually arranged separately.',
+    'Price is for the goods at the China port. Shipping, insurance, and Ghana clearing are usually separate.',
   exw:
-    'Ex Works. You collect from the supplier location in China; all freight, insurance, and import handling to Ghana is on you or arranged with us.',
+    'You collect from the seller in China. Shipping, insurance, and Ghana handling are on you — or we can help arrange them.',
   ddp:
-    'Delivered Duty Paid. The price aims to cover delivery to you in Ghana, including duties where quoted. Confirm scope with us before paying.',
+    'Price aims to cover delivery to you in Ghana, including duties when quoted. Confirm what is included before you pay.',
   custom:
-    'Custom import terms. See notes below or message us for exactly what is included in this price.',
+    'Special terms for this product. See the notes below, or message us to confirm what the price covers.',
 };
 
 export interface ProductCommerceSettings {

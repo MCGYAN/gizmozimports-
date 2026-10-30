@@ -79,11 +79,11 @@ function FindMyOrderContent() {
             No account needed
           </p>
           <h1 className="mt-2 font-heading text-3xl font-bold text-brand-primary sm:text-4xl">
-            Find my order
+            Track my order
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-            Enter your order number and checkout email. See payment status, re-download your
-            invoice, or follow your China to Ghana import journey.
+            Enter your order number and the email you used at checkout. See if you paid, get your
+            bill again, or follow the trip from China to Ghana.
           </p>
         </div>
 

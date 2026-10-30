@@ -5,27 +5,27 @@ import { Search, FileText, CreditCard, MapPin } from 'lucide-react';
 const STEPS = [
   {
     icon: Search,
-    title: 'Shop the list',
-    desc: 'Browse products on the site. Pick what you want.',
-    mobileDesc: 'Browse and pick what you want.',
+    title: 'Shop',
+    desc: 'Look at the products. Pick what you want.',
+    mobileDesc: 'Look and pick what you want.',
   },
   {
     icon: FileText,
-    title: 'Get your invoice',
-    desc: 'Checkout and receive a clear invoice for your order.',
-    mobileDesc: 'Checkout and get a clear invoice.',
+    title: 'Get your bill',
+    desc: 'Checkout and get a clear invoice for your order.',
+    mobileDesc: 'Checkout and get a clear bill.',
   },
   {
     icon: CreditCard,
     title: 'Pay',
-    desc: 'Pay by bank or MoMo using the details on your invoice.',
-    mobileDesc: 'Pay by bank or MoMo on your invoice.',
+    desc: 'Pay by bank or MoMo using the details on your bill.',
+    mobileDesc: 'Pay by bank or MoMo on your bill.',
   },
   {
     icon: MapPin,
     title: 'Track to Ghana',
-    desc: 'Follow your order step by step from China to Ghana.',
-    mobileDesc: 'Track it from China to Ghana.',
+    desc: 'Follow the order from China until it reaches Ghana.',
+    mobileDesc: 'Watch it come to Ghana.',
   },
 ];
 
@@ -38,7 +38,7 @@ export default function ProcessSteps() {
             How buying works
           </h2>
           <p className="mt-1 hidden text-sm leading-relaxed text-slate-600 md:mt-2 md:block md:text-base">
-            Four clear steps. No chasing. You stay in control.
+            Four easy steps. You always know what to do next.
           </p>
         </div>
 

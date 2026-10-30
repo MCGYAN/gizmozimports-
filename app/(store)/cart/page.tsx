@@ -57,7 +57,7 @@ export default function CartPage() {
                 <ShoppingCart className="h-8 w-8 sm:h-12 sm:w-12" />
               </div>
               <h2 className="font-heading text-xl font-bold text-brand-primary sm:mb-4 sm:text-3xl">Your basket is empty</h2>
-              <p className="mt-2 mb-6 text-sm font-medium text-slate-600 sm:mb-8 sm:text-base">Find something to import. Add it here when you are ready.</p>
+              <p className="mt-2 mb-6 text-sm font-medium text-slate-600 sm:mb-8 sm:text-base">Find something you like. Add it here when you are ready.</p>
               <Link href="/shop" className="btn-primary inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-primary px-8 text-sm font-bold text-brand-primary hover:bg-brand-accent sm:w-auto sm:text-base">
                 Start an Order
               </Link>
@@ -204,7 +204,7 @@ export default function CartPage() {
                     href="/shop"
                     className="block w-full text-center text-gray-500 hover:text-brand-primary font-bold py-2 transition-colors whitespace-nowrap"
                   >
-                    Continue browsing
+                    Keep shopping
                   </Link>
 
                   <div className="mt-8 bg-gray-50 rounded-xl p-5 space-y-4">
