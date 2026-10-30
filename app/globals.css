@@ -1015,7 +1015,7 @@ img {
 
     /* Admin — brand-aligned surfaces */
     .admin-card {
-      @apply liquid-glass-card p-6 transition-shadow duration-300 hover:shadow-[0_12px_40px_rgba(17, 24, 39,0.08)];
+      @apply liquid-glass-card p-6 transition-shadow duration-300 hover:shadow-store;
     }
 
     .admin-link {
@@ -1031,7 +1031,7 @@ img {
     }
 
     .admin-kpi {
-      @apply liquid-glass-card flex flex-col gap-3 p-4 transition-shadow duration-300 hover:shadow-[0_12px_40px_rgba(17, 24, 39,0.08)] md:p-5;
+      @apply liquid-glass-card flex flex-col gap-3 p-4 transition-shadow duration-300 hover:shadow-store md:p-5;
     }
 
     .admin-section-label {
