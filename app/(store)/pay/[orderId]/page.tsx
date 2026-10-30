@@ -113,7 +113,7 @@ export default function PaymentPage() {
           <p className="text-gray-600 mb-6">{error}</p>
           <Link
             href="/"
-            className="inline-flex items-center px-6 py-3 bg-brand-primary hover:bg-[#111827] text-white rounded-lg font-semibold transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-brand-primary hover:bg-[#0C4A6E] text-white rounded-lg font-semibold transition-colors"
           >
             <Home className="w-5 h-5 mr-2" />
             Go to Homepage
@@ -207,7 +207,7 @@ export default function PaymentPage() {
         <button
           onClick={handlePayNow}
           disabled={processing}
-          className="w-full bg-brand-primary hover:bg-[#111827] text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-70 flex items-center justify-center cursor-pointer"
+          className="w-full bg-brand-primary hover:bg-[#0C4A6E] text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-70 flex items-center justify-center cursor-pointer"
         >
           {processing ? (
             <>

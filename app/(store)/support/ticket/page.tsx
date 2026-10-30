@@ -86,7 +86,7 @@ export default function SupportTicketPage() {
                 </p>
                 <Link
                   href="/support/tickets"
-                  className="block bg-brand-primary hover:bg-[#111827] text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
+                  className="block bg-brand-primary hover:bg-[#0C4A6E] text-white py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
                 >
                   View My Tickets
                 </Link>
@@ -330,7 +330,7 @@ export default function SupportTicketPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-4 bg-brand-primary hover:bg-[#111827] text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="flex-1 py-4 bg-brand-primary hover:bg-[#0C4A6E] text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   {isSubmitting ? (
                     <>

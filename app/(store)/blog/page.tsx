@@ -210,7 +210,7 @@ export default function BlogPage() {
                   />
                   <button
                     type="submit"
-                    className="w-full bg-brand-primary text-white py-3 rounded-xl font-medium hover:bg-[#111827] transition-colors whitespace-nowrap"
+                    className="w-full bg-brand-primary text-white py-3 rounded-xl font-medium hover:bg-[#0C4A6E] transition-colors whitespace-nowrap"
                   >
                     Subscribe
                   </button>
@@ -235,7 +235,7 @@ export default function BlogPage() {
         </div>
       </div>
 
-      <div className="bg-[#111827] py-16">
+      <div className="bg-[#0C4A6E] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">Ready to Start Shopping?</h2>
           <p className="text-xl text-white/80 mb-8 leading-relaxed">

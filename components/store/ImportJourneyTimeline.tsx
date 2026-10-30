@@ -23,7 +23,7 @@ const MOBILE_MILESTONES = [
 
 export default function ImportJourneyTimeline() {
   return (
-    <section className="relative overflow-hidden bg-[#111827] py-8 md:py-20">
+    <section className="relative overflow-hidden bg-[#0C4A6E] py-8 md:py-20">
       <div className="store-container relative">
         <div className="md:max-w-2xl">
           <h2 className="font-heading text-[1.35rem] font-bold leading-tight tracking-tight text-white md:text-[1.75rem] lg:text-[2.25rem]">
@@ -47,7 +47,7 @@ export default function ImportJourneyTimeline() {
                 className="relative z-10 flex flex-col items-center"
                 style={{ width: `${100 / MOBILE_MILESTONES.length}%` }}
               >
-                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-brand-primary ring-2 ring-[#111827]">
+                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-brand-primary ring-2 ring-[#0C4A6E]">
                   {i + 1}
                 </span>
                 <span className="mt-2 max-w-[4.5rem] text-center text-[9px] font-semibold leading-tight text-white/90">

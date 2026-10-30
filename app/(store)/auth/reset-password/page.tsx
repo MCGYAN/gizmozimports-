@@ -99,7 +99,7 @@ function ResetPasswordForm() {
           </p>
           <Link
             href="/auth/forgot-password"
-            className="inline-block rounded-lg bg-brand-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-[#111827]"
+            className="inline-block rounded-lg bg-brand-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-[#0C4A6E]"
           >
             Request new link
           </Link>
@@ -175,7 +175,7 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#111827] disabled:opacity-50"
+              className="w-full rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#0C4A6E] disabled:opacity-50"
             >
               {isLoading ? 'Saving…' : 'Save new password'}
             </button>

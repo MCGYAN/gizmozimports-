@@ -155,7 +155,7 @@ export default function ExchangePage() {
 
   if (!storefrontLoading && !buyRmbEnabled) {
     return (
-      <main className="min-h-screen bg-[#111827] text-white">
+      <main className="min-h-screen bg-[#0C4A6E] text-white">
         <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
           <h1 className="font-heading text-3xl font-bold">Buy RMB is off right now</h1>
           <p className="mt-3 text-blue-100">
@@ -174,7 +174,7 @@ export default function ExchangePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#111827] text-white">
+    <main className="min-h-screen bg-[#0C4A6E] text-white">
       <div className="mx-auto max-w-xl px-4 py-12 sm:px-6">
         <header>
           <p className="text-sm font-medium text-brand-accent">Buy RMB</p>
@@ -198,7 +198,7 @@ export default function ExchangePage() {
                 }}
                 className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                   selected
-                    ? 'bg-white text-[#111827]'
+                    ? 'bg-white text-[#0C4A6E]'
                     : 'bg-white/10 text-white/80 hover:bg-white/15'
                 }`}
               >

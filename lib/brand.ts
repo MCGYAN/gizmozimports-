@@ -15,12 +15,12 @@ export const ADMIN_LOGO_ICON_PATH = '/images/gizmoz-trades-icon.png' as const;
 export const SITE_LOGO_SIZE = { width: 798, height: 253 } as const;
 
 /**
- * Gizmoz Trades palette — White / Light Blue / Deep Navy.
- * Light Blue is the signature accent; Navy carries type and dark surfaces.
- * Accent is light — pair with navy text on filled accent buttons (not white).
+ * Gizmoz Trades palette — White / Light Blue / Soft Ocean.
+ * Light Blue is the signature accent; Soft Ocean carries type and dark surfaces.
+ * Accent is light — pair with ocean text on filled accent buttons (not white).
  */
 export const BRAND_WHITE = '#FFFFFF';
-export const BRAND_PRIMARY = '#111827'; // Deep Navy
+export const BRAND_PRIMARY = '#0C4A6E'; // Soft Ocean (headers, type, dark surfaces)
 export const BRAND_ACCENT = '#8CCFFF'; // Light Blue (signature)
 export const BRAND_ICE = '#EAF6FF'; // Ice Blue sections
 export const BRAND_SLATE = '#64748B'; // Supporting text / borders

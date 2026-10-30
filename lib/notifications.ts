@@ -86,7 +86,7 @@ function emailButton(text: string, href: string, color?: string): string {
 function emailInfoRow(label: string, value: string): string {
     return `<tr>
 <td style="padding:10px 16px;color:#6b7280;font-size:13px;border-bottom:1px solid #f3f4f6;width:40%;">${label}</td>
-<td style="padding:10px 16px;color:#111827;font-size:14px;font-weight:600;border-bottom:1px solid #f3f4f6;">${value}</td>
+<td style="padding:10px 16px;color:#0C4A6E;font-size:14px;font-weight:600;border-bottom:1px solid #f3f4f6;">${value}</td>
 </tr>`;
 }
 
@@ -160,7 +160,7 @@ export async function sendReceiptReadyEmail({
     to,
     subject: `Payment confirmed. Receipt ${documentNumber}`,
     html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Payment confirmed</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Payment confirmed</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   We received <strong>${escapeHtml(amountLabel)}</strong> for your ${escapeHtml(label)}.
   Your official receipt is ready in your Gizmoz Trades account.
@@ -301,7 +301,7 @@ export async function sendOrderConfirmation(order: any) {
     const customerEmailHtml = emailLayout(`
 <div style="text-align:center;margin-bottom:24px;">
   <div style="width:64px;height:64px;background-color:${BRAND.colorLight};border-radius:50%;margin:0 auto 16px;line-height:64px;font-size:28px;">&#10003;</div>
-  <h2 style="margin:0 0 4px;color:#111827;font-size:24px;">Order Confirmed!</h2>
+  <h2 style="margin:0 0 4px;color:#0C4A6E;font-size:24px;">Order Confirmed!</h2>
   <p style="margin:0;color:#6b7280;font-size:15px;">Thank you for your purchase, ${name}.</p>
 </div>
 
@@ -329,7 +329,7 @@ ${emailButton('Track Your Order', trackingUrl)}
 
     // 2. Email to Admin
     const adminEmailHtml = emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">&#128230; New Order Received</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">&#128230; New Order Received</h2>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:12px;overflow:hidden;margin:16px 0;">
   ${emailInfoRow('Order', `#${order_number || id}`)}
@@ -425,7 +425,7 @@ export async function sendOrderStatusUpdate(order: any, newStatus: string) {
         html: emailLayout(`
 <div style="text-align:center;margin-bottom:24px;">
   <div style="width:64px;height:64px;background-color:${sc.bg};border-radius:50%;margin:0 auto 16px;line-height:64px;font-size:28px;">${sc.icon}</div>
-  <h2 style="margin:0 0 4px;color:#111827;font-size:22px;">Order Update</h2>
+  <h2 style="margin:0 0 4px;color:#0C4A6E;font-size:22px;">Order Update</h2>
   <p style="margin:0;color:#6b7280;font-size:14px;">Hi ${name}, here's an update on your order.</p>
 </div>
 
@@ -474,7 +474,7 @@ export async function sendInvoiceCancelledEmail(order: {
         to,
         subject: `Invoice cancelled ${orderNumber}`,
         html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Do not pay this invoice</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Do not pay this invoice</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   Hi ${escapeHtml(name)}, invoice <strong>${escapeHtml(String(orderNumber))}</strong> was cancelled.
 </p>
@@ -520,7 +520,7 @@ export async function sendPaymentAwaitingAdminAlert(order: {
         to: ADMIN_EMAIL,
         subject: `Payment to confirm #${order_number || id}`,
         html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Customer says they have paid</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Customer says they have paid</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   Check the bank or MoMo transfer, then confirm payment in admin.
 </p>
@@ -593,7 +593,7 @@ export async function sendExchangePaymentAwaitingAdminAlert(exchange: {
         to: ADMIN_EMAIL,
         subject: `Buy RMB payment to confirm #${ref} (${countryLabel})`,
         html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Buy RMB. Customer says they have paid</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Buy RMB. Customer says they have paid</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   Check the ${escapeHtml(countryLabel)} transfer, open the invoice with Alipay QR, then confirm and send RMB.
 </p>
@@ -641,7 +641,7 @@ export async function sendExchangeBuyerStatusEmail(
       to: email,
       subject: `Cedis confirmed. Sending your RMB #${ref}`,
       html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Payment confirmed</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Payment confirmed</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   Hi ${escapeHtml(name)}, we confirmed your GH¢${gh} transfer for Buy RMB <strong>#${escapeHtml(ref)}</strong>.
   We are sending <strong>${rmb} RMB</strong> to your Alipay receive QR.
@@ -656,7 +656,7 @@ ${emailButton('View your invoice', invoiceUrl)}
     to: email,
     subject: `RMB sent #${ref}`,
     html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Your RMB is on the way</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Your RMB is on the way</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   Hi ${escapeHtml(name)}, we sent <strong>${rmb} RMB</strong> to your Alipay for Buy RMB <strong>#${escapeHtml(ref)}</strong>.
   Check Alipay for the credit. If anything looks off, reply on WhatsApp with your invoice number.
@@ -676,7 +676,7 @@ export async function sendWelcomeMessage(user: { email: string, firstName: strin
         html: emailLayout(`
 <div style="text-align:center;margin-bottom:24px;">
   <div style="width:64px;height:64px;background-color:${BRAND.colorLight};border-radius:50%;margin:0 auto 16px;line-height:64px;font-size:28px;">&#128075;</div>
-  <h2 style="margin:0 0 4px;color:#111827;font-size:24px;">Welcome, ${firstName}!</h2>
+  <h2 style="margin:0 0 4px;color:#0C4A6E;font-size:24px;">Welcome, ${firstName}!</h2>
   <p style="margin:0;color:#6b7280;font-size:15px;">We're so glad you're here.</p>
 </div>
 
@@ -750,7 +750,7 @@ export async function sendPaymentLink(order: any) {
         html: emailLayout(`
 <div style="text-align:center;margin-bottom:24px;">
   <div style="width:64px;height:64px;background-color:#fef3c7;border-radius:50%;margin:0 auto 16px;line-height:64px;font-size:28px;">&#128179;</div>
-  <h2 style="margin:0 0 4px;color:#111827;font-size:22px;">Complete Your Order</h2>
+  <h2 style="margin:0 0 4px;color:#0C4A6E;font-size:22px;">Complete Your Order</h2>
   <p style="margin:0;color:#6b7280;font-size:14px;">Hi ${name}, your order is waiting for payment.</p>
 </div>
 
@@ -794,7 +794,7 @@ export async function sendContactMessage(data: { name: string, email: string, su
         html: emailLayout(`
 <div style="text-align:center;margin-bottom:24px;">
   <div style="width:64px;height:64px;background-color:${BRAND.colorLight};border-radius:50%;margin:0 auto 16px;line-height:64px;font-size:28px;">&#128172;</div>
-  <h2 style="margin:0 0 4px;color:#111827;font-size:22px;">Message Received</h2>
+  <h2 style="margin:0 0 4px;color:#0C4A6E;font-size:22px;">Message Received</h2>
   <p style="margin:0;color:#6b7280;font-size:14px;">We'll get back to you soon.</p>
 </div>
 
@@ -815,7 +815,7 @@ export async function sendContactMessage(data: { name: string, email: string, su
         to: ADMIN_EMAIL,
         subject: subject,
         html: emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">New contact message</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">New contact message</h2>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:12px;overflow:hidden;margin:16px 0;">
   ${emailInfoRow('From', safeName)}

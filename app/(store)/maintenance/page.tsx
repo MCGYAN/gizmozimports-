@@ -59,7 +59,7 @@ export default function MaintenancePage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <a
               href="mailto:gizmozexports@gmail.com"
-              className="inline-flex items-center gap-2 bg-brand-primary text-white px-6 py-3 rounded-full font-medium hover:bg-[#111827] transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 bg-brand-primary text-white px-6 py-3 rounded-full font-medium hover:bg-[#0C4A6E] transition-colors whitespace-nowrap"
             >
               <i className="ri-mail-line"></i>
               Email us

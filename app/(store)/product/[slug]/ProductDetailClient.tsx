@@ -43,7 +43,7 @@ import { ChevronRight, Heart, Star, Minus, Plus, ShoppingCart, ShieldCheck, Refr
 function colorNameToHex(name: string): string {
   const map: Record<string, string> = {
     red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308',
-    orange: '#f97316', purple: '#a855f7', pink: '#ec4899', black: '#111827',
+    orange: '#f97316', purple: '#a855f7', pink: '#ec4899', black: '#0C4A6E',
     white: '#ffffff', gray: '#6b7280', grey: '#6b7280', brown: '#92400e',
     navy: '#1e3a5f', gold: '#d4a017', silver: '#c0c0c0', beige: '#f5f5dc',
     maroon: '#800000', teal: '#14b8a6', coral: '#ff7f50', ivory: '#fffff0',
@@ -915,7 +915,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
         {/* Mobile: price + add to basket always within thumb reach (sits above MobileBottomNav on phones) */}
         {allowOnlineCheckout && (
-          <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(17, 24, 39,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <div className="fixed inset-x-0 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(12, 74, 110,0.06)] backdrop-blur lg:hidden bottom-[calc(3.4rem+env(safe-area-inset-bottom))] md:bottom-0 md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center gap-2.5">
               <div className="min-w-0">
                 <p className="text-lg font-extrabold leading-tight text-brand-primary">{money(displayPrice)}</p>

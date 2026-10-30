@@ -322,7 +322,7 @@ function SignupForm() {
             <button
               type="submit"
               disabled={isLoading || verifying}
-              className="w-full cursor-pointer whitespace-nowrap rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full cursor-pointer whitespace-nowrap rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#0C4A6E] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading || verifying ? (
                 <span className="flex items-center justify-center">

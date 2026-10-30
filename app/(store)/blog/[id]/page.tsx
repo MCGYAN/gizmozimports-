@@ -356,7 +356,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
 
-        <div className="mt-16 bg-[#111827] p-12 text-center text-white">
+        <div className="mt-16 bg-[#0C4A6E] p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Enjoyed This Article?</h2>
           <p className="text-white/80 mb-8 text-lg">
             Subscribe to our newsletter for more shopping tips and exclusive offers

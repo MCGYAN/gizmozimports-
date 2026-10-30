@@ -37,7 +37,7 @@ export default function AddressBook() {
         <h2 className="text-2xl font-bold text-gray-900">Address Book</h2>
         <button
           onClick={() => setShowForm(true)}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-brand-primary px-4 py-2.5 font-semibold text-white transition-colors hover:bg-[#111827] sm:w-auto"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-brand-primary px-4 py-2.5 font-semibold text-white transition-colors hover:bg-[#0C4A6E] sm:w-auto"
         >
           <i className="ri-add-line mr-2"></i>
           Add New Address
@@ -115,7 +115,7 @@ export default function AddressBook() {
             <div className="md:col-span-2 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
               <button
                 type="submit"
-                className="flex-1 py-3 bg-brand-primary text-white rounded-lg font-semibold hover:bg-[#111827] transition-colors whitespace-nowrap"
+                className="flex-1 py-3 bg-brand-primary text-white rounded-lg font-semibold hover:bg-[#0C4A6E] transition-colors whitespace-nowrap"
               >
                 Save Address
               </button>

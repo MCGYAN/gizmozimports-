@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                     <stop offset="95%" stopColor={BRAND_ACCENT} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(17, 24, 39,0.06)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(12, 74, 110,0.06)" />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
@@ -439,8 +439,8 @@ export default function AdminDashboard() {
                   contentStyle={{
                     backgroundColor: 'rgba(255,255,255,0.96)',
                     borderRadius: '10px',
-                    border: '1px solid rgba(17, 24, 39,0.08)',
-                    boxShadow: '0 8px 24px rgba(17, 24, 39,0.08)',
+                    border: '1px solid rgba(12, 74, 110,0.08)',
+                    boxShadow: '0 8px 24px rgba(12, 74, 110,0.08)',
                   }}
                   formatter={(value) => [`GH¢${(value as number)?.toFixed(2) ?? '0.00'}`, 'Revenue']}
                 />
@@ -637,7 +637,7 @@ export default function AdminDashboard() {
             {topProducts.map((product) => (
               <div
                 key={product.id}
-                className="admin-product-tile overflow-hidden rounded-xl border border-slate-100 bg-white/50 p-2.5 transition-shadow hover:shadow-[0_8px_24px_rgba(17, 24, 39,0.06)] md:p-3"
+                className="admin-product-tile overflow-hidden rounded-xl border border-slate-100 bg-white/50 p-2.5 transition-shadow hover:shadow-[0_8px_24px_rgba(12, 74, 110,0.06)] md:p-3"
               >
                 <div className="mb-2 aspect-square overflow-hidden rounded-lg bg-slate-100">
                   <img src={product.image} alt={product.name} className="h-full w-full object-cover" />

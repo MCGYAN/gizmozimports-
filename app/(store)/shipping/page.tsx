@@ -16,7 +16,7 @@ export default function ShippingPage() {
       </div>
 
       <div className="store-container store-section">
-        <section className="mb-16 overflow-hidden border border-brand-primary/10 bg-[#111827] p-6 text-white sm:p-8">
+        <section className="mb-16 overflow-hidden border border-brand-primary/10 bg-[#0C4A6E] p-6 text-white sm:p-8">
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="text-sm font-medium text-brand-accent">
@@ -188,7 +188,7 @@ export default function ShippingPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3 text-center">
             <Link
               href="/account"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-primary px-8 py-4 font-medium text-white transition-colors hover:bg-[#111827]"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-primary px-8 py-4 font-medium text-white transition-colors hover:bg-[#0C4A6E]"
             >
               <i className="ri-user-line"></i>
               Open my orders
@@ -202,7 +202,7 @@ export default function ShippingPage() {
           </div>
         </div>
 
-        <div className="bg-[#111827] p-8 text-center text-white">
+        <div className="bg-[#0C4A6E] p-8 text-center text-white">
           <h2 className="mb-4 text-3xl font-bold">Questions about delivery?</h2>
           <p className="mb-6 leading-relaxed text-white/80">
             Ask about timing, pickup, or where your order stands.

@@ -98,7 +98,7 @@ export default function WishlistPage() {
 
       <section className="store-section bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="bg-[#111827] p-12 text-center text-white">
+          <div className="bg-[#0C4A6E] p-12 text-center text-white">
             <h2 className="text-3xl font-bold mb-4">Share your import shortlist</h2>
             <p className="text-white/80 mb-8 text-lg">Loop in partners or family who co-sign big buys so everyone sees the same Gizmoz Trades listings.</p>
             <div className="flex justify-center space-x-4">

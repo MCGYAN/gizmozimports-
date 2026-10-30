@@ -241,7 +241,7 @@ export async function POST(request: Request) {
                         const recipientName = escapeHtml(recipient.name || 'Valued Customer');
                         const brandedHtml = emailLayout(
                             `
-<h2 style="margin:0 0 16px;color:#111827;font-size:22px;text-align:center;">${safeSubject}</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:22px;text-align:center;">${safeSubject}</h2>
 <p style="color:#374151;font-size:14px;line-height:1.7;margin:16px 0;">Hi ${recipientName},</p>
 <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 16px;">${safeMessage.replace(/\n/g, '</p><p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 16px;">')}</p>
 `,
@@ -329,7 +329,7 @@ export async function POST(request: Request) {
 
                     const recipientName = escapeHtml(recipient.name || 'Valued Customer');
                     const brandedHtml = emailLayout(`
-<h2 style="margin:0 0 16px;color:#111827;font-size:22px;text-align:center;">${safeSubject}</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:22px;text-align:center;">${safeSubject}</h2>
 <p style="color:#374151;font-size:14px;line-height:1.7;margin:16px 0;">Hi ${recipientName},</p>
 <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 16px;">${safeMessage.replace(/\n/g, '</p><p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 16px;">')}</p>
 `, safeSubject);

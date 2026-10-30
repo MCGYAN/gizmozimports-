@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/auth/login"
-              className="inline-block whitespace-nowrap rounded-lg bg-brand-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-[#111827]"
+              className="inline-block whitespace-nowrap rounded-lg bg-brand-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-[#0C4A6E]"
             >
               Back to sign in
             </Link>
@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading || verifying}
-              className="w-full rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#111827] disabled:opacity-50"
+              className="w-full rounded-lg bg-brand-primary py-4 font-semibold text-white transition-colors hover:bg-[#0C4A6E] disabled:opacity-50"
             >
               {isLoading || verifying ? 'Sending…' : 'Send reset link'}
             </button>

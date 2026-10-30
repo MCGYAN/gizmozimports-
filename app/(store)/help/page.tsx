@@ -110,7 +110,7 @@ export default function HelpCenterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-        <div className="bg-[#111827] text-white py-16">
+        <div className="bg-[#0C4A6E] text-white py-16">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <h1 className="text-4xl font-bold mb-4">How can we help?</h1>
             <p className="text-white/80 mb-8 text-lg">Search for answers or pick a topic below</p>

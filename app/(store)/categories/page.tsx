@@ -55,7 +55,7 @@ export default async function CategoriesPage() {
         )}
       </div>
 
-      <div className="bg-[#111827] py-10 md:py-20">
+      <div className="bg-[#0C4A6E] py-10 md:py-20">
         <div className="store-container max-w-3xl text-center">
           <h2 className="font-heading text-xl font-bold text-white md:text-3xl">
             Not sure where to start?

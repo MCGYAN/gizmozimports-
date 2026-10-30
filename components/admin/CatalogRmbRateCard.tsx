@@ -154,7 +154,7 @@ export default function CatalogRmbRateCard() {
             ) : null}
           </div>
 
-          <div className="w-full rounded-2xl border border-white/80 bg-white/80 p-4 shadow-[0_10px_30px_rgba(17, 24, 39,0.06)] backdrop-blur-sm md:w-[min(100%,22rem)]">
+          <div className="w-full rounded-2xl border border-white/80 bg-white/80 p-4 shadow-[0_10px_30px_rgba(12, 74, 110,0.06)] backdrop-blur-sm md:w-[min(100%,22rem)]">
             <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
               Conversion
             </p>

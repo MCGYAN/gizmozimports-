@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#111827',
+  themeColor: '#0C4A6E',
 };
 
 const siteUrl = SEO.siteUrl;
@@ -106,12 +106,12 @@ export default function RootLayout({
   return (
     <html lang="en-GH" className={outfit.variable} suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#111827" />
+        <meta name="theme-color" content="#0C4A6E" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content={SEO.brandName} />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#111827" />
+        <meta name="msapplication-TileColor" content="#0C4A6E" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="geo.region" content="GH" />
         <meta name="geo.placename" content="Ghana" />

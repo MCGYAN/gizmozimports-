@@ -65,7 +65,7 @@ export default function WhatWeSourcePage() {
             />
           ))}
         </div>
-        <div className="mt-10 bg-[#111827] p-8 text-white">
+        <div className="mt-10 bg-[#0C4A6E] p-8 text-white">
           <h2 className="text-2xl font-bold">Cannot find it in the shop?</h2>
           <p className="mt-2 text-blue-100">
             Message us with a photo or short description. We will tell you if we can help.

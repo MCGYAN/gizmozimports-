@@ -92,7 +92,7 @@ export default function FAQsPage() {
         )}
       </div>
 
-      <div className="bg-[#111827] py-16">
+      <div className="bg-[#0C4A6E] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Still have questions?</h2>
           <p className="text-xl text-white/80 mb-8 leading-relaxed">

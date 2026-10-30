@@ -66,7 +66,7 @@ export async function markShippingPaymentSent({
         subject: `Shipping payment to confirm ${orderNumber}`,
         html: emailLayout(
           `
-<h2 style="margin:0 0 16px;color:#111827;font-size:20px;">Customer says shipping was paid</h2>
+<h2 style="margin:0 0 16px;color:#0C4A6E;font-size:20px;">Customer says shipping was paid</h2>
 <p style="color:#374151;font-size:14px;line-height:1.6;margin:0;">
   Check the Gizmoz Trades account for <strong>${orderNumber}</strong>. Confirm
   <strong>GH¢${Number(invoice.amount).toFixed(2)}</strong> only after it appears in the bank or MoMo account.

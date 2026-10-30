@@ -327,7 +327,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting || verifying}
-                className="w-full bg-brand-primary text-white py-4 rounded-xl font-medium hover:bg-[#111827] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                className="w-full bg-brand-primary text-white py-4 rounded-xl font-medium hover:bg-[#0C4A6E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
               >
                 {isSubmitting || verifying ? (verifying ? 'Verifying...' : 'Sending...') : 'Send Message'}
               </button>
@@ -353,7 +353,7 @@ export default function ContactPage() {
               ))}
             </div>
 
-            <div className="bg-[#111827] p-8 text-white">
+            <div className="bg-[#0C4A6E] p-8 text-white">
               <h3 className="mb-3 text-2xl font-bold">Need help now?</h3>
               <p className="mb-6 leading-relaxed text-blue-100">
                 We are here Monday to Friday, 8am to 6pm. For urgent questions, message us on WhatsApp.
