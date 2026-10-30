@@ -306,11 +306,11 @@ function AccountContent() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 pb-24 pt-5 lg:pb-12 lg:pt-10">
+      <div className="bg-gray-50 pt-5 lg:pt-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
           {/* Header */}
-          <div className="mb-4 flex items-center justify-between gap-3 md:mb-8">
+          <div className="mb-3 flex items-center justify-between gap-3 md:mb-8">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-primary text-sm font-bold text-white md:h-14 md:w-14 md:text-xl">
                 {(profileData.firstName?.[0] || user?.email?.[0] || '?').toUpperCase()}
@@ -331,7 +331,7 @@ function AccountContent() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-8">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-4 lg:gap-8">
             {/* Desktop Sidebar */}
             <div className="hidden lg:col-span-1 lg:block">
               <div className="sticky top-24 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">

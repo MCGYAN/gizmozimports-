@@ -117,23 +117,23 @@ export default function OrderStatus({
 
   if (!ranked.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 py-12 text-center">
-        <i className="ri-map-pin-line text-3xl text-slate-300" />
+      <div className="py-6 text-center sm:py-10">
+        <i className="ri-map-pin-line text-2xl text-slate-300 sm:text-3xl" />
         <p className="mt-2 font-semibold text-slate-700">Nothing in progress</p>
-        <p className="mt-1 text-sm text-slate-500">
-          Active shop imports and Buy RMB requests show here. Finished ones move to Past orders.
+        <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+          Active imports show here. Finished ones move to Past orders.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <Link
             href="/shop"
-            className="inline-flex rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-bold text-white"
+            className="inline-flex min-h-11 items-center rounded-xl bg-brand-primary px-5 text-sm font-bold text-white"
           >
             Go to shop
           </Link>
           {buyRmbEnabled ? (
             <Link
               href="/exchange"
-              className="inline-flex rounded-xl border border-brand-primary px-5 py-2.5 text-sm font-bold text-brand-primary"
+              className="inline-flex min-h-11 items-center rounded-xl border border-brand-primary px-5 text-sm font-bold text-brand-primary"
             >
               Buy RMB
             </Link>
