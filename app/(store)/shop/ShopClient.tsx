@@ -207,8 +207,8 @@ function ShopContent({
   return (
     <main className="store-page">
       <PageHero
-        title="Clear prices. Real China goods. Ready to order."
-        subtitle="Pick what you want. Pay a clear bill. Then track it from China all the way to Ghana."
+        title="See the price. Then order."
+        subtitle="Real China goods. Clear bill. Tracked from China all the way to Ghana."
       />
 
       {/* Mobile Filter Toggle */}
