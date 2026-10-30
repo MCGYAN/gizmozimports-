@@ -269,21 +269,6 @@ function AccountContent() {
     );
   }
 
-  const quickActions = [
-    {
-      icon: 'ri-medal-line',
-      title: 'Loyalty Program',
-      description: 'Earn points and rewards',
-      link: '/loyalty'
-    },
-    {
-      icon: 'ri-user-add-line',
-      title: 'Refer & Earn',
-      description: 'Invite friends and earn rewards',
-      link: '/referral'
-    }
-  ];
-
   const securityOptions = [
     {
       icon: 'ri-mail-check-line',
@@ -294,155 +279,115 @@ function AccountContent() {
     },
   ];
 
+  const desktopTabs = [
+    { id: 'status', label: 'Order status' },
+    { id: 'orders', label: 'Past orders' },
+    { id: 'shipments', label: 'My Shipments' },
+    { id: 'documents', label: 'Invoices & Receipts' },
+    { id: 'deliveries', label: 'Deliveries' },
+    { id: 'warehouse', label: 'China Warehouse' },
+    { id: 'profile', label: 'Profile Settings' },
+    { id: 'addresses', label: 'Addresses' },
+    { id: 'security', label: 'Security' },
+  ];
+
+  // Order-first on mobile so tracking/pay/docs are one swipe away
+  const mobileTabs = [
+    { id: 'status', icon: 'ri-map-pin-line', label: 'Status' },
+    { id: 'shipments', icon: 'ri-ship-2-line', label: 'Shipments' },
+    { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices' },
+    { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries' },
+    { id: 'orders', icon: 'ri-archive-line', label: 'Orders' },
+    { id: 'warehouse', icon: 'ri-building-2-line', label: 'Warehouse' },
+    { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile' },
+    { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
+    { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' },
+  ];
+
   return (
     <>
-      <div className="min-h-screen bg-gray-50 py-8 lg:py-12 pb-24 lg:pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 pb-24 pt-5 lg:pb-12 lg:pt-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
           {/* Header */}
-          <div className="mb-5 flex items-center justify-between gap-3 md:mb-8">
+          <div className="mb-4 flex items-center justify-between gap-3 md:mb-8">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-brand-light text-lg font-bold text-brand-primary shadow-inner md:h-16 md:w-16 md:text-2xl">
-                {profileData.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-primary text-sm font-bold text-white md:h-14 md:w-14 md:text-xl">
+                {(profileData.firstName?.[0] || user?.email?.[0] || '?').toUpperCase()}
               </div>
               <div className="min-w-0">
-                <h1 className="truncate font-heading text-lg font-bold text-gray-900 md:text-2xl">
-                  {profileData.firstName ? `Hello, ${profileData.firstName}` : 'Welcome back'}
+                <h1 className="truncate text-lg font-bold text-gray-900 md:text-2xl">
+                  {profileData.firstName ? `Hi, ${profileData.firstName}` : 'My account'}
                 </h1>
-                <p className="truncate text-xs font-medium text-gray-500 md:text-sm">{user?.email}</p>
+                <p className="truncate text-xs text-gray-500 md:text-sm">{user?.email}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={handleSignOut}
-              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 active:bg-slate-50 md:px-5 md:py-2.5 md:text-sm"
+              className="shrink-0 text-sm font-semibold text-gray-500 underline-offset-2 hover:text-red-600 hover:underline md:rounded-xl md:border md:border-gray-200 md:bg-white md:px-5 md:py-2.5 md:no-underline md:shadow-sm md:hover:border-red-200 md:hover:bg-red-50"
             >
               Sign out
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Desktop Sidebar Navigation */}
-            <div className="hidden lg:block lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-                <nav className="p-2 space-y-1">
-                  {[
-                    { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile Settings' },
-                    { id: 'status', icon: 'ri-map-pin-line', label: 'Order status' },
-                    { id: 'orders', icon: 'ri-archive-line', label: 'Past orders' },
-                    { id: 'warehouse', icon: 'ri-building-2-line', label: 'China Warehouse' },
-                    { id: 'shipments', icon: 'ri-ship-2-line', label: 'My Shipments' },
-                    { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices & Receipts' },
-                    { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries' },
-                    { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
-                    { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' }
-                  ].map(tab => (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-8">
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:col-span-1 lg:block">
+              <div className="sticky top-24 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <nav className="space-y-1 p-2">
+                  {desktopTabs.map((tab) => (
                     <button
                       key={tab.id}
+                      type="button"
                       onClick={() => goToTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left group ${activeTab === tab.id
-                        ? 'bg-brand-primary text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-brand-primary'
-                        }`}
+                      className={`w-full rounded-xl px-4 py-3 text-left text-sm font-bold transition-colors ${
+                        activeTab === tab.id
+                          ? 'bg-brand-primary text-white'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-brand-primary'
+                      }`}
                     >
-                      <span>{tab.label}</span>
+                      {tab.label}
                     </button>
                   ))}
                 </nav>
               </div>
             </div>
 
-            {/* Mobile nav — order journey first, settings below (always even 2-col) */}
-            <div className="mb-5 space-y-4 lg:hidden">
-              <div>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Your orders
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'status', icon: 'ri-map-pin-line', label: 'Order status', hint: 'Where it is' },
-                    { id: 'shipments', icon: 'ri-ship-2-line', label: 'Shipments', hint: 'Sea freight' },
-                    { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices', hint: 'Bills & receipts' },
-                    { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries', hint: 'Pickup booking' },
-                  ].map((tab) => {
-                    const active = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        ref={(node) => {
-                          mobileTabRefs.current[tab.id] = node;
-                        }}
-                        type="button"
-                        onClick={() => goToTab(tab.id)}
-                        className={`flex min-h-[4.5rem] flex-col items-start justify-center gap-0.5 rounded-2xl border px-3.5 py-3 text-left transition-colors ${
-                          active
-                            ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-800'
-                        }`}
-                      >
-                        <i className={`${tab.icon} text-xl ${active ? 'text-white' : 'text-brand-accent'}`} aria-hidden />
-                        <span className="mt-1 text-sm font-bold leading-tight">{tab.label}</span>
-                        <span className={`text-[11px] ${active ? 'text-white/75' : 'text-slate-400'}`}>
-                          {tab.hint}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Account
-                </p>
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                  {[
-                    { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile' },
-                    { id: 'orders', icon: 'ri-archive-line', label: 'Past orders' },
-                    { id: 'warehouse', icon: 'ri-building-2-line', label: 'China warehouse' },
-                    { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
-                    { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' },
-                  ].map((tab, index, arr) => {
-                    const active = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        ref={(node) => {
-                          mobileTabRefs.current[tab.id] = node;
-                        }}
-                        type="button"
-                        onClick={() => goToTab(tab.id)}
-                        className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
-                          index < arr.length - 1 ? 'border-b border-slate-100' : ''
-                        } ${
-                          active
-                            ? 'bg-brand-primary/5 text-brand-primary'
-                            : 'bg-white text-slate-700 active:bg-slate-50'
-                        }`}
-                      >
-                        <span
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-                            active ? 'bg-brand-primary text-white' : 'bg-slate-100 text-brand-primary'
-                          }`}
-                        >
-                          <i className={`${tab.icon} text-lg`} aria-hidden />
-                        </span>
-                        <span className="flex-1 text-sm font-semibold">{tab.label}</span>
-                        <i className="ri-arrow-right-s-line text-lg text-slate-300" aria-hidden />
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Mobile: simple sticky chips — no grids, no section labels */}
+            <div className="sticky top-[4.25rem] z-20 -mx-4 border-b border-gray-200 bg-gray-50/95 px-4 py-2.5 backdrop-blur lg:hidden">
+              <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide [-webkit-overflow-scrolling:touch]">
+                {mobileTabs.map((tab) => {
+                  const active = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      ref={(node) => {
+                        mobileTabRefs.current[tab.id] = node;
+                      }}
+                      type="button"
+                      onClick={() => goToTab(tab.id)}
+                      className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold whitespace-nowrap transition-colors ${
+                        active
+                          ? 'bg-brand-primary text-white'
+                          : 'bg-white text-gray-600 ring-1 ring-gray-200'
+                      }`}
+                    >
+                      <i className={`${tab.icon} text-[15px]`} aria-hidden />
+                      {tab.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Main Content Area */}
+            {/* Main Content */}
             <div className="lg:col-span-3">
-              <div className="min-h-[320px] rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:min-h-[420px] sm:p-6 md:p-8">
+              <div className="min-h-[320px] rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:min-h-[420px] sm:p-6 md:p-8">
                 {activeTab === 'profile' && (
                   <div className="max-w-2xl">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Information</h2>
-                    <p className="text-gray-500 mb-8">Update your personal details and contact info.</p>
+                    <h2 className="mb-1 text-xl font-bold text-gray-900 md:text-2xl">Profile</h2>
+                    <p className="mb-6 text-sm text-gray-500 md:mb-8">Your name and contact details.</p>
 
                     {profileMessage.text && (
                       <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${profileMessage.type === 'success' ? 'bg-blue-50 text-brand-primary border border-blue-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
@@ -512,9 +457,9 @@ function AccountContent() {
                       </div>
                     </form>
 
-                    <div className="mt-12 pt-12 border-t border-gray-100">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">Change Password</h3>
-                      <p className="text-gray-500 mb-6">Ensure your account uses a strong, unique password.</p>
+                    <div className="mt-10 border-t border-gray-100 pt-8 md:mt-12 md:pt-12">
+                      <h3 className="mb-1 text-lg font-bold text-gray-900 md:text-xl">Change password</h3>
+                      <p className="mb-5 text-sm text-gray-500 md:mb-6">Use a strong password you do not reuse elsewhere.</p>
 
                       {passwordMessage.text && (
                         <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${passwordMessage.type === 'success' ? 'bg-blue-50 text-brand-primary border border-blue-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
@@ -597,7 +542,7 @@ function AccountContent() {
 
                 {activeTab === 'security' && (
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Security Settings</h2>
+                    <h2 className="mb-4 text-xl font-bold text-gray-900 md:mb-6 md:text-2xl">Security</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {securityOptions.map((option, index) => {
                         const inner = (
