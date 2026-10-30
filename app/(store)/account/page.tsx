@@ -383,7 +383,7 @@ function AccountContent() {
 
             {/* Main Content */}
             <div className="lg:col-span-3">
-              <div className="min-h-[320px] rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:min-h-[420px] sm:p-6 md:p-8">
+              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6 md:p-8">
                 {activeTab === 'profile' && (
                   <div className="max-w-2xl">
                     <h2 className="mb-1 text-xl font-bold text-gray-900 md:text-2xl">Profile</h2>
