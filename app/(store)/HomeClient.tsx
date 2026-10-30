@@ -158,10 +158,10 @@ export default function HomeClient({
           <div className="mb-4 flex items-end justify-between gap-3 md:mb-7">
             <div className="min-w-0">
               <h2 className="font-heading text-xl font-bold tracking-tight text-brand-primary sm:text-2xl md:text-[2.25rem]">
-                What do you need?
+                Shop by category
               </h2>
               <p className="mt-1 text-sm text-slate-500 sm:mt-2">
-                Pick a group. Then choose a product.
+                Tap a category. Order what is listed.
               </p>
             </div>
             {hasCategories ? (
@@ -193,7 +193,8 @@ export default function HomeClient({
                 Categories coming soon
               </p>
               <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-                You can still shop now, or message us if you need help.
+                Browse the shop for listed products, or contact us if you need help finding
+                something.
               </p>
             </div>
           )}
@@ -206,10 +207,10 @@ export default function HomeClient({
           <div className="mb-5 flex items-end justify-between gap-3 md:mb-7">
             <div className="min-w-0">
               <h2 className="font-heading text-xl font-bold tracking-tight text-brand-primary sm:text-2xl md:text-[2.25rem]">
-                Popular right now
+                Featured products
               </h2>
               <p className="mt-1 text-sm text-slate-500 sm:mt-2">
-                See the price. Order. Pay your bill. We bring it to Ghana.
+                See the price. Order. Get your invoice and pay.
               </p>
             </div>
             <Link
@@ -231,7 +232,7 @@ export default function HomeClient({
                 New items are coming soon
               </p>
               <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-                Open the shop, or ask us if you need something special.
+                Check the shop, or contact us if you need help.
               </p>
               <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center sm:gap-3">
                 <Link
@@ -239,14 +240,14 @@ export default function HomeClient({
                   prefetch
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-sm font-bold text-brand-primary"
                 >
-                  Open the shop
+                  Browse the shop
                 </Link>
                 <Link
                   href="/contact"
                   prefetch
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-bold text-brand-primary"
                 >
-                  Ask us
+                  Contact us
                 </Link>
               </div>
             </div>

@@ -19,7 +19,7 @@ export default function Footer() {
   const siteName = getSetting('site_name') || 'Gizmoz Trades';
   const siteTagline =
     getSetting('site_tagline') ||
-    'China goods for Ghana. Clear prices. Easy pay. Real tracking.';
+    'Buy from China the easy way. Get your bill, pay, and track it to Ghana.';
   const contactAddress = getSetting('contact_address') || '';
   const contactWhatsapp = getSetting('contact_whatsapp') || '';
   const socialFacebook = getSetting('social_facebook') || '';
