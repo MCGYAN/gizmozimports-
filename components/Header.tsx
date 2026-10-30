@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import MiniCart from './MiniCart';
 import StoreLogo from './StoreLogo';
 import { useCart } from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
@@ -16,6 +16,8 @@ import {
 import AnnouncementBar from './AnnouncementBar';
 import { Search, User, ShoppingCart, Menu, X } from 'lucide-react';
 import { useBuyRmbStorefront } from '@/hooks/useBuyRmbStorefront';
+
+const MiniCart = dynamic(() => import('./MiniCart'), { ssr: false });
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

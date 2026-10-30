@@ -13,6 +13,7 @@ const outfit = Outfit({
   variable: "--font-outfit",
   display: "swap",
   preload: true,
+  adjustFontFallback: true,
 });
 
 export const viewport: Viewport = {
@@ -118,7 +119,8 @@ export default function RootLayout({
 
         <link rel="icon" href="/icon" type="image/png" sizes="any" />
         {/* Single deferred Remixicon load (icons are non-critical for first paint). */}
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link
           id="remixicon-css"
           rel="stylesheet"
@@ -128,7 +130,7 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var l=document.getElementById('remixicon-css');if(!l)return;l.onload=function(){l.media='all'};if(l.sheet)l.media='all';setTimeout(function(){l.media='all'},2500);})();`,
+            __html: `(function(){var l=document.getElementById('remixicon-css');if(!l)return;l.onload=function(){l.media='all'};if(l.sheet)l.media='all';setTimeout(function(){l.media='all'},3500);})();`,
           }}
         />
         <noscript>

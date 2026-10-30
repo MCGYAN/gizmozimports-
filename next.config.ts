@@ -5,11 +5,14 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts'],
   },
+  poweredByHeader: false,
+  compress: true,
   images: {
     minimumCacheTTL: 2592000,
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Leaner set for mobile-first Ghana connections
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',

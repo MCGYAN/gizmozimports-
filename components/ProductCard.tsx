@@ -50,6 +50,8 @@ interface ProductCardProps {
   categorySlug?: string;
   /** Tighter layout for homepage 2×2 mobile grid */
   compact?: boolean;
+  /** Prioritize image decode for above-the-fold cards */
+  priority?: boolean;
 }
 
 export default function ProductCard({
@@ -72,6 +74,7 @@ export default function ProductCard({
   categoryName,
   categorySlug,
   compact = false,
+  priority = false,
 }: ProductCardProps) {
   const wishlist = useWishlist();
   const { getSetting } = useCMS();
@@ -120,6 +123,7 @@ export default function ProductCard({
           src={image}
           alt={name}
           fit="contain"
+          priority={priority}
           className="h-full w-full object-contain transition-transform duration-300 ease-out mix-blend-multiply md:group-hover:scale-[1.02]"
           sizes={compact ? '(max-width: 1024px) 45vw, 25vw' : '(max-width: 640px) 72vw, 260px'}
         />

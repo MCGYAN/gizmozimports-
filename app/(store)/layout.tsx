@@ -3,17 +3,21 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import MobileBottomNav from '@/components/MobileBottomNav';
-import ScrollToTop from '@/components/ScrollToTop';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import NavigationProgress from '@/components/NavigationProgress';
 import { CMSProvider } from '@/context/CMSContext';
 
-// Silent PWA registration only. No cookie / install / update popups on first visit.
+// Below-fold / non-critical chrome — keep Header eager for first paint
+const Footer = dynamic(() => import('@/components/Footer'));
+const MobileBottomNav = dynamic(() => import('@/components/MobileBottomNav'), { ssr: false });
+const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), { ssr: false });
+const NavigationProgress = dynamic(() => import('@/components/NavigationProgress'), {
+  ssr: false,
+});
 const PWAInstaller = dynamic(() => import('@/components/PWAInstaller'), { ssr: false });
 const OfflineIndicator = dynamic(() => import('@/components/OfflineIndicator'), { ssr: false });
-const StickyConversionDock = dynamic(() => import('@/components/store/StickyConversionDock'), { ssr: false });
+const StickyConversionDock = dynamic(() => import('@/components/store/StickyConversionDock'), {
+  ssr: false,
+});
 
 export default function StoreLayout({
   children,

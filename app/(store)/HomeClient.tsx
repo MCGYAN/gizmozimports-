@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import ProductCard, { type ColorVariant, getColorHex } from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
@@ -9,6 +10,9 @@ import { useCMS } from '@/context/CMSContext';
 import { buildWhatsAppHref } from '@/lib/store-config';
 
 const ImportCta = dynamic(() => import('@/components/store/ImportCta'), { loading: () => null });
+
+const HERO_IMAGE =
+  'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=75&w=900&auto=format&fit=crop';
 
 export default function HomeClient({
   featuredProducts,
@@ -33,7 +37,7 @@ export default function HomeClient({
   const hasCategories = displayCategories.length > 0;
   const hasFeaturedProducts = featuredProducts.length > 0;
 
-  const renderProductCard = (product: any) => {
+  const renderProductCard = (product: any, index = 0) => {
     const variants = product.product_variants || [];
     const hasVariants = variants.length > 0;
     const minVariantPrice = hasVariants
@@ -83,6 +87,7 @@ export default function HomeClient({
           categoryName={product.categories?.name}
           categorySlug={product.categories?.slug}
           compact
+          priority={index < 2}
         />
       </div>
     );
@@ -109,7 +114,7 @@ export default function HomeClient({
                 <Link href="/shop" prefetch className="hero-cta-primary">
                   Start shopping
                 </Link>
-                <Link href="/order-tracking" prefetch className="hero-cta-secondary">
+                <Link href="/order-tracking" prefetch={false} className="hero-cta-secondary">
                   Track my order
                 </Link>
               </div>
@@ -117,10 +122,14 @@ export default function HomeClient({
 
             <div className="relative">
               <div className="relative aspect-[5/4] overflow-hidden rounded-xl border border-white/15 sm:aspect-[4/3] lg:aspect-[5/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1000&auto=format&fit=crop"
+                <Image
+                  src={HERO_IMAGE}
                   alt="Warehouse goods ready for China to Ghana shipping"
-                  className="h-full w-full object-cover"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  quality={70}
+                  className="object-cover"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-brand-primary/25 via-transparent to-transparent" />
 
@@ -216,7 +225,7 @@ export default function HomeClient({
 
           {hasFeaturedProducts ? (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
-              {featuredProducts.map(renderProductCard)}
+              {featuredProducts.map((product, index) => renderProductCard(product, index))}
             </div>
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-white px-5 py-10 text-center">

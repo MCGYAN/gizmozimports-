@@ -13,11 +13,12 @@ interface CategoryCardProps {
  * Category tile — 2-col friendly on mobile.
  * Image sits in a fixed square; label below so text never fights a tiny overlay.
  */
-export default function CategoryCard({ slug, name, image }: CategoryCardProps) {
+export default function CategoryCard({ slug, name, image, index = 0 }: CategoryCardProps) {
+  const prioritize = index < 4;
   return (
     <Link
       href={`/shop?category=${slug}`}
-      prefetch
+      prefetch={prioritize}
       className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white transition-colors active:bg-slate-50"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
@@ -27,6 +28,9 @@ export default function CategoryCard({ slug, name, image }: CategoryCardProps) {
             alt={name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
+            quality={62}
+            priority={prioritize}
+            loading={prioritize ? 'eager' : 'lazy'}
             className="object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.03]"
           />
         ) : (
