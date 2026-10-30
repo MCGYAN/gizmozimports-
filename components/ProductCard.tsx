@@ -99,8 +99,10 @@ export default function ProductCard({
     else wishlist?.addToWishlist({ id, name, price, originalPrice, image, rating, reviewCount, badge, inStock, slug });
   };
 
-  const cartButtonClass = `btn-interactive flex w-full shrink-0 items-center justify-center bg-brand-accent text-brand-primary font-bold transition-colors hover:brightness-95 disabled:pointer-events-none disabled:opacity-50 sm:w-auto ${
-    compact ? 'h-8 rounded-lg px-3 text-[10px] lg:h-9 lg:rounded-xl lg:px-4 lg:text-xs' : 'h-9 rounded-xl px-3 text-[11px] sm:h-10 sm:px-5 sm:text-xs'
+  const cartButtonClass = `btn-interactive flex w-full items-center justify-center bg-brand-accent text-brand-primary font-bold transition-colors hover:brightness-95 disabled:pointer-events-none disabled:opacity-50 ${
+    compact
+      ? 'h-8 rounded-lg px-3 text-[10px] lg:h-9 lg:rounded-xl lg:px-4 lg:text-xs'
+      : 'h-9 rounded-xl px-3 text-[11px] sm:h-10 sm:w-auto sm:px-5 sm:text-xs'
   }`;
 
   return (
@@ -211,10 +213,12 @@ export default function ProductCard({
 
         <div
           className={`mt-auto border-t border-slate-100 ${
-            compact ? 'max-lg:space-y-2 max-lg:pt-2.5 lg:flex lg:items-end lg:justify-between lg:gap-3 lg:pt-5' : 'space-y-2 pt-3 sm:flex sm:items-end sm:justify-between sm:gap-3 sm:space-y-0 sm:pt-5'
+            compact
+              ? 'flex flex-col gap-2 pt-2.5 lg:pt-5'
+              : 'flex flex-col gap-2 pt-3 sm:flex-row sm:items-end sm:justify-between sm:gap-3 sm:pt-5'
           }`}
         >
-          <div className="min-w-0 shrink-0">
+          <div className="min-w-0">
             {originalPrice && originalPrice > displayPrice && (
               <span
                 className={`block whitespace-nowrap font-medium text-slate-400 line-through ${
@@ -233,11 +237,11 @@ export default function ProductCard({
             </span>
           </div>
 
-          <div className={compact ? 'max-lg:w-full lg:mt-0.5 lg:w-auto lg:shrink-0' : 'w-full sm:mt-0.5 sm:w-auto sm:shrink-0'}>
+          <div className={compact ? 'w-full' : 'w-full sm:mt-0.5 sm:w-auto sm:shrink-0'}>
             {inStock ? (
               <Link
                 href={`/product/${slug}`}
-                className={`${cartButtonClass} max-lg:w-full`}
+                className={cartButtonClass}
                 aria-label="Choose quantity and options, then order"
               >
                 Order now
@@ -246,7 +250,7 @@ export default function ProductCard({
               <button
                 type="button"
                 disabled
-                className={`${cartButtonClass} max-lg:w-full`}
+                className={cartButtonClass}
                 aria-label="Out of stock"
               >
                 Order now
