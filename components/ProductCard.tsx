@@ -209,29 +209,46 @@ export default function ProductCard({
           </div>
         )}
 
-        <div className={`mt-auto flex flex-col gap-2 border-t border-slate-100 sm:flex-row sm:items-end sm:justify-between ${compact ? 'max-lg:pt-2.5 sm:gap-2 lg:gap-3 lg:pt-5' : 'pt-3 sm:gap-3 sm:pt-5'}`}>
-          <div className="min-w-0 sm:flex-1">
+        <div
+          className={`mt-auto border-t border-slate-100 ${
+            compact ? 'max-lg:space-y-2 max-lg:pt-2.5 lg:flex lg:items-end lg:justify-between lg:gap-3 lg:pt-5' : 'space-y-2 pt-3 sm:flex sm:items-end sm:justify-between sm:gap-3 sm:space-y-0 sm:pt-5'
+          }`}
+        >
+          <div className="min-w-0">
             {originalPrice && originalPrice > displayPrice && (
-              <span className={`block font-medium text-slate-400 line-through ${compact ? 'text-[10px] lg:text-xs' : 'text-[11px] sm:text-xs'}`}>
+              <span
+                className={`block font-medium text-slate-400 line-through ${
+                  compact ? 'text-[10px] lg:text-xs' : 'text-[11px] sm:text-xs'
+                }`}
+              >
                 {formatPrice(originalPrice)}
               </span>
             )}
-            <span className={`font-heading block break-words font-black leading-tight text-brand-primary ${compact ? 'text-[13px] lg:text-lg' : 'text-base sm:text-lg'}`}>
+            <span
+              className={`font-heading block break-words font-black leading-tight text-brand-primary ${
+                compact ? 'text-sm lg:text-lg' : 'text-base sm:text-lg'
+              }`}
+            >
               {priceLabel()}
             </span>
           </div>
 
-          <div className="sm:mt-0.5 sm:shrink-0">
+          <div className={compact ? 'max-lg:w-full lg:mt-0.5 lg:w-auto lg:shrink-0' : 'w-full sm:mt-0.5 sm:w-auto sm:shrink-0'}>
             {inStock ? (
               <Link
                 href={`/product/${slug}`}
-                className={cartButtonClass}
+                className={`${cartButtonClass} max-lg:w-full`}
                 aria-label="Choose quantity and options, then order"
               >
                 Order now
               </Link>
             ) : (
-              <button type="button" disabled className={cartButtonClass} aria-label="Out of stock">
+              <button
+                type="button"
+                disabled
+                className={`${cartButtonClass} max-lg:w-full`}
+                aria-label="Out of stock"
+              >
                 Order now
               </button>
             )}

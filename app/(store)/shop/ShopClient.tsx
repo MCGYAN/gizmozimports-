@@ -98,7 +98,8 @@ function ShopContent({
   const [sortBy, setSortBy] = useState(initialSort || 'popular');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const productsPerPage = 9;
+  // Even page size so 2-col / 4-col grids never leave a lonely orphan cell
+  const productsPerPage = 8;
 
   // Fetch Products
   useEffect(() => {
@@ -211,24 +212,25 @@ function ShopContent({
       />
 
       {/* Mobile Filter Toggle */}
-      <div className="sticky top-[72px] z-20 border-b border-white/40 liquid-glass px-4 py-4 md:hidden">
-        <div className="flex justify-between items-center">
+      <div className="sticky top-[4.25rem] z-20 border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+        <div className="flex items-center justify-between gap-3">
           <button
+            type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center space-x-2 text-brand-primary font-medium"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-brand-primary"
           >
-            <Filter className="w-5 h-5" />
-            <span>Filters & Sort</span>
+            <Filter className="h-4 w-4" />
+            <span>Filters</span>
           </button>
-          <span className="text-sm text-gray-500">{totalProducts} listings</span>
+          <span className="text-xs font-medium text-slate-500">{totalProducts} listings</span>
         </div>
       </div>
 
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col gap-8 md:flex-row">
+      <section className="py-6 sm:py-10 md:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-col gap-6 md:flex-row md:gap-8">
             <aside
-              className={`${isFilterOpen ? 'fixed inset-0 z-50 overflow-y-auto liquid-glass' : 'hidden'} md:block md:w-64 md:flex-shrink-0`}
+              className={`${isFilterOpen ? 'fixed inset-0 z-50 overflow-y-auto bg-white' : 'hidden'} md:block md:w-64 md:flex-shrink-0`}
             >
               <div className="md:sticky md:top-28">
                 <div className="liquid-glass-card p-6 md:bg-transparent md:px-4 md:py-0 md:shadow-none md:backdrop-blur-none md:border-0">
@@ -378,21 +380,22 @@ function ShopContent({
               </div>
             </aside>
 
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-                <p className="text-gray-600">
-                  Showing <span className="font-semibold text-gray-900">{products.length}</span> of <span className="font-semibold text-gray-900">{totalProducts}</span> featured listings
+            <div className="flex-1 min-w-0">
+              <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <p className="text-sm text-slate-600">
+                  Showing <span className="font-semibold text-slate-900">{products.length}</span> of{' '}
+                  <span className="font-semibold text-slate-900">{totalProducts}</span>
                 </p>
 
-                <div className="flex items-center space-x-3">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">Sort by:</label>
+                <div className="flex items-center gap-2">
+                  <label className="shrink-0 text-xs text-slate-500 sm:text-sm">Sort</label>
                   <select
                     value={sortBy}
                     onChange={(e) => {
                       setSortBy(e.target.value);
                       setPage(1);
                     }}
-                    className="cursor-pointer rounded-lg border border-white/50 bg-white/50 px-4 py-2 pr-8 text-sm backdrop-blur-xl focus:border-brand-accent focus:ring-2 focus:ring-brand-accent"
+                    className="min-h-10 flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/25 sm:flex-none"
                   >
                     <option value="popular">Most Popular</option>
                     <option value="new">Newest</option>
@@ -404,16 +407,16 @@ function ShopContent({
               </div>
 
               {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
-                  {[...Array(6)].map((_, i) => (
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+                  {[...Array(8)].map((_, i) => (
                     <ProductCardSkeleton key={i} />
                   ))}
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8" data-product-shop>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5" data-product-shop>
                     {products.map(product => (
-                      <ProductCard key={product.id} {...product} />
+                      <ProductCard key={product.id} {...product} compact />
                     ))}
                   </div>
 

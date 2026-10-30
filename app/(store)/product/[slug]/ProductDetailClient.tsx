@@ -382,48 +382,48 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
       <StructuredData data={breadcrumbSchema} />
 
       <main className="store-page">
-        <section className="py-8 bg-gray-50 border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <nav className="flex items-center space-x-2 text-sm flex-wrap gap-y-2">
-              <Link href="/" className="text-gray-600 hover:text-brand-primary transition-colors">Home</Link>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-              <Link href="/shop" className="text-gray-600 hover:text-brand-primary transition-colors">Shop</Link>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+        <section className="border-b border-slate-200 bg-slate-50 py-4 sm:py-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <nav className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs sm:gap-x-2 sm:text-sm">
+              <Link href="/" className="text-slate-500 hover:text-brand-primary">Home</Link>
+              <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+              <Link href="/shop" className="text-slate-500 hover:text-brand-primary">Shop</Link>
+              <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
               <Link
                 href={product.categorySlug ? `/shop?category=${product.categorySlug}` : '/shop'}
-                className="text-gray-600 hover:text-brand-primary transition-colors"
+                className="text-slate-500 hover:text-brand-primary"
               >
                 {product.category}
               </Link>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-brand-primary font-bold truncate max-w-[200px]">{product.name}</span>
+              <ChevronRight className="hidden h-3.5 w-3.5 text-slate-400 sm:block" />
+              <span className="hidden max-w-[200px] truncate font-semibold text-brand-primary sm:inline">{product.name}</span>
             </nav>
           </div>
         </section>
 
-        <section className="py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid lg:grid-cols-2 gap-12">
+        <section className="py-6 sm:py-10 md:py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
               <div>
-                <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="relative mb-3 aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-white sm:mb-4">
                   <Image
                     src={product.images[selectedImage]}
                     alt={product.name}
                     fill
-                    className="object-contain object-center p-5 sm:p-8 md:p-10"
+                    className="object-contain object-center p-4 sm:p-8 md:p-10"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority
                     quality={85}
                   />
                   {discount > 0 && (
-                    <span className="absolute top-4 right-4 z-10 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                    <span className="absolute right-3 top-3 z-10 rounded-lg bg-red-600 px-2.5 py-1 text-xs font-semibold text-white sm:right-4 sm:top-4 sm:rounded-full sm:px-4 sm:py-2 sm:text-sm">
                       Save {discount}%
                     </span>
                   )}
                 </div>
 
                 {product.images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-4 gap-2 sm:gap-4">
                     {product.images.map((image: string, index: number) => (
                       <button
                         key={index}
@@ -450,12 +450,16 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               </div>
 
               <div>
-                <div className="flex items-start justify-between mb-4 gap-3">
+                <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-brand-primary font-semibold mb-2">{product.category}</p>
-                    <h1 className="text-3xl lg:text-4xl font-extrabold text-brand-primary mb-3">{product.name}</h1>
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-brand-accent sm:mb-2 sm:text-sm sm:normal-case sm:tracking-normal">
+                      {product.category}
+                    </p>
+                    <h1 className="font-heading text-xl font-extrabold leading-snug text-brand-primary sm:mb-3 sm:text-3xl lg:text-4xl">
+                      {product.name}
+                    </h1>
                   </div>
-                  <div className="flex shrink-0 items-start gap-2">
+                  <div className="flex shrink-0 items-start gap-1.5 sm:gap-2">
                     <SocialShareButtons
                       url={shareUrl}
                       title={product.name}
@@ -463,34 +467,35 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                       image={product.images[0]}
                     />
                     <button
+                      type="button"
                       onClick={() => setIsWishlisted(!isWishlisted)}
-                      className="w-12 h-12 flex items-center justify-center border border-gray-200 hover:border-brand-accent rounded-full transition-all hover:shadow-md cursor-pointer"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 sm:h-12 sm:w-12"
                       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
-                      <Heart className={`w-6 h-6 transition-colors ${isWishlisted ? 'fill-brand-accent text-brand-accent' : 'text-gray-700'}`} />
+                      <Heart className={`h-5 w-5 transition-colors sm:h-6 sm:w-6 ${isWishlisted ? 'fill-brand-accent text-brand-accent' : 'text-slate-700'}`} />
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-center mb-6">
-                  <div className="flex items-center space-x-1 mr-3">
+                <div className="mb-4 flex items-center sm:mb-6">
+                  <div className="mr-2 flex items-center space-x-0.5 sm:mr-3 sm:space-x-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-5 h-5 ${star <= Math.round(product.rating) ? 'fill-brand-accent text-brand-accent' : 'text-gray-300'}`}
+                        className={`h-4 w-4 sm:h-5 sm:w-5 ${star <= Math.round(product.rating) ? 'fill-brand-accent text-brand-accent' : 'text-slate-300'}`}
                       />
                     ))}
                   </div>
-                  <span className="text-gray-700 font-medium">{Number(product.rating).toFixed(1)}</span>
+                  <span className="text-sm font-medium text-slate-700">{Number(product.rating).toFixed(1)}</span>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="text-3xl font-bold text-gray-900 lg:text-4xl">
+                    <span className="text-2xl font-bold text-slate-900 sm:text-3xl lg:text-4xl">
                       {money(displayPrice)}
                     </span>
                     {product.compare_at_price && product.compare_at_price > displayPrice ? (
-                      <span className="text-xl text-gray-400 line-through">
+                      <span className="text-base text-slate-400 line-through sm:text-xl">
                         {money(product.compare_at_price)}
                       </span>
                     ) : null}
@@ -510,7 +515,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   ) : null}
                 </div>
 
-                <p className="text-gray-700 leading-relaxed mb-6 text-lg">{product.description}</p>
+                <p className="mb-5 text-sm leading-relaxed text-slate-600 sm:mb-6 sm:text-lg sm:text-slate-700">{product.description}</p>
 
                 {showImportDetails ? (
                   <ImportDetailsCard
@@ -832,18 +837,20 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           </div>
         </section>
 
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="border-b border-gray-300 mb-8">
-              <div className="flex space-x-4 sm:space-x-8 overflow-x-auto">
+        <section className="bg-slate-50 py-8 sm:py-12 md:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-5 border-b border-slate-200 sm:mb-8">
+              <div className="-mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:gap-2 sm:px-0">
                 {['description', 'features', 'care', 'reviews'].map((tab) => (
                   <button
                     key={tab}
+                    type="button"
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-4 font-bold transition-colors relative whitespace-nowrap cursor-pointer ${activeTab === tab
-                      ? 'text-brand-primary border-b-2 border-brand-accent'
-                      : 'text-gray-500 hover:text-brand-primary'
-                      }`}
+                    className={`shrink-0 whitespace-nowrap px-3 pb-3 text-sm font-bold transition-colors sm:px-4 sm:pb-4 sm:text-base ${
+                      activeTab === tab
+                        ? 'border-b-2 border-brand-accent text-brand-primary'
+                        : 'text-slate-500 hover:text-brand-primary'
+                    }`}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
                   </button>
@@ -853,18 +860,18 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
             {activeTab === 'description' && (
               <div className="prose max-w-none">
-                <p className="text-gray-700 text-lg leading-relaxed">{product.description}</p>
+                <p className="text-sm leading-relaxed text-slate-700 sm:text-lg">{product.description}</p>
               </div>
             )}
 
             {activeTab === 'features' && (
               <div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-6">Key Features</h3>
-                <ul className="grid md:grid-cols-2 gap-4">
+                <h3 className="mb-4 font-heading text-lg font-bold text-brand-primary sm:mb-6 sm:text-2xl">Key Features</h3>
+                <ul className="grid gap-3 md:grid-cols-2 md:gap-4">
                   {product.features.map((feature: string, index: number) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle2 className="w-5 h-5 text-brand-accent mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 text-lg">{feature}</span>
+                      <CheckCircle2 className="mr-2.5 mt-0.5 h-5 w-5 shrink-0 text-brand-accent" />
+                      <span className="text-sm text-slate-700 sm:text-lg">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -873,8 +880,8 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
             {activeTab === 'care' && (
               <div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-6">Care Instructions</h3>
-                <p className="text-gray-700 text-lg leading-relaxed">{product.care}</p>
+                <h3 className="mb-4 font-heading text-lg font-bold text-brand-primary sm:mb-6 sm:text-2xl">Care Instructions</h3>
+                <p className="text-sm leading-relaxed text-slate-700 sm:text-lg">{product.care}</p>
               </div>
             )}
 
@@ -887,16 +894,18 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
         </section>
 
         {relatedProducts.length > 0 && (
-          <section className="store-section bg-white/20 backdrop-blur-sm" data-product-shop>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-primary mb-4">You May Also Like</h2>
-                <p className="text-lg text-gray-500 font-medium">Curated recommendations based on this product</p>
+          <section className="store-section bg-white" data-product-shop>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <div className="mb-5 text-left sm:mb-10 sm:text-center">
+                <h2 className="font-heading text-xl font-extrabold text-brand-primary sm:mb-2 sm:text-3xl lg:text-4xl">
+                  You may also like
+                </h2>
+                <p className="mt-1 text-sm text-slate-500 sm:text-lg">More from this category</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
                 {relatedProducts.map((p) => (
-                  <ProductCard key={p.id} {...p} />
+                  <ProductCard key={p.id} {...p} compact />
                 ))}
               </div>
             </div>

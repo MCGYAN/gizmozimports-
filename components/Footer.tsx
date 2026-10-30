@@ -76,7 +76,7 @@ export default function Footer() {
           </div>
 
           {/* Links */}
-          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 sm:gap-x-8 lg:col-span-3 lg:mt-0 lg:gap-12 lg:border lg:border-white/10 lg:p-8">
+          <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 lg:col-span-3 lg:mt-0 lg:grid-cols-3 lg:gap-12 lg:border lg:border-white/10 lg:p-8">
             <div>
               <h4 className={mobileHeadingClass}>Shop</h4>
               <ul className="space-y-1.5 text-sm lg:space-y-3">

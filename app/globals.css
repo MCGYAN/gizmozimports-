@@ -905,7 +905,7 @@ img {
   }
 
   .store-section {
-    @apply py-12 md:py-16 lg:py-20;
+    @apply py-8 sm:py-12 md:py-16 lg:py-20;
   }
 
   .store-page {

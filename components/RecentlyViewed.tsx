@@ -41,7 +41,7 @@ export default function RecentlyViewed() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
           {recentProducts.map((product) => (
             <Link
               key={product.id}

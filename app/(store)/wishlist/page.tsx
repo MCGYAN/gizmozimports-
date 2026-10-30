@@ -79,10 +79,10 @@ export default function WishlistPage() {
       ) : (
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
               {wishlistItems.map((product) => (
-                <div key={product.id} className="relative">
-                  <ProductCard {...product} slug={product.slug || product.id} />
+                <div key={product.id} className="relative min-w-0">
+                  <ProductCard {...product} slug={product.slug || product.id} compact />
                   <button
                     onClick={() => removeFromWishlist(product.id)}
                     className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-red-50 transition-colors z-10"

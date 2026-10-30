@@ -9,37 +9,39 @@ interface CategoryCardProps {
   subtitle?: string;
 }
 
-export default function CategoryCard({
-  slug,
-  name,
-  image,
-}: CategoryCardProps) {
+/**
+ * Category tile — 2-col friendly on mobile.
+ * Image sits in a fixed square; label below so text never fights a tiny overlay.
+ */
+export default function CategoryCard({ slug, name, image }: CategoryCardProps) {
   return (
     <Link
       href={`/shop?category=${slug}`}
       prefetch
-      className="group relative aspect-[5/6] w-full overflow-hidden rounded-xl border border-slate-200/80 bg-slate-100 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-8px_rgba(15,23,42,0.12)] sm:aspect-[4/5] sm:rounded-2xl"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white transition-colors active:bg-slate-50"
     >
-      {image ? (
-        <Image
-          src={image}
-          alt={name}
-          fill
-          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
-          className="object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+      <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#172554]" aria-hidden />
+        )}
+      </div>
+      <div className="flex min-h-[2.75rem] items-center justify-between gap-2 px-3 py-2.5 sm:min-h-[3.25rem] sm:px-3.5 sm:py-3">
+        <h3 className="font-heading line-clamp-2 text-[13px] font-bold leading-snug text-brand-primary sm:text-sm md:text-base">
+          {name}
+        </h3>
+        <i
+          className="ri-arrow-right-s-line shrink-0 text-lg text-slate-300 transition-colors group-hover:text-brand-accent"
+          aria-hidden
         />
-      ) : (
-        <div className="absolute inset-0 bg-[#172554]" aria-hidden />
-      )}
-
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/65 via-black/35 to-transparent sm:h-24"
-        aria-hidden
-      />
-
-      <h3 className="absolute bottom-2 left-2 right-2 font-heading text-[11px] font-bold leading-tight text-white sm:bottom-3.5 sm:left-3.5 sm:right-3.5 sm:text-sm md:text-base">
-        {name}
-      </h3>
+      </div>
     </Link>
   );
 }

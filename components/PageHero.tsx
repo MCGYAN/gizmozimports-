@@ -13,23 +13,23 @@ export default function PageHero({ title, subtitle, size = 'compact' }: PageHero
   const isLarge = size === 'large';
 
   return (
-    <div className={`hero-mesh relative overflow-hidden ${isLarge ? 'py-14 md:py-24' : 'py-10 md:py-16'}`}>
+    <div className={`hero-mesh relative overflow-hidden ${isLarge ? 'py-12 sm:py-14 md:py-24' : 'py-7 sm:py-10 md:py-16'}`}>
       <div className="store-container relative z-10">
-        <div className={`${isLarge ? 'max-w-3xl' : 'max-w-2xl'} max-md:mobile-editorial-inset`}>
-          <p className="mb-2 text-sm font-medium text-blue-100/90 md:mb-3">Gizmoz Trades</p>
+        <div className={`${isLarge ? 'max-w-3xl' : 'max-w-2xl'}`}>
+          <p className="mb-1.5 text-xs font-medium text-blue-100/90 sm:mb-2 sm:text-sm md:mb-3">Gizmoz Trades</p>
           <h1
             className={`font-heading font-bold tracking-tight text-white ${
               isLarge
-                ? 'text-[1.75rem] leading-tight sm:text-4xl md:text-5xl'
-                : 'text-[1.625rem] leading-tight sm:text-3xl md:text-4xl'
+                ? 'text-[1.65rem] leading-tight sm:text-4xl md:text-5xl'
+                : 'text-[1.4rem] leading-tight sm:text-3xl md:text-4xl'
             }`}
           >
             {title}
           </h1>
           {subtitle ? (
             <p
-              className={`mt-3 max-w-2xl leading-relaxed text-white/85 ${
-                isLarge ? 'text-[15px] sm:text-lg' : 'text-[15px] sm:text-base'
+              className={`mt-2 max-w-2xl leading-relaxed text-white/85 sm:mt-3 ${
+                isLarge ? 'text-sm sm:text-lg' : 'text-sm sm:text-base'
               }`}
             >
               {subtitle}

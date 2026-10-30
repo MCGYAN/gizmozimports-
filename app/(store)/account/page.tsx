@@ -300,21 +300,24 @@ function AccountContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
-            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
-              <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-brand-light flex items-center justify-center text-brand-primary text-xl md:text-2xl font-bold shadow-inner border-2 border-white">
+          <div className="mb-5 flex items-center justify-between gap-3 md:mb-8">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-brand-light text-lg font-bold text-brand-primary shadow-inner md:h-16 md:w-16 md:text-2xl">
                 {profileData.firstName?.[0] || user?.email?.[0]?.toUpperCase()}
               </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate pr-2">{profileData.firstName ? `Hello, ${profileData.firstName}!` : 'Welcome Back'}</h1>
-                <p className="text-gray-500 text-sm font-medium truncate">{user?.email}</p>
+              <div className="min-w-0">
+                <h1 className="truncate font-heading text-lg font-bold text-gray-900 md:text-2xl">
+                  {profileData.firstName ? `Hello, ${profileData.firstName}` : 'Welcome back'}
+                </h1>
+                <p className="truncate text-xs font-medium text-gray-500 md:text-sm">{user?.email}</p>
               </div>
             </div>
             <button
+              type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-all font-bold shadow-sm w-full md:w-auto justify-center md:justify-start"
+              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 active:bg-slate-50 md:px-5 md:py-2.5 md:text-sm"
             >
-              Sign Out
+              Sign out
             </button>
           </div>
 
@@ -349,43 +352,87 @@ function AccountContent() {
               </div>
             </div>
 
-            {/* Mobile nav — full grid so every section is visible */}
-            <div className="mb-4 lg:hidden">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Account menu
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile' },
-                  { id: 'status', icon: 'ri-map-pin-line', label: 'Status' },
-                  { id: 'orders', icon: 'ri-archive-line', label: 'Orders' },
-                  { id: 'warehouse', icon: 'ri-building-2-line', label: 'Warehouse' },
-                  { id: 'shipments', icon: 'ri-ship-2-line', label: 'Shipments' },
-                  { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices' },
-                  { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries' },
-                  { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
-                  { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' },
-                ].map((tab) => {
-                  const active = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      ref={(node) => {
-                        mobileTabRefs.current[tab.id] = node;
-                      }}
-                      type="button"
-                      onClick={() => goToTab(tab.id)}
-                      className={`flex min-h-[4.25rem] flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-center transition-colors ${
-                        active
-                          ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
-                          : 'border-slate-200 bg-white text-slate-600'
-                      }`}
-                    >
-                      <i className={`${tab.icon} text-lg`} aria-hidden />
-                      <span className="text-[10px] font-bold leading-tight">{tab.label}</span>
-                    </button>
-                  );
-                })}
+            {/* Mobile nav — order journey first, settings below (always even 2-col) */}
+            <div className="mb-5 space-y-4 lg:hidden">
+              <div>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Your orders
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'status', icon: 'ri-map-pin-line', label: 'Order status', hint: 'Where it is' },
+                    { id: 'shipments', icon: 'ri-ship-2-line', label: 'Shipments', hint: 'Sea freight' },
+                    { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices', hint: 'Bills & receipts' },
+                    { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries', hint: 'Pickup booking' },
+                  ].map((tab) => {
+                    const active = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        ref={(node) => {
+                          mobileTabRefs.current[tab.id] = node;
+                        }}
+                        type="button"
+                        onClick={() => goToTab(tab.id)}
+                        className={`flex min-h-[4.5rem] flex-col items-start justify-center gap-0.5 rounded-2xl border px-3.5 py-3 text-left transition-colors ${
+                          active
+                            ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-800'
+                        }`}
+                      >
+                        <i className={`${tab.icon} text-xl ${active ? 'text-white' : 'text-brand-accent'}`} aria-hidden />
+                        <span className="mt-1 text-sm font-bold leading-tight">{tab.label}</span>
+                        <span className={`text-[11px] ${active ? 'text-white/75' : 'text-slate-400'}`}>
+                          {tab.hint}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Account
+                </p>
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  {[
+                    { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile' },
+                    { id: 'orders', icon: 'ri-archive-line', label: 'Past orders' },
+                    { id: 'warehouse', icon: 'ri-building-2-line', label: 'China warehouse' },
+                    { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
+                    { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' },
+                  ].map((tab, index, arr) => {
+                    const active = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        ref={(node) => {
+                          mobileTabRefs.current[tab.id] = node;
+                        }}
+                        type="button"
+                        onClick={() => goToTab(tab.id)}
+                        className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
+                          index < arr.length - 1 ? 'border-b border-slate-100' : ''
+                        } ${
+                          active
+                            ? 'bg-brand-primary/5 text-brand-primary'
+                            : 'bg-white text-slate-700 active:bg-slate-50'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                            active ? 'bg-brand-primary text-white' : 'bg-slate-100 text-brand-primary'
+                          }`}
+                        >
+                          <i className={`${tab.icon} text-lg`} aria-hidden />
+                        </span>
+                        <span className="flex-1 text-sm font-semibold">{tab.label}</span>
+                        <i className="ri-arrow-right-s-line text-lg text-slate-300" aria-hidden />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
