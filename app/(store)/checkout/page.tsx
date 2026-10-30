@@ -398,7 +398,7 @@ export default function CheckoutPage() {
                     Processing…
                   </>
                 ) : (
-                  `Get invoice · GH¢${total.toFixed(2)}`
+                  `Get invoice and pay · GH¢${total.toFixed(2)}`
                 )}
               </button>
             </div>

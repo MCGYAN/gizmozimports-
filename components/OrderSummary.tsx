@@ -56,7 +56,7 @@ export default function OrderSummary({ items, subtotal, shipping, tax, total }: 
         <div className="flex justify-between text-gray-700">
           <span>Shipping</span>
           <span className="font-semibold">
-            {shipping === 0 ? 'Get invoice & pay' : formatStoreMoney(shipping)}
+            {shipping === 0 ? 'After packing' : formatStoreMoney(shipping)}
           </span>
         </div>
       </div>
