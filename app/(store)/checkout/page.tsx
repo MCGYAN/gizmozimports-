@@ -273,39 +273,49 @@ export default function CheckoutPage() {
   }
 
   const inputClass = (hasError: boolean) =>
-    `w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-brand-accent focus:border-brand-accent ${hasError ? 'border-red-500' : 'border-gray-300'}`;
+    `w-full rounded-xl border px-3.5 py-2.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/25 ${hasError ? 'border-red-500' : 'border-slate-200'}`;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link href="/cart" className="text-gray-600 hover:text-gray-900 font-medium inline-flex items-center whitespace-nowrap">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Cart
-          </Link>
-        </div>
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:py-8">
+        <Link
+          href="/cart"
+          className="mb-4 inline-flex items-center text-sm font-medium text-slate-600 hover:text-brand-primary"
+        >
+          <ArrowLeft className="mr-1.5 h-4 w-4" />
+          Back to cart
+        </Link>
 
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-        <p className="text-sm text-gray-600 mb-6">One step. Add your contact details and pay.</p>
+        <h1 className="font-heading text-xl font-bold text-brand-primary sm:text-3xl">Checkout</h1>
+        <p className="mt-1 text-sm text-slate-500">Your details → invoice → pay.</p>
 
         {user && (
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full bg-brand-light px-4 py-2 text-sm font-medium text-brand-primary">
-            <UserCircle className="h-4 w-4" />
-            Checking out as {user.email}
+          <p className="mt-3 inline-flex max-w-full items-center gap-2 truncate rounded-lg bg-brand-light px-3 py-1.5 text-xs font-medium text-brand-primary sm:text-sm">
+            <UserCircle className="h-4 w-4 shrink-0" />
+            <span className="truncate">{user.email}</span>
           </p>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Contact details */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Your details</h2>
+        <div className="mt-5 grid grid-cols-1 gap-4 lg:mt-8 lg:grid-cols-3 lg:gap-8">
+          <div className="order-1 lg:order-2 lg:col-span-1">
+            <OrderSummary
+              items={cart}
+              subtotal={subtotal}
+              shipping={shippingCost}
+              tax={tax}
+              total={total}
+            />
+          </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="order-2 space-y-4 lg:order-1 lg:col-span-2 lg:space-y-6">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-6">
+              <h2 className="mb-3 text-base font-bold text-brand-primary sm:mb-5 sm:text-xl">Your details</h2>
+
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div data-error={Boolean(errors.firstName)}>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      First Name *
+                    <label className="mb-1 block text-xs font-semibold text-slate-700 sm:text-sm">
+                      First name *
                     </label>
                     <input
                       type="text"
@@ -315,11 +325,11 @@ export default function CheckoutPage() {
                       className={inputClass(Boolean(errors.firstName))}
                       placeholder="John"
                     />
-                    {errors.firstName && <p className="text-sm text-red-600 mt-1">{errors.firstName}</p>}
+                    {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName}</p>}
                   </div>
                   <div data-error={Boolean(errors.lastName)}>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Last Name *
+                    <label className="mb-1 block text-xs font-semibold text-slate-700 sm:text-sm">
+                      Last name *
                     </label>
                     <input
                       type="text"
@@ -329,14 +339,14 @@ export default function CheckoutPage() {
                       className={inputClass(Boolean(errors.lastName))}
                       placeholder="Doe"
                     />
-                    {errors.lastName && <p className="text-sm text-red-600 mt-1">{errors.lastName}</p>}
+                    {errors.lastName && <p className="mt-1 text-xs text-red-600">{errors.lastName}</p>}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div data-error={Boolean(errors.email)}>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Email Address *
+                    <label className="mb-1 block text-xs font-semibold text-slate-700 sm:text-sm">
+                      Email *
                     </label>
                     <input
                       type="email"
@@ -345,14 +355,14 @@ export default function CheckoutPage() {
                       value={shippingData.email}
                       readOnly={!!user}
                       onChange={(e) => setShippingData({ ...shippingData, email: e.target.value })}
-                      className={`${inputClass(Boolean(errors.email))} ${user ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`${inputClass(Boolean(errors.email))} ${user ? 'cursor-not-allowed bg-slate-50' : ''}`}
                       placeholder="you@example.com"
                     />
-                    {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
+                    {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
                   </div>
                   <div data-error={Boolean(errors.phone)}>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Phone Number *
+                    <label className="mb-1 block text-xs font-semibold text-slate-700 sm:text-sm">
+                      Phone *
                     </label>
                     <input
                       type="tel"
@@ -363,50 +373,35 @@ export default function CheckoutPage() {
                       className={inputClass(Boolean(errors.phone))}
                       placeholder="024 123 4567"
                     />
-                    {errors.phone && <p className="text-sm text-red-600 mt-1">{errors.phone}</p>}
+                    {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Payment + single CTA */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="rounded-xl border border-brand-accent/25 bg-brand-accent/10 px-4 py-3 text-sm text-brand-primary">
-                Cart total is GH¢{total.toFixed(2)}. You get an invoice with bank and MoMo details.
-                Pay by transfer, then tap “I’ve paid” on your order page.
+              <div className="mt-4 rounded-xl border border-brand-accent/20 bg-brand-accent/5 px-3.5 py-3 text-xs leading-relaxed text-brand-primary sm:mt-5 sm:text-sm">
+                You get an invoice with bank and MoMo details. Pay by transfer, then tap “I’ve paid”
+                on your order page.
               </div>
 
               <button
+                type="button"
                 onClick={handlePlaceOrder}
                 disabled={isLoading}
-                className="w-full mt-4 bg-brand-primary hover:bg-[#172554] text-white py-4 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer disabled:opacity-70 flex items-center justify-center"
+                className="mt-3 flex w-full items-center justify-center rounded-xl bg-brand-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#172554] disabled:opacity-70 sm:mt-4 sm:py-4 sm:text-base"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="mr-2 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Processing...
+                    Processing…
                   </>
                 ) : (
-                  `Get invoice and pay GH¢${total.toFixed(2)}`
+                  `Get invoice · GH¢${total.toFixed(2)}`
                 )}
               </button>
-              <p className="mt-2 text-center text-xs text-gray-500">
-                You’ll get the invoice now. Pay by bank transfer or MoMo, then tap I’ve paid.
-              </p>
             </div>
-          </div>
-
-          <div className="lg:col-span-1">
-            <OrderSummary
-              items={cart}
-              subtotal={subtotal}
-              shipping={shippingCost}
-              tax={tax}
-              total={total}
-            />
           </div>
         </div>
       </div>

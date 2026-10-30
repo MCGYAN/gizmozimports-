@@ -349,43 +349,49 @@ function AccountContent() {
               </div>
             </div>
 
-            {/* Mobile Horizontal Navigation */}
-            <div className="sticky top-16 z-20 -mx-4 mb-2 border-b border-slate-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur lg:hidden">
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [-webkit-overflow-scrolling:touch]">
+            {/* Mobile nav — full grid so every section is visible */}
+            <div className="mb-4 lg:hidden">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Account menu
+              </p>
+              <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: 'profile', icon: 'ri-user-settings-line', label: 'Profile' },
                   { id: 'status', icon: 'ri-map-pin-line', label: 'Status' },
-                  { id: 'orders', icon: 'ri-archive-line', label: 'Past' },
+                  { id: 'orders', icon: 'ri-archive-line', label: 'Orders' },
                   { id: 'warehouse', icon: 'ri-building-2-line', label: 'Warehouse' },
                   { id: 'shipments', icon: 'ri-ship-2-line', label: 'Shipments' },
-                  { id: 'documents', icon: 'ri-file-list-3-line', label: 'Receipts' },
+                  { id: 'documents', icon: 'ri-file-list-3-line', label: 'Invoices' },
                   { id: 'deliveries', icon: 'ri-calendar-check-line', label: 'Deliveries' },
-                  { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Address' },
+                  { id: 'addresses', icon: 'ri-map-pin-2-line', label: 'Addresses' },
                   { id: 'security', icon: 'ri-shield-keyhole-line', label: 'Security' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    ref={(node) => {
-                      mobileTabRefs.current[tab.id] = node;
-                    }}
-                    type="button"
-                    onClick={() => goToTab(tab.id)}
-                    className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-bold whitespace-nowrap transition-all border shadow-sm ${
-                      activeTab === tab.id
-                        ? 'bg-brand-primary text-white border-brand-primary'
-                        : 'bg-white text-gray-600 border-gray-200'
-                    }`}
-                  >
-                    <i className={`${tab.icon} text-base`} aria-hidden />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
+                ].map((tab) => {
+                  const active = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      ref={(node) => {
+                        mobileTabRefs.current[tab.id] = node;
+                      }}
+                      type="button"
+                      onClick={() => goToTab(tab.id)}
+                      className={`flex min-h-[4.25rem] flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-center transition-colors ${
+                        active
+                          ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                          : 'border-slate-200 bg-white text-slate-600'
+                      }`}
+                    >
+                      <i className={`${tab.icon} text-lg`} aria-hidden />
+                      <span className="text-[10px] font-bold leading-tight">{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Main Content Area */}
             <div className="lg:col-span-3">
-              <div className="min-h-[420px] rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-6 md:p-8">
+              <div className="min-h-[320px] rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:min-h-[420px] sm:p-6 md:p-8">
                 {activeTab === 'profile' && (
                   <div className="max-w-2xl">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Information</h2>

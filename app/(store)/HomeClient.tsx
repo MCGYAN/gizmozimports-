@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import ProductCard, { type ColorVariant, getColorHex } from '@/components/ProductCard';
@@ -8,10 +7,6 @@ import CategoryCard from '@/components/CategoryCard';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useCMS } from '@/context/CMSContext';
 import { buildWhatsAppHref } from '@/lib/store-config';
-import {
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
 
 const ImportJourneyTimeline = dynamic(() => import('@/components/store/ImportJourneyTimeline'), { loading: () => null });
 const ImportCta = dynamic(() => import('@/components/store/ImportCta'), { loading: () => null });
@@ -25,21 +20,11 @@ export default function HomeClient({
 }) {
   usePageTitle('China to Ghana Imports');
   const { getSetting } = useCMS();
-  const categorySliderRef = useRef<HTMLDivElement>(null);
 
   const waHero = buildWhatsAppHref(getSetting('contact_whatsapp'));
   const waHeroPrefilled = waHero
     ? `${waHero}${waHero.includes('?') ? '&' : '?'}text=${encodeURIComponent('Hi Gizmoz Trades, I need help with an order on the website.')}`
     : '';
-
-  const scrollCategorySlider = (direction: 'left' | 'right') => {
-    if (categorySliderRef.current) {
-      categorySliderRef.current.scrollBy({
-        left: direction === 'left' ? -400 : 400,
-        behavior: 'smooth',
-      });
-    }
-  };
 
   const displayCategories = categories.filter((c: any) => !c.parent_id).slice(0, 8);
   const hasCategories = displayCategories.length > 0;
@@ -186,40 +171,17 @@ export default function HomeClient({
               </p>
             </div>
             {hasCategories ? (
-              <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
-                <div className="hidden gap-3 md:flex lg:hidden">
-                  <button
-                    type="button"
-                    onClick={() => scrollCategorySlider('left')}
-                    className="btn-interactive flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-primary shadow-sm hover:border-brand-accent/30"
-                    aria-label="Scroll categories left"
-                  >
-                    <ChevronLeft className="h-6 w-6" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollCategorySlider('right')}
-                    className="btn-interactive flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-primary shadow-sm hover:border-brand-accent/30"
-                    aria-label="Scroll categories right"
-                  >
-                    <ChevronRight className="h-6 w-6" />
-                  </button>
-                </div>
-                <Link
-                  href="/categories"
-                  prefetch
-                  className="btn-interactive inline-flex min-h-[44px] items-center justify-center rounded-xl border border-brand-primary/15 bg-white px-5 py-2.5 text-sm font-bold text-brand-primary shadow-sm hover:border-brand-accent/40 hover:text-brand-accent"
-                >
-                  View all categories
-                </Link>
-              </div>
+              <Link
+                href="/categories"
+                prefetch
+                className="btn-interactive inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-brand-primary/15 bg-white px-5 py-2.5 text-sm font-bold text-brand-primary shadow-sm hover:border-brand-accent/40 hover:text-brand-accent md:w-auto"
+              >
+                View all categories
+              </Link>
             ) : null}
           </div>
           {hasCategories ? (
-            <div
-              ref={categorySliderRef}
-              className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-1 scrollbar-hide sm:mx-0 sm:gap-4 sm:px-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0 xl:gap-5"
-            >
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-4 md:gap-4 xl:gap-5">
               {displayCategories.map((cat: any, idx: number) => (
                 <CategoryCard
                   key={cat.id || cat.slug}
