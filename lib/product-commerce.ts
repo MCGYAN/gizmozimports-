@@ -78,6 +78,35 @@ export function getImportTypeLabel(value: string): string {
   return IMPORT_TYPE_OPTIONS.find((o) => o.value === value)?.label || value;
 }
 
+/** CIF Tema / DDP: sea freight is in the product price (no separate shipping bill). */
+export function importTypeIncludesFreight(importType: string | null | undefined): boolean {
+  const t = String(importType || '').trim();
+  return t === 'cif_tema' || t === 'ddp';
+}
+
+/**
+ * Checkout "Shipping" line when amount is not charged yet.
+ * Uses each line item's import_type (CIF/DDP = included; otherwise after packing).
+ */
+export function resolveCheckoutShippingLabel(
+  importTypes: Array<string | null | undefined>,
+): string {
+  if (!importTypes.length) return 'After packing';
+
+  const normalized = importTypes.map((t) => String(t || '').trim());
+  const includedFlags = normalized.map((t) => importTypeIncludesFreight(t));
+  const allIncluded = includedFlags.every(Boolean);
+  const noneIncluded = includedFlags.every((v) => !v);
+
+  if (allIncluded) {
+    if (normalized.every((t) => t === 'cif_tema')) return 'Included to Tema';
+    if (normalized.every((t) => t === 'ddp')) return 'Included';
+    return 'Included';
+  }
+  if (noneIncluded) return 'After packing';
+  return 'Depends on item';
+}
+
 export function buildProductInquiryWhatsAppText(productName: string, shareUrl: string): string {
   return `Hi, I'm interested in: ${productName}\n${shareUrl}`;
 }

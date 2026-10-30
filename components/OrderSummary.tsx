@@ -17,9 +17,18 @@ interface OrderSummaryProps {
   shipping: number;
   tax: number;
   total: number;
+  /** When shipping amount is 0 — e.g. After packing / Included to Tema */
+  shippingLabel?: string;
 }
 
-export default function OrderSummary({ items, subtotal, shipping, tax, total }: OrderSummaryProps) {
+export default function OrderSummary({
+  items,
+  subtotal,
+  shipping,
+  tax,
+  total,
+  shippingLabel = 'After packing',
+}: OrderSummaryProps) {
   return (
     <div className="store-card sticky top-4 p-4 sm:p-6">
       <h2 className="mb-3 text-base font-bold text-gray-900 sm:mb-5 sm:text-xl">Your order</h2>
@@ -56,7 +65,7 @@ export default function OrderSummary({ items, subtotal, shipping, tax, total }: 
         <div className="flex justify-between text-gray-700">
           <span>Shipping</span>
           <span className="font-semibold">
-            {shipping === 0 ? 'After packing' : formatStoreMoney(shipping)}
+            {shipping === 0 ? shippingLabel : formatStoreMoney(shipping)}
           </span>
         </div>
       </div>

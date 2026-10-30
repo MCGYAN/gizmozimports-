@@ -14,6 +14,7 @@ import { executeRecaptcha } from '@/lib/recaptcha';
 import { downloadElementAsPdf } from '@/lib/download-pdf';
 import { ShoppingCart, ArrowLeft, UserCircle } from 'lucide-react';
 import { resolveCheckoutPaymentChannel } from '@/lib/payment-routing';
+import { resolveCheckoutShippingLabel } from '@/lib/product-commerce';
 
 /** Contact details remembered locally so repeat buyers skip retyping. */
 const CONTACT_STORAGE_KEY = 'gizmoz-checkout-contact';
@@ -73,6 +74,7 @@ export default function CheckoutPage() {
 
   const [paymentMethod, setPaymentMethod] = useState<'moolre' | 'invoice'>('invoice');
   const [errors, setErrors] = useState<any>({});
+  const [shippingLabel, setShippingLabel] = useState('After packing');
 
   // Restore remembered contact details, then let a signed-in session override email
   useEffect(() => {
@@ -95,6 +97,49 @@ export default function CheckoutPage() {
     }
     checkUser();
   }, []);
+
+  // Shipping copy follows each product's import type (CIF/DDP = included)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolveShippingCopy() {
+      if (!cart.length) {
+        setShippingLabel('After packing');
+        return;
+      }
+
+      const fromCart = cart.map((item) => item.importType || '');
+      if (fromCart.every(Boolean)) {
+        setShippingLabel(resolveCheckoutShippingLabel(fromCart));
+        return;
+      }
+
+      const ids = [...new Set(cart.map((item) => item.id))];
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, metadata')
+        .in('id', ids);
+
+      if (cancelled) return;
+      if (error || !data) {
+        setShippingLabel(resolveCheckoutShippingLabel(fromCart));
+        return;
+      }
+
+      const byId = new Map(
+        data.map((row: any) => [row.id, String(row.metadata?.import_type || '')]),
+      );
+      const types = cart.map(
+        (item) => item.importType || byId.get(item.id) || '',
+      );
+      setShippingLabel(resolveCheckoutShippingLabel(types));
+    }
+
+    void resolveShippingCopy();
+    return () => {
+      cancelled = true;
+    };
+  }, [cart]);
 
   const subtotal = cartSubtotal;
   const shippingCost = 0;
@@ -304,6 +349,7 @@ export default function CheckoutPage() {
               shipping={shippingCost}
               tax={tax}
               total={total}
+              shippingLabel={shippingLabel}
             />
           </div>
 

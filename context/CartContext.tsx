@@ -14,6 +14,8 @@ export type CartItem = {
     slug: string;
     maxStock: number;
     moq?: number; // Minimum Order Quantity
+    /** products.metadata.import_type — drives checkout shipping copy */
+    importType?: string;
 };
 
 type CartContextType = {

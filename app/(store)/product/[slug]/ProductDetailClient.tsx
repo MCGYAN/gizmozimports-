@@ -259,7 +259,8 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
         variantId: variantRow?.id || undefined,
         slug: product.slug,
         maxStock: activeStock,
-        moq: product.moq || 1
+        moq: product.moq || 1,
+        importType: product.commerce?.importType || undefined,
       },
       { openCart },
     );
