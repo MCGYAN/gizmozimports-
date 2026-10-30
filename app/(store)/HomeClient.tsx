@@ -105,19 +105,11 @@ export default function HomeClient({
                 Pick what you want. Get a clear bill. Pay. Then watch it travel all the way to
                 Ghana.
               </p>
-              <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
-                <Link
-                  href="/shop"
-                  prefetch
-                  className="inline-flex min-h-12 items-center justify-center rounded-lg bg-brand-accent px-6 text-sm font-semibold text-brand-primary transition-colors hover:bg-white"
-                >
+              <div className="hero-cta-group mt-7 sm:mt-8">
+                <Link href="/shop" prefetch className="hero-cta-primary">
                   Start shopping
                 </Link>
-                <Link
-                  href="/order-tracking"
-                  prefetch
-                  className="inline-flex min-h-12 items-center justify-center rounded-lg px-2 text-sm font-semibold text-white/90 underline-offset-4 hover:text-white hover:underline sm:px-3"
-                >
+                <Link href="/order-tracking" prefetch className="hero-cta-secondary">
                   Track my order
                 </Link>
               </div>
