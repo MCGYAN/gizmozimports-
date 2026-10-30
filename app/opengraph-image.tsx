@@ -20,96 +20,81 @@ export default async function Image() {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '56px 64px',
-          background: 'linear-gradient(135deg, #0C4A6E 0%, #083A57 48%, #0A5578 100%)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #0E5A86 0%, #0C4A6E 42%, #083A57 100%)',
           color: '#fff',
           fontFamily: 'system-ui, sans-serif',
           position: 'relative',
+          padding: '48px 64px',
         }}
       >
-        {/* Soft Light Blue wash — brand mesh feel (Satori-safe, no filters) */}
         <div
           style={{
             position: 'absolute',
-            top: -120,
-            left: -80,
-            width: 480,
-            height: 480,
+            top: -100,
+            left: -40,
+            width: 460,
+            height: 460,
             borderRadius: 999,
-            background: 'rgba(140, 207, 255, 0.2)',
+            background: 'rgba(140, 207, 255, 0.18)',
           }}
         />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: -140,
-            right: -60,
-            width: 420,
-            height: 420,
-            borderRadius: 999,
-            background: 'rgba(234, 246, 255, 0.1)',
-          }}
-        />
-
-        <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logoSrc}
-            width={280}
-            height={101}
-            style={{ objectFit: 'contain' }}
-            alt=""
-          />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, position: 'relative' }}>
-          <div
-            style={{
-              display: 'flex',
-              width: 72,
-              height: 6,
-              background: '#8CCFFF',
-              borderRadius: 4,
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 52,
-              fontWeight: 700,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.1,
-              maxWidth: 960,
-            }}
-          >
-            Buy from China the easy way
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 26,
-              color: '#EAF6FF',
-              maxWidth: 900,
-              lineHeight: 1.35,
-              opacity: 0.92,
-            }}
-          >
-            Gadgets, electronics &amp; everyday goods · Clear prices · Real updates
-          </div>
-        </div>
 
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            flexDirection: 'column',
             alignItems: 'center',
-            fontSize: 22,
+            justifyContent: 'center',
+            gap: 36,
             position: 'relative',
           }}
         >
-          <span style={{ color: '#8CCFFF', fontWeight: 600 }}>gizmozimports.com</span>
-          <span style={{ color: 'rgba(255,255,255,0.72)', fontWeight: 500 }}>China to Ghana</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoSrc}
+            width={420}
+            height={151}
+            style={{ objectFit: 'contain' }}
+            alt=""
+          />
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 18,
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                fontSize: 42,
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                lineHeight: 1.2,
+                textAlign: 'center',
+                maxWidth: 980,
+              }}
+            >
+              Import from China to Ghana without the stress
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                fontSize: 24,
+                color: 'rgba(255,255,255,0.9)',
+                textAlign: 'center',
+                maxWidth: 920,
+                lineHeight: 1.35,
+              }}
+            >
+              Gadgets, electronics &amp; everyday goods · Clear prices · Real updates
+            </div>
+          </div>
         </div>
       </div>
     ),

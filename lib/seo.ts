@@ -77,10 +77,10 @@ export const SEO = {
     ],
   },
 
-  /** `/og/share.png` — Soft Ocean card; new filename so WhatsApp/Facebook re-fetch. */
-  defaultOgImagePath: `${SITE_URL}/og/share.png`,
+  /** `/og/preview.png` — centered Soft Ocean card (WhatsApp structure). New path busts cache. */
+  defaultOgImagePath: `${SITE_URL}/og/preview.png`,
   ogImages: {
-    default: '/og/share.png',
+    default: '/og/preview.png',
     twitter: '/og/twitter.png',
     square: '/og/square.png',
     buyRmb: '/og/buy-rmb.png',
