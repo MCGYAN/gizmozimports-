@@ -123,23 +123,25 @@ export default function HomeClient({
             </div>
 
             <div className="relative">
-              <div className="relative aspect-[5/4] overflow-hidden rounded-xl sm:aspect-[4/3] lg:aspect-[5/4]">
+              <div className="relative aspect-[5/4] overflow-hidden rounded-xl border border-white/15 sm:aspect-[4/3] lg:aspect-[5/4]">
                 <img
                   src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1000&auto=format&fit=crop"
                   alt="Warehouse goods ready for China to Ghana shipping"
                   className="h-full w-full object-cover"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-brand-primary/25 via-transparent to-transparent" />
 
-                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-white/95 px-2.5 py-1.5 text-brand-primary shadow-sm sm:left-4 sm:top-4 sm:px-3 sm:py-2">
-                  <i className="ri-shield-check-line text-sm text-brand-primary sm:text-base" aria-hidden />
+                {/* Upper right */}
+                <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-white/20 bg-brand-primary/92 px-2.5 py-1.5 text-white backdrop-blur-sm sm:right-4 sm:top-4 sm:px-3 sm:py-2">
+                  <i className="ri-shield-check-line text-sm text-brand-accent sm:text-base" aria-hidden />
                   <span className="text-[11px] font-semibold sm:text-xs">Verified supplier</span>
                 </div>
 
-                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5 rounded-md bg-brand-primary/90 px-3 py-2 text-white sm:bottom-4 sm:left-4 sm:right-auto sm:min-w-[11.5rem]">
+                {/* Lower left */}
+                <div className="absolute bottom-3 left-3 flex max-w-[85%] items-center gap-2.5 rounded-lg border border-white/20 bg-brand-primary/92 px-3 py-2 text-white backdrop-blur-sm sm:bottom-4 sm:left-4">
                   <i className="ri-ship-line text-base text-brand-accent" aria-hidden />
                   <div className="min-w-0">
-                    <p className="text-[10px] font-medium text-brand-accent">Live status</p>
+                    <p className="text-[10px] font-medium text-brand-accent">Status</p>
                     <p className="truncate text-xs font-semibold sm:text-sm">In transit to Accra</p>
                   </div>
                 </div>
