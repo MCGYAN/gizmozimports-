@@ -25,12 +25,12 @@ function resolveSiteUrl(raw: string | undefined): string {
 const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_APP_URL);
 const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || 'Gizmoz Trades').trim() || 'Gizmoz Trades';
 
-const TAGLINE = 'China goods for Ghana — clear price, real tracking';
+const TAGLINE = 'Shop from China. We deliver in Ghana.';
 const TAGLINE_LONG =
-  'Gizmoz Trades is the simple way to buy goods from China for Ghana. See the price, get a clear bill, pay by MoMo or bank, and track your order to Ghana. WhatsApp help when you need it, plus Buy RMB for China payments.';
+  'Gizmoz Trades helps you buy phones, gadgets, and everyday items from China and get them in Ghana. See the price first, pay by MoMo or bank, track your order, and chat on WhatsApp when you need help. You can also Buy RMB for China payments.';
 
 const DEFAULT_DESCRIPTION =
-  'Buy gadgets, phones, home items, and more from China for Ghana with Gizmoz Trades. Clear prices, easy pay, order tracking, and Buy RMB with Ghana Cedis.';
+  'Order phones, gadgets, and everyday items from China with Gizmoz Trades. See the price first, pay by MoMo or bank, and track your order until it arrives in Ghana.';
 
 export const SEO = {
   siteUrl: SITE_URL,
@@ -41,7 +41,7 @@ export const SEO = {
   tagline: TAGLINE,
   taglineLong: TAGLINE_LONG,
 
-  defaultTitle: `${SITE_NAME} | China to Ghana Imports`,
+  defaultTitle: `${SITE_NAME} | Shop from China, delivered in Ghana`,
   defaultDescription: DEFAULT_DESCRIPTION,
 
   keywords: [
@@ -61,13 +61,13 @@ export const SEO = {
     whatWeAre:
       'Gizmoz Trades is an online store that helps people in Ghana buy goods from China. You shop, get a clear bill, pay, and track the order to Ghana.',
     services: [
-      'Shop China goods for Ghana (phones, gadgets, home items, tools, and more)',
+      'Shop phones, gadgets, home items, tools, and more from China for delivery in Ghana',
       'Online checkout with a clear invoice and order tracking',
       'Buy RMB: pay Ghana Cedis and get RMB to pay China suppliers',
       'WhatsApp and phone help when you need it',
     ],
     whoFor:
-      'People and shops in Ghana who want China goods with a clear price and real updates.',
+      'People and shops in Ghana who want to buy from China with a clear price and real updates.',
     locations: 'Serves customers across Ghana. Goods move from China into Ghana for clearing, pickup, or delivery.',
     differentiators: [
       'Clear price before you pay',
@@ -77,10 +77,10 @@ export const SEO = {
     ],
   },
 
-  /** `/og/preview.png` — centered Soft Ocean card (WhatsApp structure). New path busts cache. */
-  defaultOgImagePath: `${SITE_URL}/og/preview.png`,
+  /** `/og/flyer.png` — Soft Ocean flyer (logo on top, copy below). New path busts share caches. */
+  defaultOgImagePath: `${SITE_URL}/og/flyer.png`,
   ogImages: {
-    default: '/og/preview.png',
+    default: '/og/flyer.png',
     twitter: '/og/twitter.png',
     square: '/og/square.png',
     buyRmb: '/og/buy-rmb.png',
@@ -111,23 +111,23 @@ export const SEO = {
   /** Per-page meta (override CMS; use with pageMetadata()). */
   pages: {
     home: {
-      title: 'China goods for Ghana',
+      title: 'Shop from China, delivered in Ghana',
       description: DEFAULT_DESCRIPTION,
     },
     shop: {
-      title: 'Shop clear China prices',
+      title: 'Shop with clear prices',
       description:
-        'Clear prices. Real China goods. Order online, pay a clear bill, and track it from China to Ghana with Gizmoz Trades.',
+        'Browse phones, gadgets, and everyday items from China. See the price, pay a clear bill, and track your order to Ghana with Gizmoz Trades.',
     },
     categories: {
       title: 'Shop by type',
       description:
-        'Pick a product group — phones, home items, tools, and more — then shop from China with Gizmoz Trades.',
+        'Pick a product group — phones, home items, tools, and more — then order from China with Gizmoz Trades.',
     },
     about: {
       title: 'About Gizmoz Trades',
       description:
-        'Gizmoz Trades helps Ghana buy from China. Clear prices, easy pay, real tracking, and people you can talk to.',
+        'Gizmoz Trades helps people in Ghana buy from China. Clear prices, easy pay, real tracking, and people you can talk to.',
     },
     contact: {
       title: 'Contact us',

@@ -90,7 +90,7 @@ export const STORE_SEO_KEYWORDS = [
   'Gizmoz Trades',
   'Gizmoz Trades',
   'buy from China Ghana',
-  'China goods for Ghana',
+  'shop from China Ghana',
   'import from China to Ghana',
   'buy gadgets from China Ghana',
   'China to Ghana shipping',

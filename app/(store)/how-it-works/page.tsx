@@ -6,7 +6,7 @@ import { leadConfig } from '@/lib/leadConfig';
 export const metadata: Metadata = {
   title: 'How It Works | Shop, Pay, Track | Gizmoz Trades',
   description:
-    'Buy China goods for Ghana in four easy steps: shop, get your bill, pay, and track it to Ghana.',
+    'Buy from China in four easy steps: shop, get your bill, pay, and track it to Ghana.',
   keywords: ['buy from China Ghana', 'import goods from China to Ghana', 'China to Ghana shop'],
 };
 
