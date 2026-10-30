@@ -99,11 +99,11 @@ export default function HomeClient({
                 Gizmoz Trades
               </p>
               <h1 className="font-heading mt-3 text-[1.75rem] font-bold leading-[1.12] tracking-tight sm:text-4xl lg:text-[2.75rem]">
-                China goods for Ghana — clear price, real tracking.
+                Buy from China the easy way.
               </h1>
               <p className="mt-4 text-[15px] leading-relaxed text-white/80 sm:text-base">
-                See what you want. Get a clear bill. Pay by MoMo or bank. Then watch your order
-                come all the way from China to you.
+                Pick what you want. Get a clear bill. Pay. Then watch it travel all the way to
+                Ghana.
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
                 <Link
