@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Outfit } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import CookieConsentBanner from "@/components/CookieConsentBanner";
+import AnalyticsLoader from "@/components/AnalyticsLoader";
 import { SEO } from "@/lib/seo";
 import { buildSiteJsonLdGraph } from "@/lib/structured-data";
 import "./globals.css";
@@ -94,8 +95,6 @@ export const metadata: Metadata = {
   category: "shopping",
 };
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -146,25 +145,6 @@ export default function RootLayout({
         />
       </head>
 
-      {GA_MEASUREMENT_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-            strategy="lazyOnload"
-          />
-          <Script id="google-analytics" strategy="lazyOnload">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_MEASUREMENT_ID}', {
-                page_path: window.location.pathname,
-              });
-            `}
-          </Script>
-        </>
-      )}
-
       <body className="antialiased font-sans overflow-x-hidden pwa-body bg-brand-surface text-brand-foreground [scrollbar-gutter:stable]" suppressHydrationWarning>
         <a
           href="#main-content"
@@ -177,6 +157,8 @@ export default function RootLayout({
             <div id="main-content">
               {children}
             </div>
+            <CookieConsentBanner />
+            <AnalyticsLoader />
           </WishlistProvider>
         </CartProvider>
       </body>

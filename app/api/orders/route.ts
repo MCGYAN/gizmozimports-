@@ -31,7 +31,8 @@ export async function POST(req: Request) {
       recaptchaToken,
       shippingData,
       cart,
-      userId
+      userId,
+      termsAcceptedAt,
     } = body;
 
     // reCAPTCHA verification: log failures but don't block checkout
@@ -158,6 +159,10 @@ export async function POST(req: Request) {
         fulfillment_stage: 'awaiting_payment',
         service_country: 'Ghana',
         handoff_choice: 'after_package_ready',
+        terms_accepted_at:
+          typeof termsAcceptedAt === 'string' && termsAcceptedAt.trim()
+            ? termsAcceptedAt.trim()
+            : new Date().toISOString(),
       }
     };
 

@@ -211,6 +211,7 @@ export default function CheckoutPage() {
           recaptchaToken: recaptchaToken || '',
           shippingData,
           paymentMethod: channel,
+          termsAcceptedAt: new Date().toISOString(),
           cart: cart.map((item: { id: string; name: string; variant?: string; variantId?: string; quantity: number; price: number; image?: string; slug?: string }) => ({
             id: item.id,
             name: item.name,
@@ -447,6 +448,18 @@ export default function CheckoutPage() {
                   `Get invoice and pay · GH¢${total.toFixed(2)}`
                 )}
               </button>
+
+              <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-500 sm:text-xs">
+                By tapping Get invoice and pay, you agree to our{' '}
+                <Link href="/terms" className="font-semibold text-brand-primary underline-offset-2 hover:underline">
+                  Terms
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="font-semibold text-brand-primary underline-offset-2 hover:underline">
+                  Privacy
+                </Link>
+                .
+              </p>
             </div>
           </div>
         </div>

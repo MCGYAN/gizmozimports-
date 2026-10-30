@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import PageHero from '@/components/PageHero';
 import {
   buildWhatsAppHref,
   resolveContactWhatsApp,
@@ -8,60 +9,61 @@ export default function ReturnsPage() {
   const waHref = buildWhatsAppHref(resolveContactWhatsApp(null));
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="store-page-header py-16">
-        <div className="store-container relative z-10 text-center">
-          <p className="store-eyebrow mb-3">Support</p>
-          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-            Returns and issues
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/80">
-            Every order is different. Message us and we will tell you the next step.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#f7f8fa]">
+      <PageHero
+        size="large"
+        title="Returns and issues"
+        subtitle="China-to-Ghana orders are handled case by case. Message us and we will tell you the next step."
+      />
 
-      <div className="store-container store-section">
-        <div className="mx-auto max-w-2xl space-y-8">
-          <div className="store-card space-y-4 p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900">How to get help</h2>
-            <ol className="list-decimal space-y-3 pl-5 text-gray-600">
+      <section className="border-b border-slate-200/80 bg-white">
+        <div className="store-container py-10 sm:py-14 md:py-16">
+          <div className="mx-auto max-w-2xl">
+            <h2 className="font-heading text-xl font-bold text-brand-primary sm:text-2xl">
+              How to get help
+            </h2>
+            <ol className="mt-5 list-decimal space-y-3 pl-5 text-[15px] leading-relaxed text-slate-600">
               <li>Have your order number ready if you have it.</li>
               <li>Send clear photos if something is damaged or wrong.</li>
               <li>Contact us on WhatsApp or the contact page. We review it with you.</li>
             </ol>
-            <p className="text-sm text-gray-500">
-              There is no self-serve returns page. We handle each order with you personally.
+            <p className="mt-5 text-sm leading-relaxed text-slate-500">
+              There is no automatic 14-day self-serve returns portal. We handle each import order
+              with you personally. Full rules are in our{' '}
+              <Link href="/terms" className="font-semibold text-brand-primary underline-offset-2 hover:underline">
+                Terms
+              </Link>
+              .
             </p>
-          </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            {waHref ? (
-              <a
-                href={waHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 py-4 font-bold text-white"
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {waHref ? (
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-interactive inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 text-sm font-semibold text-white"
+                >
+                  <i className="ri-whatsapp-line text-lg" aria-hidden />
+                  Message on WhatsApp
+                </a>
+              ) : null}
+              <Link
+                href="/contact"
+                className="btn-interactive inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-primary px-6 text-sm font-semibold text-white"
               >
-                <i className="ri-whatsapp-line text-xl"></i>
-                Message on WhatsApp
-              </a>
-            ) : null}
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 font-bold text-white hover:bg-[#0C4A6E]"
-            >
-              Contact us
-            </Link>
-            <Link
-              href="/account"
-              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-200 bg-white px-8 py-4 font-semibold text-brand-primary"
-            >
-              Open my orders
-            </Link>
+                Contact us
+              </Link>
+              <Link
+                href="/account"
+                className="btn-interactive inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-brand-primary"
+              >
+                Open my orders
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

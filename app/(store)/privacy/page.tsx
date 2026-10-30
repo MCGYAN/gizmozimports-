@@ -8,7 +8,7 @@ export default function PrivacyPage() {
             <p className="text-xl text-gray-600 leading-relaxed">
               We protect your information. Here is how we use it and keep it safe.
             </p>
-            <p className="text-sm text-gray-500 mt-4">Last updated: February 2026</p>
+            <p className="text-sm text-gray-500 mt-4">Last updated: October 2026</p>
           </div>
         </div>
       </div>
@@ -285,44 +285,36 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="mb-12">
+          <section id="cookies" className="mb-12 scroll-mt-28">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Cookies & Tracking</h2>
             <p className="text-gray-600 leading-relaxed mb-6">
-              We use cookies and similar technologies to enhance your browsing experience:
+              We use cookies and similar tools so the shop works. You can choose optional analytics
+              in the cookie banner on first visit.
             </p>
 
             <div className="space-y-4">
-              <div className="bg-white border border-gray-200 p-6 rounded-xl">
-                <h3 className="font-bold text-gray-900 mb-2">Essential Cookies</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Required for the website to function properly (e.g., shopping cart, login sessions). These cannot be disabled.
+              <div className="rounded-xl border border-gray-200 bg-white p-6">
+                <h3 className="mb-2 font-bold text-gray-900">Essential</h3>
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Needed for sign-in, cart, checkout memory, and security. These stay on so the
+                  site can work.
                 </p>
               </div>
 
-              <div className="bg-white border border-gray-200 p-6 rounded-xl">
-                <h3 className="font-bold text-gray-900 mb-2">Analytics Cookies</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Help us understand how visitors use our website so we can improve it. These collect anonymous usage data.
-                </p>
-              </div>
-
-              <div className="bg-white border border-gray-200 p-6 rounded-xl">
-                <h3 className="font-bold text-gray-900 mb-2">Marketing Cookies</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Used to show you relevant advertisements based on your interests. You can opt out of these through your browser settings.
-                </p>
-              </div>
-
-              <div className="bg-white border border-gray-200 p-6 rounded-xl">
-                <h3 className="font-bold text-gray-900 mb-2">Preference Cookies</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Remember your preferences and settings (e.g., language, region) to provide a personalised experience.
+              <div className="rounded-xl border border-gray-200 bg-white p-6">
+                <h3 className="mb-2 font-bold text-gray-900">Analytics (optional)</h3>
+                <p className="text-sm leading-relaxed text-gray-600">
+                  If you tap OK on the cookie banner, we may use Google Analytics to see how people
+                  use the site (for example which pages are visited). IP addresses are anonymised
+                  where supported. Choose Essential only to skip this.
                 </p>
               </div>
             </div>
 
-            <p className="text-gray-600 leading-relaxed mt-6">
-              You can control cookie preferences through your browser settings. However, disabling certain cookies may affect website functionality.
+            <p className="mt-6 text-gray-600 leading-relaxed">
+              We do not currently use separate marketing ad cookies on this storefront. You can also
+              clear site data in your browser settings. Clearing data may sign you out or empty the
+              cart.
             </p>
           </section>
 

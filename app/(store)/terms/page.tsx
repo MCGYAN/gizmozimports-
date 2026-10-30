@@ -8,7 +8,7 @@ export default function TermsPage() {
             <p className="text-xl text-gray-600 leading-relaxed">
               Simple rules for using our site. Read them before you order.
             </p>
-            <p className="text-sm text-gray-500 mt-4">Last updated: February 2026</p>
+            <p className="text-sm text-gray-500 mt-4">Last updated: October 2026</p>
           </div>
         </div>
       </div>
@@ -166,26 +166,93 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Shipping & Delivery</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Import, shipping & delivery</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Delivery times and costs vary by location and shipping method selected. See our Shipping Policy for detailed information.
+              Gizmoz Trades helps you buy goods from China for delivery into Ghana. Times and costs
+              depend on the product, shipping method, and Ghana clearing. See our{' '}
+              <a href="/shipping" className="font-semibold text-brand-primary underline-offset-2 hover:underline">
+                Shipping page
+              </a>{' '}
+              for how the journey works.
             </p>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Risk of loss and title for products pass to you upon delivery to the carrier. We are not responsible for delays caused by the shipping carrier or circumstances beyond our control (weather, strikes, customs, etc.).
-            </p>
+            <ul className="mb-6 space-y-2 text-gray-600">
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  Some product prices already include sea freight (for example CIF or DDP where
+                  stated). Other orders may need a separate shipping bill after packing, based on
+                  size, weight, and the arrival-day dollar rate.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  Shipping invoices can expire when the exchange rate changes. If a bill expires,
+                  request a fresh one from your account.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  Local clearing, duties, or last-mile delivery in Ghana may be extra when they
+                  apply. We tell you before you pay those fees.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  Timelines are estimates. We are not responsible for delays caused by carriers,
+                  customs, weather, strikes, or events outside our control.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  You must give accurate contact and delivery details. We are not responsible for
+                  failed handoff caused by wrong phone numbers or addresses.
+                </span>
+              </li>
+            </ul>
             <p className="text-gray-600 leading-relaxed">
-              You must provide accurate and complete delivery information. We are not responsible for delivery failures due to incorrect addresses.
+              Risk in the goods generally passes when the package is ready for pickup or delivery
+              in Ghana, or when handed to a carrier for last-mile delivery, unless the product terms
+              say otherwise.
             </p>
           </section>
 
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Returns & Refunds</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Returns, damage & refunds</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              We offer a 14-day return policy for most products. See our Returns Policy for complete details on eligibility, process, and conditions.
+              China-to-Ghana import orders are handled case by case. There is no automatic 14-day
+              self-serve return portal. See our{' '}
+              <a href="/returns" className="font-semibold text-brand-primary underline-offset-2 hover:underline">
+                Returns page
+              </a>{' '}
+              for how to get help.
             </p>
-            <p className="text-gray-600 leading-relaxed">
-              Refunds are processed within 5-7 business days of receiving your return. Refunds are issued to the original payment method.
-            </p>
+            <ul className="mb-6 space-y-2 text-gray-600">
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  Contact us quickly with your order number and clear photos if something is wrong,
+                  damaged, or not what you ordered.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  We review each case with you and explain the next step (repair path, partial
+                  refund, replacement where possible, or another fair option).
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <i className="ri-arrow-right-s-line mt-1 text-brand-primary"></i>
+                <span>
+                  Approved refunds go back to the original payment method (bank or MoMo) within a
+                  reasonable time after we confirm the outcome.
+                </span>
+              </li>
+            </ul>
           </section>
 
           <section className="mb-12">
@@ -274,10 +341,12 @@ export default function TermsPage() {
           <section className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">11. Governing Law & Disputes</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              These terms are governed by the laws applicable in the jurisdiction where the Store operates, without regard to conflict-of-law rules. Disputes shall be brought in the courts of that jurisdiction unless mandatory consumer law in your country requires otherwise.
+              These terms are governed by the laws of Ghana. Disputes shall be brought in the courts
+              of Accra, Ghana, unless mandatory consumer law requires otherwise.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Before initiating any legal action, you agree to first contact us to seek resolution through informal negotiation.
+              Before starting legal action, contact us first so we can try to resolve the issue
+              through informal negotiation.
             </p>
           </section>
 
