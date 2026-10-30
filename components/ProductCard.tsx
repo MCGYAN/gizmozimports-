@@ -214,10 +214,10 @@ export default function ProductCard({
             compact ? 'max-lg:space-y-2 max-lg:pt-2.5 lg:flex lg:items-end lg:justify-between lg:gap-3 lg:pt-5' : 'space-y-2 pt-3 sm:flex sm:items-end sm:justify-between sm:gap-3 sm:space-y-0 sm:pt-5'
           }`}
         >
-          <div className="min-w-0">
+          <div className="min-w-0 shrink-0">
             {originalPrice && originalPrice > displayPrice && (
               <span
-                className={`block font-medium text-slate-400 line-through ${
+                className={`block whitespace-nowrap font-medium text-slate-400 line-through ${
                   compact ? 'text-[10px] lg:text-xs' : 'text-[11px] sm:text-xs'
                 }`}
               >
@@ -225,7 +225,7 @@ export default function ProductCard({
               </span>
             )}
             <span
-              className={`font-heading block break-words font-black leading-tight text-brand-primary ${
+              className={`font-heading block whitespace-nowrap font-black leading-tight text-brand-primary ${
                 compact ? 'text-sm lg:text-lg' : 'text-base sm:text-lg'
               }`}
             >
